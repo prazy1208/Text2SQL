@@ -1,0 +1,99 @@
+[
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "columns": [
+      {
+        "name": "customer_id",
+        "description": "Unique system-generated identifier assigned to each customer."
+      },
+      {
+        "name": "first_name",
+        "description": "Customer's first name as provided during registration."
+      },
+      {
+        "name": "last_name",
+        "description": "Customer's last name as provided during registration."
+      },
+      {
+        "name": "email",
+        "description": "Registered email address used for communication, promotions, and order notifications."
+      },
+      {
+        "name": "city",
+        "description": "City where the customer resides."
+      },
+      {
+        "name": "state",
+        "description": "State where the customer resides."
+      },
+      {
+        "name": "signup_date",
+        "description": "Date when the customer created their account in the retail system."
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "columns": [
+      {
+        "name": "order_id",
+        "description": "Unique system-generated identifier for each customer order."
+      },
+      {
+        "name": "customer_id",
+        "description": "Foreign key referencing the customer who placed the order."
+      },
+      {
+        "name": "product_id",
+        "description": "Foreign key referencing the product that was purchased."
+      },
+      {
+        "name": "order_date",
+        "description": "Date when the order was placed by the customer."
+      },
+      {
+        "name": "quantity",
+        "description": "Number of units of the product purchased in the order."
+      },
+      {
+        "name": "total_amount",
+        "description": "Total monetary value of the order calculated as quantity multiplied by unit price."
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "columns": [
+      {
+        "name": "product_id",
+        "description": "Unique system-generated identifier assigned to each product."
+      },
+      {
+        "name": "product_name",
+        "description": "Official name of the product available for sale."
+      },
+      {
+        "name": "category",
+        "description": "Product category used for grouping similar items (e.g., electronics, apparel, home goods)."
+      },
+      {
+        "name": "brand",
+        "description": "Brand or manufacturer associated with the product."
+      },
+      {
+        "name": "price",
+        "description": "Current selling price of the product per unit."
+      },
+      {
+        "name": "launch_date",
+        "description": "Date when the product was first introduced to the market."
+      }
+    ]
+  }
+]

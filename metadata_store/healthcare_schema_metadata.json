@@ -1,0 +1,107 @@
+[
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "table_description": "Stores medical diagnoses assigned during patient visits, including severity and diagnostic codes.",
+    "columns": [
+      {
+        "name": "diagnosis_id",
+        "description": "Unique system-generated identifier for each diagnosis record."
+      },
+      {
+        "name": "visit_id",
+        "description": "Foreign key referencing the visit during which the diagnosis was made."
+      },
+      {
+        "name": "diagnosis_code",
+        "description": "Standardized medical diagnosis code (e.g., ICD code) representing the condition."
+      },
+      {
+        "name": "diagnosis_description",
+        "description": "Textual description of the diagnosed medical condition."
+      },
+      {
+        "name": "severity_level",
+        "description": "Indicates the severity of the diagnosed condition (e.g., mild, moderate, severe)."
+      }
+    ]
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "columns": [
+      {
+        "name": "patient_id",
+        "description": "Unique system-generated identifier assigned to each patient."
+      },
+      {
+        "name": "first_name",
+        "description": "Patient's legal first name."
+      },
+      {
+        "name": "last_name",
+        "description": "Patient's legal last name."
+      },
+      {
+        "name": "date_of_birth",
+        "description": "Date of birth of the patient used for age-based analysis and eligibility checks."
+      },
+      {
+        "name": "gender",
+        "description": "Self-reported gender of the patient."
+      },
+      {
+        "name": "city",
+        "description": "City of residence of the patient."
+      },
+      {
+        "name": "state",
+        "description": "State of residence of the patient."
+      },
+      {
+        "name": "insurance_type",
+        "description": "Type of insurance coverage used by the patient (e.g., private, government, uninsured)."
+      },
+      {
+        "name": "registration_date",
+        "description": "Date when the patient was first registered in the healthcare system."
+      }
+    ]
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "columns": [
+      {
+        "name": "visit_id",
+        "description": "Unique system-generated identifier for each patient visit."
+      },
+      {
+        "name": "patient_id",
+        "description": "Foreign key referencing the patient who attended the visit."
+      },
+      {
+        "name": "admission_date",
+        "description": "Date when the patient was admitted for the visit."
+      },
+      {
+        "name": "discharge_date",
+        "description": "Date when the patient was discharged from the visit."
+      },
+      {
+        "name": "department",
+        "description": "Medical department responsible for the visit (e.g., cardiology, emergency, oncology)."
+      },
+      {
+        "name": "visit_type",
+        "description": "Classification of visit such as inpatient, outpatient, or emergency."
+      },
+      {
+        "name": "total_cost",
+        "description": "Total billed cost associated with the visit, including treatments and services."
+      }
+    ]
+  }
+]

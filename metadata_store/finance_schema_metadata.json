@@ -1,0 +1,99 @@
+[
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "columns": [
+      {
+        "name": "account_id",
+        "description": "Unique system-generated identifier assigned to each bank account."
+      },
+      {
+        "name": "customer_name",
+        "description": "Full name of the customer who owns the bank account."
+      },
+      {
+        "name": "account_type",
+        "description": "Type of bank account such as savings or checking."
+      },
+      {
+        "name": "branch_city",
+        "description": "City where the bank branch managing the account is located."
+      },
+      {
+        "name": "opening_date",
+        "description": "Date when the bank account was opened."
+      },
+      {
+        "name": "current_balance",
+        "description": "Current available balance in the account."
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "columns": [
+      {
+        "name": "loan_id",
+        "description": "Unique system-generated identifier for each loan record."
+      },
+      {
+        "name": "account_id",
+        "description": "Foreign key referencing the account associated with the loan."
+      },
+      {
+        "name": "loan_type",
+        "description": "Category of loan such as home loan, auto loan, or personal loan."
+      },
+      {
+        "name": "loan_amount",
+        "description": "Total principal amount borrowed under the loan agreement."
+      },
+      {
+        "name": "interest_rate",
+        "description": "Annual interest rate applied to the loan expressed as a percentage."
+      },
+      {
+        "name": "loan_start_date",
+        "description": "Date when the loan repayment period began."
+      },
+      {
+        "name": "loan_end_date",
+        "description": "Date when the loan is scheduled to be fully repaid."
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "columns": [
+      {
+        "name": "transaction_id",
+        "description": "Unique system-generated identifier for each transaction."
+      },
+      {
+        "name": "account_id",
+        "description": "Foreign key referencing the account on which the transaction occurred."
+      },
+      {
+        "name": "transaction_date",
+        "description": "Date when the transaction was executed."
+      },
+      {
+        "name": "transaction_type",
+        "description": "Type of transaction such as debit (money withdrawn) or credit (money deposited)."
+      },
+      {
+        "name": "amount",
+        "description": "Monetary value of the transaction."
+      },
+      {
+        "name": "description",
+        "description": "Short textual explanation describing the purpose or nature of the transaction."
+      }
+    ]
+  }
+]
