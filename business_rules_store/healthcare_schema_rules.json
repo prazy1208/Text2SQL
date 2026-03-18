@@ -1,0 +1,199 @@
+[
+  {
+    "index": 0,
+    "rule_id": 1,
+    "concept_name": "Patient Registration Activity",
+    "description": "Patient registration activity reflects how new patients begin interacting with healthcare services.",
+    "insight": "Monitoring registration patterns helps healthcare providers understand patient intake trends and service demand.",
+    "keywords": [
+      "new patients",
+      "patient registration",
+      "patient intake",
+      "patient enrollment"
+    ],
+    "content": "Patient Registration Activity Patient registration activity reflects how new patients begin interacting with healthcare services. Monitoring registration patterns helps healthcare providers understand patient intake trends and service demand. new patients patient registration patient intake patient enrollment"
+  },
+  {
+    "index": 1,
+    "rule_id": 2,
+    "concept_name": "Patient Demographic Distribution",
+    "description": "Patient demographic distribution describes how patients are represented across different demographic characteristics.",
+    "insight": "Understanding demographic distribution helps healthcare organizations identify the populations they serve.",
+    "keywords": [
+      "patient demographics",
+      "patient distribution",
+      "demographic analysis"
+    ],
+    "content": "Patient Demographic Distribution Patient demographic distribution describes how patients are represented across different demographic characteristics. Understanding demographic distribution helps healthcare organizations identify the populations they serve. patient demographics patient distribution demographic analysis"
+  },
+  {
+    "index": 2,
+    "rule_id": 3,
+    "concept_name": "Patient Visit Activity",
+    "description": "Patient visit activity represents how frequently patients interact with healthcare providers through appointments or consultations.",
+    "insight": "Tracking visit activity helps healthcare providers understand service utilization patterns.",
+    "keywords": [
+      "patient visits",
+      "appointments",
+      "consultations",
+      "visit frequency"
+    ],
+    "content": "Patient Visit Activity Patient visit activity represents how frequently patients interact with healthcare providers through appointments or consultations. Tracking visit activity helps healthcare providers understand service utilization patterns. patient visits appointments consultations visit frequency"
+  },
+  {
+    "index": 3,
+    "rule_id": 4,
+    "concept_name": "Healthcare Service Utilization",
+    "description": "Healthcare service utilization reflects how healthcare services are used by patients across the organization.",
+    "insight": "Analyzing service utilization helps identify which services are most frequently accessed.",
+    "keywords": [
+      "service usage",
+      "healthcare utilization",
+      "medical services"
+    ],
+    "content": "Healthcare Service Utilization Healthcare service utilization reflects how healthcare services are used by patients across the organization. Analyzing service utilization helps identify which services are most frequently accessed. service usage healthcare utilization medical services"
+  },
+  {
+    "index": 4,
+    "rule_id": 5,
+    "concept_name": "Treatment Patterns",
+    "description": "Treatment patterns describe how different treatments or medical procedures are provided to patients.",
+    "insight": "Understanding treatment patterns helps healthcare organizations evaluate care delivery practices.",
+    "keywords": [
+      "treatment patterns",
+      "medical procedures",
+      "patient treatment"
+    ],
+    "content": "Treatment Patterns Treatment patterns describe how different treatments or medical procedures are provided to patients. Understanding treatment patterns helps healthcare organizations evaluate care delivery practices. treatment patterns medical procedures patient treatment"
+  },
+  {
+    "index": 5,
+    "rule_id": 6,
+    "concept_name": "Patient Care Activity",
+    "description": "Patient care activity reflects the range of interactions between healthcare providers and patients during care delivery.",
+    "insight": "Monitoring care activity helps organizations understand healthcare workload and service delivery levels.",
+    "keywords": [
+      "patient care",
+      "care activity",
+      "medical care interactions"
+    ],
+    "content": "Patient Care Activity Patient care activity reflects the range of interactions between healthcare providers and patients during care delivery. Monitoring care activity helps organizations understand healthcare workload and service delivery levels. patient care care activity medical care interactions"
+  },
+  {
+    "index": 6,
+    "rule_id": 7,
+    "concept_name": "Patient Health Trends",
+    "description": "Patient health trends describe how patient-related health activities evolve over time.",
+    "insight": "Tracking trends helps healthcare providers understand changes in care demand and treatment needs.",
+    "keywords": [
+      "health trends",
+      "patient health patterns",
+      "health activity trends"
+    ],
+    "content": "Patient Health Trends Patient health trends describe how patient-related health activities evolve over time. Tracking trends helps healthcare providers understand changes in care demand and treatment needs. health trends patient health patterns health activity trends"
+  },
+  {
+    "index": 7,
+    "rule_id": 8,
+    "concept_name": "Healthcare Provider Activity",
+    "description": "Healthcare provider activity reflects the level of engagement healthcare professionals have in delivering patient care.",
+    "insight": "Analyzing provider activity helps healthcare organizations understand workload distribution and service capacity.",
+    "keywords": [
+      "provider activity",
+      "medical staff activity",
+      "clinical workload"
+    ],
+    "content": "Healthcare Provider Activity Healthcare provider activity reflects the level of engagement healthcare professionals have in delivering patient care. Analyzing provider activity helps healthcare organizations understand workload distribution and service capacity. provider activity medical staff activity clinical workload"
+  },
+  {
+    "index": 8,
+    "rule_id": 9,
+    "concept_name": "Appointment Patterns",
+    "description": "Appointment patterns describe how patients schedule and attend healthcare visits over time.",
+    "insight": "Understanding appointment patterns helps healthcare providers optimize scheduling and service availability.",
+    "keywords": [
+      "appointments",
+      "visit scheduling",
+      "appointment trends"
+    ],
+    "content": "Appointment Patterns Appointment patterns describe how patients schedule and attend healthcare visits over time. Understanding appointment patterns helps healthcare providers optimize scheduling and service availability. appointments visit scheduling appointment trends"
+  },
+  {
+    "index": 9,
+    "rule_id": 10,
+    "concept_name": "Patient Engagement",
+    "description": "Patient engagement reflects how actively patients participate in healthcare services and interactions.",
+    "insight": "High levels of engagement often indicate stronger patient involvement in care processes.",
+    "keywords": [
+      "patient engagement",
+      "patient interaction",
+      "healthcare participation"
+    ],
+    "content": "Patient Engagement Patient engagement reflects how actively patients participate in healthcare services and interactions. High levels of engagement often indicate stronger patient involvement in care processes. patient engagement patient interaction healthcare participation"
+  },
+  {
+    "index": 10,
+    "rule_id": 11,
+    "concept_name": "Healthcare Activity Trends",
+    "description": "Healthcare activity trends describe how healthcare interactions and service usage change across different time periods.",
+    "insight": "Trend analysis helps healthcare organizations anticipate demand and allocate resources effectively.",
+    "keywords": [
+      "healthcare trends",
+      "medical activity trends",
+      "service demand trends"
+    ],
+    "content": "Healthcare Activity Trends Healthcare activity trends describe how healthcare interactions and service usage change across different time periods. Trend analysis helps healthcare organizations anticipate demand and allocate resources effectively. healthcare trends medical activity trends service demand trends"
+  },
+  {
+    "index": 11,
+    "rule_id": 12,
+    "concept_name": "Patient Participation",
+    "description": "Patient participation reflects how widely healthcare services are utilized across the patient population.",
+    "insight": "Analyzing participation helps healthcare providers understand overall service reach.",
+    "keywords": [
+      "patient participation",
+      "service adoption",
+      "patient involvement"
+    ],
+    "content": "Patient Participation Patient participation reflects how widely healthcare services are utilized across the patient population. Analyzing participation helps healthcare providers understand overall service reach. patient participation service adoption patient involvement"
+  },
+  {
+    "index": 12,
+    "rule_id": 13,
+    "concept_name": "Clinical Activity Monitoring",
+    "description": "Clinical activity monitoring focuses on observing patterns in healthcare delivery and patient interactions.",
+    "insight": "Monitoring clinical activity helps healthcare organizations maintain efficient service operations.",
+    "keywords": [
+      "clinical activity",
+      "medical operations",
+      "care monitoring"
+    ],
+    "content": "Clinical Activity Monitoring Clinical activity monitoring focuses on observing patterns in healthcare delivery and patient interactions. Monitoring clinical activity helps healthcare organizations maintain efficient service operations. clinical activity medical operations care monitoring"
+  },
+  {
+    "index": 13,
+    "rule_id": 14,
+    "concept_name": "Patient Service Demand",
+    "description": "Patient service demand reflects the level of need for healthcare services among patients.",
+    "insight": "Understanding demand helps healthcare providers plan staffing, services, and resources.",
+    "keywords": [
+      "service demand",
+      "healthcare demand",
+      "medical demand"
+    ],
+    "content": "Patient Service Demand Patient service demand reflects the level of need for healthcare services among patients. Understanding demand helps healthcare providers plan staffing, services, and resources. service demand healthcare demand medical demand"
+  },
+  {
+    "index": 14,
+    "rule_id": 15,
+    "concept_name": "Healthcare Interaction Distribution",
+    "description": "Healthcare interaction distribution describes how patient interactions are spread across different services or providers.",
+    "insight": "Analyzing interaction distribution helps healthcare organizations understand how care is delivered.",
+    "keywords": [
+      "healthcare interactions",
+      "patient interactions",
+      "service distribution"
+    ],
+    "content": "Healthcare Interaction Distribution Healthcare interaction distribution describes how patient interactions are spread across different services or providers. Analyzing interaction distribution helps healthcare organizations understand how care is delivered. healthcare interactions patient interactions service distribution"
+  }
+]

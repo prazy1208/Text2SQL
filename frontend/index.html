@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text2SQL — Intent</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <header class="header">
+      <h1>Text2SQL</h1>
+      <p class="tagline">Natural language to analytical intent</p>
+    </header>
+    <main class="main">
+      <section class="card form-card">
+        <h2>Ask a question</h2>
+        <form id="query-form" class="form">
+          <div class="field">
+            <label for="use-case">Use case</label>
+            <select id="use-case" required><option value="">Select domain…</option></select>
+          </div>
+          <div class="field">
+            <label for="message">Question</label>
+            <textarea id="message" rows="4" placeholder="e.g. How many patients were admitted last month?" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
+        </form>
+      </section>
+      <section class="card output-card" id="output-section">
+        <h2>Intent output</h2>
+        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, and business insights.</div>
+        <div id="output-content" class="output-content hidden">
+          <div class="output-block">
+            <h3>Rephrased question</h3>
+            <p id="out-rephrased" class="out-text"></p>
+          </div>
+          <div class="output-block">
+            <h3>Keywords</h3>
+            <ul id="out-keywords" class="out-list"></ul>
+          </div>
+          <div class="output-block">
+            <h3>Business insights</h3>
+            <ul id="out-insights" class="out-list"></ul>
+          </div>
+        </div>
+        <div id="output-error" class="output-error hidden"></div>
+      </section>
+    </main>
+    <footer class="footer"><span>Session: <code id="session-id">—</code></span></footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+[
+  {
+    "index": 0,
+    "rule_id": 1,
+    "concept_name": "Customer Acquisition",
+    "description": "Customer acquisition refers to the process of gaining new customers who begin interacting with the business.",
+    "insight": "Tracking acquisition helps businesses understand growth and evaluate outreach or marketing efforts.",
+    "keywords": [
+      "new customers",
+      "customer growth",
+      "customer signup",
+      "customer acquisition"
+    ],
+    "content": "Customer Acquisition Customer acquisition refers to the process of gaining new customers who begin interacting with the business. Tracking acquisition helps businesses understand growth and evaluate outreach or marketing efforts. new customers customer growth customer signup customer acquisition"
+  },
+  {
+    "index": 1,
+    "rule_id": 2,
+    "concept_name": "Customer Base Distribution",
+    "description": "Customer base distribution describes how customers are spread across different geographic locations.",
+    "insight": "Understanding where customers are concentrated helps businesses identify strong markets and areas for expansion.",
+    "keywords": [
+      "customer location",
+      "customer regions",
+      "geographic distribution",
+      "customers by region"
+    ],
+    "content": "Customer Base Distribution Customer base distribution describes how customers are spread across different geographic locations. Understanding where customers are concentrated helps businesses identify strong markets and areas for expansion. customer location customer regions geographic distribution customers by region"
+  },
+  {
+    "index": 2,
+    "rule_id": 3,
+    "concept_name": "Customer Growth Trends",
+    "description": "Customer growth trends represent how the number of customers changes over time.",
+    "insight": "Analyzing these trends helps businesses measure long-term growth and customer adoption.",
+    "keywords": [
+      "customer trends",
+      "customer increase",
+      "customer growth over time"
+    ],
+    "content": "Customer Growth Trends Customer growth trends represent how the number of customers changes over time. Analyzing these trends helps businesses measure long-term growth and customer adoption. customer trends customer increase customer growth over time"
+  },
+  {
+    "index": 3,
+    "rule_id": 4,
+    "concept_name": "Customer Engagement",
+    "description": "Customer engagement reflects how actively customers interact with the business through purchasing behavior.",
+    "insight": "Understanding engagement levels helps identify loyal customers and overall customer activity.",
+    "keywords": [
+      "customer engagement",
+      "customer activity",
+      "active customers"
+    ],
+    "content": "Customer Engagement Customer engagement reflects how actively customers interact with the business through purchasing behavior. Understanding engagement levels helps identify loyal customers and overall customer activity. customer engagement customer activity active customers"
+  },
+  {
+    "index": 4,
+    "rule_id": 5,
+    "concept_name": "Customer Purchase Behavior",
+    "description": "Customer purchase behavior describes patterns in how customers buy products over time.",
+    "insight": "Studying purchasing patterns helps businesses understand customer preferences and buying habits.",
+    "keywords": [
+      "purchase behavior",
+      "customer buying patterns",
+      "shopping behavior"
+    ],
+    "content": "Customer Purchase Behavior Customer purchase behavior describes patterns in how customers buy products over time. Studying purchasing patterns helps businesses understand customer preferences and buying habits. purchase behavior customer buying patterns shopping behavior"
+  },
+  {
+    "index": 5,
+    "rule_id": 6,
+    "concept_name": "Product Catalog Overview",
+    "description": "Product catalog analysis focuses on understanding the variety and organization of products offered by a business.",
+    "insight": "Reviewing the product catalog helps businesses maintain balanced offerings across categories and brands.",
+    "keywords": [
+      "product catalog",
+      "product list",
+      "available products"
+    ],
+    "content": "Product Catalog Overview Product catalog analysis focuses on understanding the variety and organization of products offered by a business. Reviewing the product catalog helps businesses maintain balanced offerings across categories and brands. product catalog product list available products"
+  },
+  {
+    "index": 6,
+    "rule_id": 7,
+    "concept_name": "Product Category Analysis",
+    "description": "Product categories group similar products together to simplify product organization and analysis.",
+    "insight": "Analyzing categories helps businesses understand demand patterns across different product types.",
+    "keywords": [
+      "product category",
+      "product categories",
+      "category analysis"
+    ],
+    "content": "Product Category Analysis Product categories group similar products together to simplify product organization and analysis. Analyzing categories helps businesses understand demand patterns across different product types. product category product categories category analysis"
+  },
+  {
+    "index": 7,
+    "rule_id": 8,
+    "concept_name": "Brand Representation",
+    "description": "Brand representation reflects how different brands appear within the product assortment.",
+    "insight": "Understanding brand presence helps businesses evaluate brand diversity and popularity.",
+    "keywords": [
+      "brand presence",
+      "brand distribution",
+      "brand representation"
+    ],
+    "content": "Brand Representation Brand representation reflects how different brands appear within the product assortment. Understanding brand presence helps businesses evaluate brand diversity and popularity. brand presence brand distribution brand representation"
+  },
+  {
+    "index": 8,
+    "rule_id": 9,
+    "concept_name": "Product Popularity",
+    "description": "Product popularity reflects the level of interest customers show in particular products.",
+    "insight": "Popularity insights help businesses identify products that consistently attract customer attention.",
+    "keywords": [
+      "popular products",
+      "trending products",
+      "product interest"
+    ],
+    "content": "Product Popularity Product popularity reflects the level of interest customers show in particular products. Popularity insights help businesses identify products that consistently attract customer attention. popular products trending products product interest"
+  },
+  {
+    "index": 9,
+    "rule_id": 10,
+    "concept_name": "Product Introduction Trends",
+    "description": "Product introduction trends describe how frequently new products are added to the catalog.",
+    "insight": "Monitoring product introductions helps businesses understand innovation and catalog expansion.",
+    "keywords": [
+      "new products",
+      "product launch",
+      "recent products"
+    ],
+    "content": "Product Introduction Trends Product introduction trends describe how frequently new products are added to the catalog. Monitoring product introductions helps businesses understand innovation and catalog expansion. new products product launch recent products"
+  },
+  {
+    "index": 10,
+    "rule_id": 11,
+    "concept_name": "Sales Activity",
+    "description": "Sales activity represents the overall purchasing interactions occurring between customers and the business.",
+    "insight": "Monitoring activity levels helps businesses evaluate demand and operational performance.",
+    "keywords": [
+      "sales activity",
+      "transactions",
+      "purchase activity"
+    ],
+    "content": "Sales Activity Sales activity represents the overall purchasing interactions occurring between customers and the business. Monitoring activity levels helps businesses evaluate demand and operational performance. sales activity transactions purchase activity"
+  },
+  {
+    "index": 11,
+    "rule_id": 12,
+    "concept_name": "Order Volume",
+    "description": "Order volume reflects the number of purchasing transactions occurring within a given timeframe.",
+    "insight": "Tracking order volume helps businesses understand changes in purchasing frequency.",
+    "keywords": [
+      "order volume",
+      "transaction count",
+      "number of purchases"
+    ],
+    "content": "Order Volume Order volume reflects the number of purchasing transactions occurring within a given timeframe. Tracking order volume helps businesses understand changes in purchasing frequency. order volume transaction count number of purchases"
+  },
+  {
+    "index": 12,
+    "rule_id": 13,
+    "concept_name": "Sales Trends",
+    "description": "Sales trends describe how purchasing activity evolves across different time periods.",
+    "insight": "Trend analysis helps identify growth patterns and seasonal behavior.",
+    "keywords": [
+      "sales trends",
+      "purchase trends",
+      "transaction trends"
+    ],
+    "content": "Sales Trends Sales trends describe how purchasing activity evolves across different time periods. Trend analysis helps identify growth patterns and seasonal behavior. sales trends purchase trends transaction trends"
+  },
+  {
+    "index": 13,
+    "rule_id": 14,
+    "concept_name": "Customer Purchasing Distribution",
+    "description": "Customer purchasing distribution describes how purchasing activity varies among different customers.",
+    "insight": "Understanding purchasing distribution helps identify customers with higher engagement levels.",
+    "keywords": [
+      "customer spending",
+      "top customers",
+      "customer purchase activity"
+    ],
+    "content": "Customer Purchasing Distribution Customer purchasing distribution describes how purchasing activity varies among different customers. Understanding purchasing distribution helps identify customers with higher engagement levels. customer spending top customers customer purchase activity"
+  },
+  {
+    "index": 14,
+    "rule_id": 15,
+    "concept_name": "Product Demand Patterns",
+    "description": "Product demand patterns describe how frequently different products attract customer purchases.",
+    "insight": "Understanding demand patterns helps businesses recognize products that drive consistent interest.",
+    "keywords": [
+      "product demand",
+      "high demand products",
+      "frequently purchased products"
+    ],
+    "content": "Product Demand Patterns Product demand patterns describe how frequently different products attract customer purchases. Understanding demand patterns helps businesses recognize products that drive consistent interest. product demand high demand products frequently purchased products"
+  },
+  {
+    "index": 15,
+    "rule_id": 16,
+    "concept_name": "Product Category Demand",
+    "description": "Category demand analysis evaluates how customer interest varies across different product categories.",
+    "insight": "This analysis helps businesses determine which types of products attract the most attention.",
+    "keywords": [
+      "category demand",
+      "popular categories",
+      "category interest"
+    ],
+    "content": "Product Category Demand Category demand analysis evaluates how customer interest varies across different product categories. This analysis helps businesses determine which types of products attract the most attention. category demand popular categories category interest"
+  },
+  {
+    "index": 16,
+    "rule_id": 17,
+    "concept_name": "Brand Interest",
+    "description": "Brand interest reflects the level of customer attention or engagement associated with particular brands.",
+    "insight": "Analyzing brand interest helps businesses understand which brands resonate most with customers.",
+    "keywords": [
+      "brand interest",
+      "popular brands",
+      "brand popularity"
+    ],
+    "content": "Brand Interest Brand interest reflects the level of customer attention or engagement associated with particular brands. Analyzing brand interest helps businesses understand which brands resonate most with customers. brand interest popular brands brand popularity"
+  },
+  {
+    "index": 17,
+    "rule_id": 18,
+    "concept_name": "Customer Activity Over Time",
+    "description": "Customer activity over time measures how purchasing engagement changes across different time periods.",
+    "insight": "Observing activity patterns helps identify periods of high or low customer interaction.",
+    "keywords": [
+      "customer activity trends",
+      "shopping activity",
+      "purchase timing"
+    ],
+    "content": "Customer Activity Over Time Customer activity over time measures how purchasing engagement changes across different time periods. Observing activity patterns helps identify periods of high or low customer interaction. customer activity trends shopping activity purchase timing"
+  }
+]

@@ -16,3 +16,7 @@ psycopg2-binary
 
 # Vector store (metadata → embeddings → FAISS)
 sentence-transformers
+
+# LLM (Intent Agent, Gen-SQL, etc.): OpenAI and/or Gemini
+openai
+google-genai
