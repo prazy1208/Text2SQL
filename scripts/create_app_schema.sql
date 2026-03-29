@@ -31,6 +31,16 @@ CREATE INDEX IF NOT EXISTS idx_intent_agent_output_session_id
 CREATE INDEX IF NOT EXISTS idx_intent_agent_output_use_case
     ON app_schema.intent_agent_output(use_case);
 
+-- Table agent output: at most one row per intent row (FK intent_agent_output.id)
+CREATE TABLE IF NOT EXISTS app_schema.table_agent_output (
+    id                 SERIAL PRIMARY KEY,
+    intent_output_id   INT NOT NULL REFERENCES app_schema.intent_agent_output(id) ON DELETE CASCADE,
+    selected_tables    TEXT[] NOT NULL DEFAULT '{}',
+    created_at         TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (intent_output_id)
+);
+
 COMMENT ON SCHEMA app_schema IS 'Application/session data for Text2SQL Stage 1';
 COMMENT ON TABLE app_schema.sessions IS 'One row per chat session';
 COMMENT ON TABLE app_schema.intent_agent_output IS 'One row per user query; stores Intent Agent output in separate columns';
+COMMENT ON TABLE app_schema.table_agent_output IS 'Table Agent: selected_tables for one intent_agent_output row';

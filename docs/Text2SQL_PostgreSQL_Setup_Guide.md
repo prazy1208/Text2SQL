@@ -139,14 +139,14 @@ Expected Output: - patients - visits - diagnoses
 
 ## 7. Create App Schema (Stage 1)
 
-The **app_schema** holds application and session data for the Text2SQL pipeline (Stage 1): one table for chat **sessions** and one for **intent_agent_output** (each user query and the Intent Agent’s rephrased question, keywords, and business insights in separate columns).
+The **app_schema** holds application and session data for the Text2SQL pipeline (Stage 1): **sessions**, **intent_agent_output** (Intent Agent: rephrased question, keywords, business insights), and **table_agent_output** (Table Agent: `selected_tables` linked to `intent_agent_output.id`). Fresh installs use `scripts/create_app_schema.sql` (includes all three). Existing databases created before Table Agent: run `scripts/migration_add_table_agent_output.sql` once.
 
 **Option A — Run SQL in pgAdmin**
 
 Open Query Tool on **text2sql_db** and run the following (or run the file `scripts/create_app_schema.sql`):
 
 ```sql
--- App schema for Stage 1: sessions and intent_agent_output
+-- App schema: sessions, intent_agent_output, table_agent_output (same as scripts/create_app_schema.sql)
 CREATE SCHEMA IF NOT EXISTS app_schema;
 
 CREATE TABLE IF NOT EXISTS app_schema.sessions (
@@ -171,9 +171,18 @@ CREATE INDEX IF NOT EXISTS idx_intent_agent_output_session_id
 CREATE INDEX IF NOT EXISTS idx_intent_agent_output_use_case
     ON app_schema.intent_agent_output(use_case);
 
+CREATE TABLE IF NOT EXISTS app_schema.table_agent_output (
+    id                 SERIAL PRIMARY KEY,
+    intent_output_id   INT NOT NULL REFERENCES app_schema.intent_agent_output(id) ON DELETE CASCADE,
+    selected_tables    TEXT[] NOT NULL DEFAULT '{}',
+    created_at         TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (intent_output_id)
+);
+
 COMMENT ON SCHEMA app_schema IS 'Application/session data for Text2SQL Stage 1';
 COMMENT ON TABLE app_schema.sessions IS 'One row per chat session';
 COMMENT ON TABLE app_schema.intent_agent_output IS 'One row per user query; stores Intent Agent output in separate columns';
+COMMENT ON TABLE app_schema.table_agent_output IS 'Table Agent: selected_tables for one intent_agent_output row';
 ```
 
 **Option B — Run the Python script**
@@ -184,7 +193,7 @@ From the project root, with `.env` configured (e.g. `DATABASE_URL` or `DB_HOST`,
 python scripts/run_create_app_schema.py
 ```
 
-The script uses the same database settings as `build_vector_store.py` and creates `app_schema`, `app_schema.sessions`, and `app_schema.intent_agent_output` in **text2sql_db**.
+The script uses the same database settings as `build_vector_store.py` and creates `app_schema`, `sessions`, `intent_agent_output`, and `table_agent_output` in **text2sql_db**.
 
 ------------------------------------------------------------------------
 

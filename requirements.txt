@@ -15,6 +15,7 @@ sqlalchemy
 psycopg2-binary
 
 # Vector store (metadata → embeddings → FAISS)
+numpy
 sentence-transformers
 
 # LLM (Intent Agent, Gen-SQL, etc.): OpenAI and/or Gemini

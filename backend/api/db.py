@@ -1,5 +1,5 @@
 """
-Database helpers for Stage 1 API: sessions and intent_agent_output.
+Database helpers for Stage 1 API: sessions, intent_agent_output, table_agent_output.
 """
 
 import uuid
@@ -44,15 +44,16 @@ def insert_intent_output(
     rephrased_question: str,
     keywords: list[str],
     business_insights: list[str],
-) -> None:
-    """Insert one row into app_schema.intent_agent_output."""
+) -> int:
+    """Insert one row into app_schema.intent_agent_output; return new row id."""
     engine = get_engine()
     with engine.connect() as conn:
-        conn.execute(
+        result = conn.execute(
             text(f"""
                 INSERT INTO {APP_SCHEMA}.intent_agent_output
                 (session_id, use_case, user_input, rephrased_question, keywords, business_insights)
                 VALUES (:session_id, :use_case, :user_input, :rephrased_question, :keywords, :business_insights)
+                RETURNING id
             """),
             {
                 "session_id": uuid.UUID(session_id),
@@ -63,4 +64,30 @@ def insert_intent_output(
                 "business_insights": business_insights or [],
             },
         )
+        row = result.fetchone()
         conn.commit()
+    if not row:
+        raise RuntimeError("INSERT intent_agent_output did not return id")
+    return int(row[0])
+
+
+def insert_table_agent_output(intent_output_id: int, selected_tables: list[str]) -> int:
+    """Insert one row into app_schema.table_agent_output; return new row id."""
+    engine = get_engine()
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(f"""
+                INSERT INTO {APP_SCHEMA}.table_agent_output (intent_output_id, selected_tables)
+                VALUES (:intent_output_id, :selected_tables)
+                RETURNING id
+            """),
+            {
+                "intent_output_id": intent_output_id,
+                "selected_tables": selected_tables or [],
+            },
+        )
+        row = result.fetchone()
+        conn.commit()
+    if not row:
+        raise RuntimeError("INSERT table_agent_output did not return id")
+    return int(row[0])

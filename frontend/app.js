@@ -12,6 +12,7 @@ const outputError = document.getElementById('output-error');
 const outRephrased = document.getElementById('out-rephrased');
 const outKeywords = document.getElementById('out-keywords');
 const outInsights = document.getElementById('out-insights');
+const outTables = document.getElementById('out-tables');
 const sessionIdEl = document.getElementById('session-id');
 
 async function loadUseCases() {
@@ -48,6 +49,9 @@ function showOutput(data) {
     : '<li>—</li>';
   outInsights.innerHTML = (data.business_insights && data.business_insights.length)
     ? data.business_insights.map(b => `<li>${escapeHtml(b)}</li>`).join('')
+    : '<li>—</li>';
+  outTables.innerHTML = (data.selected_tables && data.selected_tables.length)
+    ? data.selected_tables.map(t => `<li><code>${escapeHtml(t)}</code></li>`).join('')
     : '<li>—</li>';
 
   if (data.session_id) setStoredSessionId(data.session_id);
@@ -93,6 +97,7 @@ form.addEventListener('submit', async (e) => {
         rephrased_question: '',
         keywords: [],
         business_insights: [],
+        selected_tables: [],
         error: data.detail || res.statusText,
       });
       return;
@@ -104,11 +109,12 @@ form.addEventListener('submit', async (e) => {
       rephrased_question: '',
       keywords: [],
       business_insights: [],
+      selected_tables: [],
       error: err.message || 'Request failed',
     });
   } finally {
     submitBtn.disabled = false;
-    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, and business insights.';
+    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, and selected tables.';
   }
 });
 

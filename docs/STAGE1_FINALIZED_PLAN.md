@@ -160,7 +160,7 @@ Per `Text2SQL_PostgreSQL_Setup_Guide.md`, rules are in **domain schemas**, not a
 
 ## 11. Reference to Other Plans
 
-- **Project layout** (backend/agents, backend/services, config): see `PROJECT_STRUCTURE.md` in the project root. Use it to keep agents and services organized as Table, Column, Few-Shot, Gen-SQL, and SQL Validator agents are added.
+- **Project layout** (backend/agents, backend/services, config): see `docs/PROJECT_STRUCTURE.md`. Use it to keep agents and services organized as Table, Column, Few-Shot, Gen-SQL, and SQL Validator agents are added.
 - Full agent architecture (all agents, flow, Conversation deferred): `phase_3_agent_architecture_19e4c54c.plan.md` (in .cursor/plans or project).
 - Previous Stage 1 draft with app_schema.business_rules: superseded by this document; business rules are in domain schemas per setup guide.
 

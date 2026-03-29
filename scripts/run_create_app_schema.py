@@ -1,5 +1,5 @@
 """
-Create app_schema and tables (sessions, intent_agent_output) in text2sql_db.
+Create app_schema and tables (sessions, intent_agent_output, table_agent_output) in text2sql_db.
 Uses .env from project root: DATABASE_URL or DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME.
 Run from project root: python scripts/run_create_app_schema.py
 """
@@ -52,7 +52,7 @@ def main():
     finally:
         raw_conn.close()
 
-    print("Done. app_schema, app_schema.sessions, and app_schema.intent_agent_output created.")
+    print("Done. app_schema, sessions, intent_agent_output, and table_agent_output created.")
 
 
 if __name__ == "__main__":

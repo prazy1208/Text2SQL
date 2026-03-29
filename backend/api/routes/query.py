@@ -1,4 +1,4 @@
-"""Routes for Intent Agent: POST /query, GET /use-cases."""
+"""Routes: POST /query (Intent + Table Agent), GET /use-cases."""
 
 import logging
 
@@ -6,7 +6,13 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.agents.intent_agent import run_intent
-from backend.api.db import create_session, insert_intent_output, session_exists
+from backend.agents.table_agent import run_table_agent
+from backend.api.db import (
+    create_session,
+    insert_intent_output,
+    insert_table_agent_output,
+    session_exists,
+)
 from backend.config import USE_CASES
 
 logger = logging.getLogger(__name__)
@@ -24,7 +30,19 @@ class QueryResponse(BaseModel):
     rephrased_question: str
     keywords: list[str]
     business_insights: list[str]
+    selected_tables: list[str] = Field(default_factory=list)
     error: str | None = None
+
+
+def _empty_response(session_id: str, error: str) -> QueryResponse:
+    return QueryResponse(
+        session_id=session_id,
+        rephrased_question="",
+        keywords=[],
+        business_insights=[],
+        selected_tables=[],
+        error=error,
+    )
 
 
 @router.get("/use-cases")
@@ -47,21 +65,21 @@ def post_query(body: QueryRequest) -> QueryResponse:
             session_id = create_session()
         except Exception as e:
             logger.exception("Failed to create session")
-            return QueryResponse(session_id="", rephrased_question="", keywords=[], business_insights=[], error=str(e))
+            return _empty_response("", str(e))
 
-    logger.info("Intent request: use_case=%s", use_case)
+    logger.info("Query request: use_case=%s", use_case)
     try:
         intent = run_intent(body.message.strip(), use_case)
     except Exception as e:
         logger.exception("Intent Agent failed")
-        return QueryResponse(session_id=session_id, rephrased_question="", keywords=[], business_insights=[], error=str(e))
+        return _empty_response(session_id, str(e))
 
     rephrased = intent.get("rephrased_question", "")
     keywords = intent.get("keywords") or []
     business_insights = intent.get("business_insights") or []
 
     try:
-        insert_intent_output(
+        intent_output_id = insert_intent_output(
             session_id=session_id,
             use_case=use_case,
             user_input=body.message.strip(),
@@ -71,6 +89,36 @@ def post_query(body: QueryRequest) -> QueryResponse:
         )
     except Exception as e:
         logger.exception("Failed to persist intent output")
-        return QueryResponse(session_id=session_id, rephrased_question=rephrased, keywords=keywords, business_insights=business_insights, error=f"Save failed: {e}")
+        return QueryResponse(
+            session_id=session_id,
+            rephrased_question=rephrased,
+            keywords=keywords,
+            business_insights=business_insights,
+            selected_tables=[],
+            error=f"Save failed: {e}",
+        )
 
-    return QueryResponse(session_id=session_id, rephrased_question=rephrased, keywords=keywords, business_insights=business_insights, error=None)
+    selected_tables: list[str] = []
+    table_error: str | None = None
+    try:
+        table_out = run_table_agent(use_case, rephrased, keywords)
+        selected_tables = table_out.get("selected_tables") or []
+    except Exception as e:
+        logger.exception("Table Agent failed")
+        table_error = f"Table Agent failed: {e}"
+
+    try:
+        insert_table_agent_output(intent_output_id, selected_tables)
+    except Exception as e:
+        logger.exception("Failed to persist table agent output")
+        persist_msg = f"Table selection save failed: {e}"
+        table_error = f"{table_error}; {persist_msg}" if table_error else persist_msg
+
+    return QueryResponse(
+        session_id=session_id,
+        rephrased_question=rephrased,
+        keywords=keywords,
+        business_insights=business_insights,
+        selected_tables=selected_tables,
+        error=table_error,
+    )

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Text2SQL — Intent</title>
+  <title>Text2SQL — Intent & tables</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="layout">
     <header class="header">
       <h1>Text2SQL</h1>
-      <p class="tagline">Natural language to analytical intent</p>
+      <p class="tagline">Natural language to intent and table selection</p>
     </header>
     <main class="main">
       <section class="card form-card">
@@ -28,8 +28,8 @@
         </form>
       </section>
       <section class="card output-card" id="output-section">
-        <h2>Intent output</h2>
-        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, and business insights.</div>
+        <h2>Query output</h2>
+        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, business insights, and selected tables.</div>
         <div id="output-content" class="output-content hidden">
           <div class="output-block">
             <h3>Rephrased question</h3>
@@ -42,6 +42,11 @@
           <div class="output-block">
             <h3>Business insights</h3>
             <ul id="out-insights" class="out-list"></ul>
+          </div>
+          <div class="output-block">
+            <h3>Selected tables</h3>
+            <p class="output-hint">Schema-qualified names chosen for SQL generation.</p>
+            <ul id="out-tables" class="out-list out-list-mono"></ul>
           </div>
         </div>
         <div id="output-error" class="output-error hidden"></div>
