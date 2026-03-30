@@ -43,11 +43,18 @@ FAISS_INDEX_DIR = PROJECT_ROOT / "faiss_indexes"
 METADATA_STORE_DIR = PROJECT_ROOT / "metadata_store"
 BUSINESS_RULES_STORE_DIR = PROJECT_ROOT / "business_rules_store"
 
-# Per-schema FAISS index filenames (table/column metadata)
+# Per-schema FAISS index filenames (table-level metadata, Table Agent)
 FAISS_INDEX_NAMES = {
     "healthcare_schema": "healthcare_schema.index",
     "retail_schema": "retail_schema.index",
     "finance_schema": "finance_schema.index",
+}
+
+# Per-schema FAISS index filenames (one vector per column, Column Agent shortlist)
+FAISS_COLUMN_INDEX_NAMES = {
+    "healthcare_schema": "healthcare_schema_columns.index",
+    "retail_schema": "retail_schema_columns.index",
+    "finance_schema": "finance_schema_columns.index",
 }
 
 # Business-rules FAISS index filenames

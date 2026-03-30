@@ -1,7 +1,9 @@
 """
-Database helpers for Stage 1 API: sessions, intent_agent_output, table_agent_output.
+Database helpers for Stage 1 API: sessions, intent_agent_output, table_agent_output,
+column_agent_output.
 """
 
+import json
 import uuid
 
 from sqlalchemy import text
@@ -90,4 +92,30 @@ def insert_table_agent_output(intent_output_id: int, selected_tables: list[str])
         conn.commit()
     if not row:
         raise RuntimeError("INSERT table_agent_output did not return id")
+    return int(row[0])
+
+
+def insert_column_agent_output(table_agent_output_id: int, selected_columns: dict) -> int:
+    """
+    Insert one row into app_schema.column_agent_output; return new row id.
+    selected_columns: map table FQN -> list of column names, stored as JSONB.
+    """
+    engine = get_engine()
+    payload = json.dumps(selected_columns or {})
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(f"""
+                INSERT INTO {APP_SCHEMA}.column_agent_output (table_agent_output_id, selected_columns)
+                VALUES (:table_agent_output_id, CAST(:selected_columns AS jsonb))
+                RETURNING id
+            """),
+            {
+                "table_agent_output_id": table_agent_output_id,
+                "selected_columns": payload,
+            },
+        )
+        row = result.fetchone()
+        conn.commit()
+    if not row:
+        raise RuntimeError("INSERT column_agent_output did not return id")
     return int(row[0])

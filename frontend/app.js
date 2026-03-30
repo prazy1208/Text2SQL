@@ -1,4 +1,5 @@
 const SESSION_KEY = 'text2sql_session_id';
+const LAST_OUTPUT_KEY = 'text2sql_last_output';
 const API_BASE = '';
 
 const form = document.getElementById('query-form');
@@ -13,7 +14,28 @@ const outRephrased = document.getElementById('out-rephrased');
 const outKeywords = document.getElementById('out-keywords');
 const outInsights = document.getElementById('out-insights');
 const outTables = document.getElementById('out-tables');
+const outColumns = document.getElementById('out-columns');
 const sessionIdEl = document.getElementById('session-id');
+
+/**
+ * API returns selected_columns as object mapping "schema.table" -> string[].
+ * Guard against null, arrays, or bad values (cached HTML / older clients).
+ */
+function normalizeSelectedColumns(raw) {
+  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
+    return {};
+  }
+  const out = {};
+  for (const [tableFqn, v] of Object.entries(raw)) {
+    if (!tableFqn || !String(tableFqn).trim()) continue;
+    if (!Array.isArray(v)) continue;
+    const names = v.map((x) => String(x).trim()).filter(Boolean);
+    if (names.length) {
+      out[String(tableFqn).trim()] = names;
+    }
+  }
+  return out;
+}
 
 async function loadUseCases() {
   try {
@@ -37,6 +59,58 @@ function setStoredSessionId(id) {
   sessionIdEl.textContent = id || '—';
 }
 
+/** Save last /query response + form context so a hard refresh can restore the panel. */
+function persistLastOutput(useCase, message, data) {
+  try {
+    const pack = {
+      session_id: data.session_id || '',
+      rephrased_question: data.rephrased_question || '',
+      keywords: data.keywords || [],
+      business_insights: data.business_insights || [],
+      selected_tables: data.selected_tables || [],
+      selected_columns: data.selected_columns || {},
+      error: data.error || null,
+      _use_case: useCase || '',
+      _message: message || '',
+    };
+    localStorage.setItem(LAST_OUTPUT_KEY, JSON.stringify(pack));
+  } catch (e) {
+    console.warn('persistLastOutput failed', e);
+  }
+}
+
+/** Restore output and form after load (e.g. hard refresh). */
+function restoreLastOutput() {
+  try {
+    const raw = localStorage.getItem(LAST_OUTPUT_KEY);
+    if (!raw) return;
+    const pack = JSON.parse(raw);
+    const useCase = pack._use_case;
+    const msg = pack._message;
+    delete pack._use_case;
+    delete pack._message;
+
+    if (useCase && [...useCaseSelect.options].some((o) => o.value === useCase)) {
+      useCaseSelect.value = useCase;
+    }
+    if (msg != null) messageInput.value = msg;
+
+    const hasContent =
+      (pack.rephrased_question && String(pack.rephrased_question).trim()) ||
+      (pack.keywords && pack.keywords.length) ||
+      (pack.business_insights && pack.business_insights.length) ||
+      (pack.selected_tables && pack.selected_tables.length) ||
+      Object.keys(normalizeSelectedColumns(pack.selected_columns)).length ||
+      (pack.error && String(pack.error).trim());
+    if (hasContent) {
+      showOutput(pack);
+    }
+  } catch (e) {
+    console.warn('restoreLastOutput failed', e);
+    localStorage.removeItem(LAST_OUTPUT_KEY);
+  }
+}
+
 function showOutput(data) {
   outputError.classList.add('hidden');
   outputError.textContent = '';
@@ -53,6 +127,27 @@ function showOutput(data) {
   outTables.innerHTML = (data.selected_tables && data.selected_tables.length)
     ? data.selected_tables.map(t => `<li><code>${escapeHtml(t)}</code></li>`).join('')
     : '<li>—</li>';
+
+  const cols = normalizeSelectedColumns(data.selected_columns);
+  const colKeys = Object.keys(cols);
+  if (outColumns) {
+    if (!colKeys.length) {
+      const hint =
+        (data.selected_tables && data.selected_tables.length)
+          ? 'No columns in this response.'
+          : '—';
+      outColumns.innerHTML = `<p class="out-text-muted">${escapeHtml(hint)}</p>`;
+    } else {
+      colKeys.sort();
+      outColumns.innerHTML = colKeys.map((tableFqn) => {
+        const list = cols[tableFqn];
+        const items = list.map((c) => `<li><code>${escapeHtml(String(c))}</code></li>`).join('');
+        return `<div class="out-column-group"><h4 class="out-column-table"><code>${escapeHtml(tableFqn)}</code></h4><ul class="out-list out-list-mono">${items}</ul></div>`;
+      }).join('');
+    }
+  } else {
+    console.error('text2sql UI: missing #out-columns in index.html — hard refresh (Ctrl+Shift+R) or clear cache.');
+  }
 
   if (data.session_id) setStoredSessionId(data.session_id);
   if (data.error) {
@@ -93,30 +188,43 @@ form.addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (!res.ok) {
-      showOutput({
+      const detail = data.detail != null ? data.detail : res.statusText;
+      const errText = typeof detail === 'string' ? detail : JSON.stringify(detail);
+      const errPayload = {
         rephrased_question: '',
         keywords: [],
         business_insights: [],
         selected_tables: [],
-        error: data.detail || res.statusText,
-      });
+        selected_columns: {},
+        error: errText,
+      };
+      showOutput(errPayload);
+      persistLastOutput(useCase, message, errPayload);
       return;
     }
 
     showOutput(data);
+    persistLastOutput(useCase, message, data);
   } catch (err) {
-    showOutput({
+    const errPayload = {
       rephrased_question: '',
       keywords: [],
       business_insights: [],
       selected_tables: [],
+      selected_columns: {},
       error: err.message || 'Request failed',
-    });
+    };
+    showOutput(errPayload);
+    persistLastOutput(useCase, message, errPayload);
   } finally {
     submitBtn.disabled = false;
-    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, and selected tables.';
+    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, selected tables, and selected columns.';
   }
 });
 
-loadUseCases();
-setStoredSessionId(getStoredSessionId());
+async function init() {
+  await loadUseCases();
+  restoreLastOutput();
+  setStoredSessionId(getStoredSessionId());
+}
+init();

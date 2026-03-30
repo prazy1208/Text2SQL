@@ -11,6 +11,7 @@ Text2SQL project/
 │   ├── PROJECT_STRUCTURE.md      # this file
 │   ├── STAGE1_FINALIZED_PLAN.md
 │   ├── TABLE_AGENT_5A_PLAN.md    # Table Agent implementation plan (5a)
+│   ├── COLUMN_AGENT_5B_PLAN.md   # Column Agent implementation plan (5b)
 │   ├── INSTALLATION_REQUIREMENTS.md
 │   └── Text2SQL_PostgreSQL_Setup_Guide.md
 ├── requirements.txt
@@ -22,7 +23,7 @@ Text2SQL project/
 ├── business_rules_store/         # business-rules metadata JSON (per schema)
 ├── backend/                      # API and pipeline
 ├── scripts/                      # create_app_schema.sql, migrations (e.g. migration_add_table_agent_output.sql)
-└── frontend/                     # Stage 1 UI: intent + selected_tables; index.html, styles.css, app.js; served at / by FastAPI
+└── frontend/                     # Stage 1 UI: intent, selected_tables, selected_columns; index.html, styles.css, app.js; served at / by FastAPI
 ```
 
 ## Backend
@@ -35,21 +36,23 @@ backend/
 │   ├── __init__.py
 │   ├── intent_agent.py           # Stage 1: rephrase + keywords + business_insights
 │   ├── table_agent.py            # Table selection: shortlist + LLM → selected_tables (schema.table)
-│   │   # (later) column_agent.py, few_shot_agent.py, gen_sql_agent.py, sql_validator.py
+│   ├── column_agent.py           # Column selection: shortlist + LLM → selected_columns per table
+│   │   # (later) few_shot_agent.py, gen_sql_agent.py, sql_validator.py
 │   └── ...
 ├── services/                     # shared services used by agents
 │   ├── __init__.py
 │   ├── business_rules_retrieval.py   # FAISS retrieval → list of insight strings
 │   ├── llm_client.py                 # OpenAI / Gemini chat_completion
 │   ├── table_metadata_retrieval.py   # table metadata + optional FAISS shortlist
+│   ├── column_metadata_retrieval.py # column candidates for selected tables; threshold + column FAISS
 │   └── ...
 └── api/                          # FastAPI app and routes
     ├── __init__.py
     ├── main.py                   # App entry point; mounts routers (uvicorn backend.api.main:app)
-    ├── db.py                     # Session, intent_agent_output, table_agent_output
+    ├── db.py                     # Session, intent_agent_output, table_agent_output, column_agent_output
     └── routes/                   # One module per agent/flow
         ├── __init__.py
-        ├── query.py              # GET /use-cases, POST /query (Intent + Table Agent)
+        ├── query.py              # GET /use-cases, POST /query (Intent + Table + Column Agent)
         └── ...                   # (later) sql.py for Gen-SQL, etc.
 ```
 
@@ -65,4 +68,5 @@ backend/
 
 - Stage 1 scope and order: `docs/STAGE1_FINALIZED_PLAN.md`
 - Table Agent (5a) — metadata shortlist, LLM selection, DB, API, UI: `docs/TABLE_AGENT_5A_PLAN.md`
+- Column Agent (5b) — column metadata, threshold/FAISS, LLM, DB, API: `docs/COLUMN_AGENT_5B_PLAN.md`
 - Full agent architecture (Phase 3): see plan referenced there (e.g. phase_3_agent_architecture in .cursor/plans).

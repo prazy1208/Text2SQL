@@ -1,14 +1,16 @@
-"""Routes: POST /query (Intent + Table Agent), GET /use-cases."""
+"""Routes: POST /query (Intent + Table + Column Agent), GET /use-cases."""
 
 import logging
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from backend.agents.column_agent import run_column_agent
 from backend.agents.intent_agent import run_intent
 from backend.agents.table_agent import run_table_agent
 from backend.api.db import (
     create_session,
+    insert_column_agent_output,
     insert_intent_output,
     insert_table_agent_output,
     session_exists,
@@ -31,6 +33,7 @@ class QueryResponse(BaseModel):
     keywords: list[str]
     business_insights: list[str]
     selected_tables: list[str] = Field(default_factory=list)
+    selected_columns: dict[str, list[str]] = Field(default_factory=dict)
     error: str | None = None
 
 
@@ -41,6 +44,7 @@ def _empty_response(session_id: str, error: str) -> QueryResponse:
         keywords=[],
         business_insights=[],
         selected_tables=[],
+        selected_columns={},
         error=error,
     )
 
@@ -95,6 +99,7 @@ def post_query(body: QueryRequest) -> QueryResponse:
             keywords=keywords,
             business_insights=business_insights,
             selected_tables=[],
+            selected_columns={},
             error=f"Save failed: {e}",
         )
 
@@ -107,12 +112,35 @@ def post_query(body: QueryRequest) -> QueryResponse:
         logger.exception("Table Agent failed")
         table_error = f"Table Agent failed: {e}"
 
+    table_agent_output_id: int | None = None
     try:
-        insert_table_agent_output(intent_output_id, selected_tables)
+        table_agent_output_id = insert_table_agent_output(intent_output_id, selected_tables)
     except Exception as e:
         logger.exception("Failed to persist table agent output")
         persist_msg = f"Table selection save failed: {e}"
         table_error = f"{table_error}; {persist_msg}" if table_error else persist_msg
+
+    selected_columns: dict[str, list[str]] = {}
+    column_error: str | None = None
+    if table_agent_output_id is not None:
+        if selected_tables:
+            try:
+                col_out = run_column_agent(use_case, rephrased, keywords, selected_tables)
+                selected_columns = col_out.get("selected_columns") or {}
+            except Exception as e:
+                logger.exception("Column Agent failed")
+                column_error = f"Column Agent failed: {e}"
+                selected_columns = {}
+        try:
+            insert_column_agent_output(table_agent_output_id, selected_columns)
+        except Exception as e:
+            logger.exception("Failed to persist column agent output")
+            persist_col = f"Column selection save failed: {e}"
+            column_error = f"{column_error}; {persist_col}" if column_error else persist_col
+
+    err = table_error
+    if column_error:
+        err = f"{err}; {column_error}" if err else column_error
 
     return QueryResponse(
         session_id=session_id,
@@ -120,5 +148,6 @@ def post_query(body: QueryRequest) -> QueryResponse:
         keywords=keywords,
         business_insights=business_insights,
         selected_tables=selected_tables,
-        error=table_error,
+        selected_columns=selected_columns,
+        error=err,
     )

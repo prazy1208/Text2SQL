@@ -6,23 +6,65 @@
     "columns": [
       {
         "name": "diagnosis_id",
-        "description": "Unique system-generated identifier for each diagnosis record."
+        "description": "Unique system-generated identifier for each diagnosis record.",
+        "data_type": "integer"
       },
       {
         "name": "visit_id",
-        "description": "Foreign key referencing the visit during which the diagnosis was made."
+        "description": "Foreign key referencing the visit during which the diagnosis was made.",
+        "data_type": "integer"
       },
       {
         "name": "diagnosis_code",
-        "description": "Standardized medical diagnosis code (e.g., ICD code) representing the condition."
+        "description": "Standardized medical diagnosis code (e.g., ICD code) representing the condition.",
+        "data_type": "character varying(20)"
       },
       {
         "name": "diagnosis_description",
-        "description": "Textual description of the diagnosed medical condition."
+        "description": "Textual description of the diagnosed medical condition.",
+        "data_type": "character varying(255)"
       },
       {
         "name": "severity_level",
-        "description": "Indicates the severity of the diagnosed condition (e.g., mild, moderate, severe)."
+        "description": "Indicates the severity of the diagnosed condition (e.g., mild, moderate, severe).",
+        "data_type": "character varying(20)"
+      }
+    ]
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "table_description": "Stores healthcare domain business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe healthcare analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "columns": [
+      {
+        "name": "rule_id",
+        "description": "Unique identifier assigned to each healthcare business rule.",
+        "data_type": "integer"
+      },
+      {
+        "name": "concept_name",
+        "description": "High-level healthcare concept or analytical theme represented by the rule, such as patient activity, treatment patterns, or healthcare service utilization.",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "description",
+        "description": "Neutral natural-language explanation of the healthcare concept. \nThis field describes the concept without referencing database schema elements, implementation details, or SQL logic.",
+        "data_type": "text"
+      },
+      {
+        "name": "insight",
+        "description": "Healthcare insight explaining why the concept is important for analysis, reporting, or operational understanding.",
+        "data_type": "text"
+      },
+      {
+        "name": "keywords",
+        "description": "List of keywords or phrases associated with the healthcare concept. \nThese keywords help semantic retrieval systems match user queries with relevant business rules.",
+        "data_type": "text[]"
+      },
+      {
+        "name": "created_at",
+        "description": "Timestamp indicating when the healthcare business rule was created. \nUseful for governance, auditing, and lifecycle management.",
+        "data_type": "timestamp without time zone"
       }
     ]
   },
@@ -33,39 +75,48 @@
     "columns": [
       {
         "name": "patient_id",
-        "description": "Unique system-generated identifier assigned to each patient."
+        "description": "Unique system-generated identifier assigned to each patient.",
+        "data_type": "integer"
       },
       {
         "name": "first_name",
-        "description": "Patient's legal first name."
+        "description": "Patient's legal first name.",
+        "data_type": "character varying(100)"
       },
       {
         "name": "last_name",
-        "description": "Patient's legal last name."
+        "description": "Patient's legal last name.",
+        "data_type": "character varying(100)"
       },
       {
         "name": "date_of_birth",
-        "description": "Date of birth of the patient used for age-based analysis and eligibility checks."
+        "description": "Date of birth of the patient used for age-based analysis and eligibility checks.",
+        "data_type": "date"
       },
       {
         "name": "gender",
-        "description": "Self-reported gender of the patient."
+        "description": "Self-reported gender of the patient.",
+        "data_type": "character varying(20)"
       },
       {
         "name": "city",
-        "description": "City of residence of the patient."
+        "description": "City of residence of the patient.",
+        "data_type": "character varying(100)"
       },
       {
         "name": "state",
-        "description": "State of residence of the patient."
+        "description": "State of residence of the patient.",
+        "data_type": "character varying(100)"
       },
       {
         "name": "insurance_type",
-        "description": "Type of insurance coverage used by the patient (e.g., private, government, uninsured)."
+        "description": "Type of insurance coverage used by the patient (e.g., private, government, uninsured).",
+        "data_type": "character varying(50)"
       },
       {
         "name": "registration_date",
-        "description": "Date when the patient was first registered in the healthcare system."
+        "description": "Date when the patient was first registered in the healthcare system.",
+        "data_type": "date"
       }
     ]
   },
@@ -76,31 +127,38 @@
     "columns": [
       {
         "name": "visit_id",
-        "description": "Unique system-generated identifier for each patient visit."
+        "description": "Unique system-generated identifier for each patient visit.",
+        "data_type": "integer"
       },
       {
         "name": "patient_id",
-        "description": "Foreign key referencing the patient who attended the visit."
+        "description": "Foreign key referencing the patient who attended the visit.",
+        "data_type": "integer"
       },
       {
         "name": "admission_date",
-        "description": "Date when the patient was admitted for the visit."
+        "description": "Date when the patient was admitted for the visit.",
+        "data_type": "date"
       },
       {
         "name": "discharge_date",
-        "description": "Date when the patient was discharged from the visit."
+        "description": "Date when the patient was discharged from the visit.",
+        "data_type": "date"
       },
       {
         "name": "department",
-        "description": "Medical department responsible for the visit (e.g., cardiology, emergency, oncology)."
+        "description": "Medical department responsible for the visit (e.g., cardiology, emergency, oncology).",
+        "data_type": "character varying(100)"
       },
       {
         "name": "visit_type",
-        "description": "Classification of visit such as inpatient, outpatient, or emergency."
+        "description": "Classification of visit such as inpatient, outpatient, or emergency.",
+        "data_type": "character varying(50)"
       },
       {
         "name": "total_cost",
-        "description": "Total billed cost associated with the visit, including treatments and services."
+        "description": "Total billed cost associated with the visit, including treatments and services.",
+        "data_type": "numeric(12,2)"
       }
     ]
   }

@@ -6,27 +6,70 @@
     "columns": [
       {
         "name": "account_id",
-        "description": "Unique system-generated identifier assigned to each bank account."
+        "description": "Unique system-generated identifier assigned to each bank account.",
+        "data_type": "integer"
       },
       {
         "name": "customer_name",
-        "description": "Full name of the customer who owns the bank account."
+        "description": "Full name of the customer who owns the bank account.",
+        "data_type": "character varying(150)"
       },
       {
         "name": "account_type",
-        "description": "Type of bank account such as savings or checking."
+        "description": "Type of bank account such as savings or checking.",
+        "data_type": "character varying(50)"
       },
       {
         "name": "branch_city",
-        "description": "City where the bank branch managing the account is located."
+        "description": "City where the bank branch managing the account is located.",
+        "data_type": "character varying(100)"
       },
       {
         "name": "opening_date",
-        "description": "Date when the bank account was opened."
+        "description": "Date when the bank account was opened.",
+        "data_type": "date"
       },
       {
         "name": "current_balance",
-        "description": "Current available balance in the account."
+        "description": "Current available balance in the account.",
+        "data_type": "numeric(14,2)"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "table_description": "Stores domain-level financial business knowledge used by the Intent Agent to interpret user queries. \nThese rules describe financial analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic in order to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "columns": [
+      {
+        "name": "rule_id",
+        "description": "Unique identifier assigned to each financial business rule.",
+        "data_type": "integer"
+      },
+      {
+        "name": "concept_name",
+        "description": "High-level financial concept or analytical theme represented by the rule, such as transaction activity, financial trends, or spending patterns.",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "description",
+        "description": "Neutral natural-language explanation of the financial concept. \nThis field describes the concept without referencing database schema elements, implementation details, or SQL logic.",
+        "data_type": "text"
+      },
+      {
+        "name": "insight",
+        "description": "Business insight explaining why the financial concept is important for analysis and decision-making.",
+        "data_type": "text"
+      },
+      {
+        "name": "keywords",
+        "description": "List of keywords or phrases associated with the financial concept. \nThese keywords help semantic retrieval systems match user queries with relevant business rules.",
+        "data_type": "text[]"
+      },
+      {
+        "name": "created_at",
+        "description": "Timestamp indicating when the financial business rule was created. \nThis supports governance, auditing, and lifecycle management of rules.",
+        "data_type": "timestamp without time zone"
       }
     ]
   },
@@ -37,31 +80,38 @@
     "columns": [
       {
         "name": "loan_id",
-        "description": "Unique system-generated identifier for each loan record."
+        "description": "Unique system-generated identifier for each loan record.",
+        "data_type": "integer"
       },
       {
         "name": "account_id",
-        "description": "Foreign key referencing the account associated with the loan."
+        "description": "Foreign key referencing the account associated with the loan.",
+        "data_type": "integer"
       },
       {
         "name": "loan_type",
-        "description": "Category of loan such as home loan, auto loan, or personal loan."
+        "description": "Category of loan such as home loan, auto loan, or personal loan.",
+        "data_type": "character varying(100)"
       },
       {
         "name": "loan_amount",
-        "description": "Total principal amount borrowed under the loan agreement."
+        "description": "Total principal amount borrowed under the loan agreement.",
+        "data_type": "numeric(14,2)"
       },
       {
         "name": "interest_rate",
-        "description": "Annual interest rate applied to the loan expressed as a percentage."
+        "description": "Annual interest rate applied to the loan expressed as a percentage.",
+        "data_type": "numeric(5,2)"
       },
       {
         "name": "loan_start_date",
-        "description": "Date when the loan repayment period began."
+        "description": "Date when the loan repayment period began.",
+        "data_type": "date"
       },
       {
         "name": "loan_end_date",
-        "description": "Date when the loan is scheduled to be fully repaid."
+        "description": "Date when the loan is scheduled to be fully repaid.",
+        "data_type": "date"
       }
     ]
   },
@@ -72,27 +122,33 @@
     "columns": [
       {
         "name": "transaction_id",
-        "description": "Unique system-generated identifier for each transaction."
+        "description": "Unique system-generated identifier for each transaction.",
+        "data_type": "integer"
       },
       {
         "name": "account_id",
-        "description": "Foreign key referencing the account on which the transaction occurred."
+        "description": "Foreign key referencing the account on which the transaction occurred.",
+        "data_type": "integer"
       },
       {
         "name": "transaction_date",
-        "description": "Date when the transaction was executed."
+        "description": "Date when the transaction was executed.",
+        "data_type": "date"
       },
       {
         "name": "transaction_type",
-        "description": "Type of transaction such as debit (money withdrawn) or credit (money deposited)."
+        "description": "Type of transaction such as debit (money withdrawn) or credit (money deposited).",
+        "data_type": "character varying(50)"
       },
       {
         "name": "amount",
-        "description": "Monetary value of the transaction."
+        "description": "Monetary value of the transaction.",
+        "data_type": "numeric(14,2)"
       },
       {
         "name": "description",
-        "description": "Short textual explanation describing the purpose or nature of the transaction."
+        "description": "Short textual explanation describing the purpose or nature of the transaction.",
+        "data_type": "character varying(255)"
       }
     ]
   }

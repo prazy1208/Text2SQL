@@ -44,3 +44,14 @@ COMMENT ON SCHEMA app_schema IS 'Application/session data for Text2SQL Stage 1';
 COMMENT ON TABLE app_schema.sessions IS 'One row per chat session';
 COMMENT ON TABLE app_schema.intent_agent_output IS 'One row per user query; stores Intent Agent output in separate columns';
 COMMENT ON TABLE app_schema.table_agent_output IS 'Table Agent: selected_tables for one intent_agent_output row';
+
+-- Column agent output: at most one row per table_agent_output row
+CREATE TABLE IF NOT EXISTS app_schema.column_agent_output (
+    id                      SERIAL PRIMARY KEY,
+    table_agent_output_id   INT NOT NULL REFERENCES app_schema.table_agent_output(id) ON DELETE CASCADE,
+    selected_columns        JSONB NOT NULL DEFAULT '{}'::jsonb,
+    created_at              TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (table_agent_output_id)
+);
+
+COMMENT ON TABLE app_schema.column_agent_output IS 'Column Agent: selected_columns (per table) for one table_agent_output row';

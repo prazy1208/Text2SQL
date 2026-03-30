@@ -1,0 +1,245 @@
+[
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "diagnosis_code",
+    "data_type": "character varying(20)",
+    "description": "Standardized medical diagnosis code (e.g., ICD code) representing the condition.",
+    "table_description": "Stores medical diagnoses assigned during patient visits, including severity and diagnostic codes.",
+    "fqn": "healthcare_schema.diagnoses.diagnosis_code"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "diagnosis_description",
+    "data_type": "character varying(255)",
+    "description": "Textual description of the diagnosed medical condition.",
+    "table_description": "Stores medical diagnoses assigned during patient visits, including severity and diagnostic codes.",
+    "fqn": "healthcare_schema.diagnoses.diagnosis_description"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "diagnosis_id",
+    "data_type": "integer",
+    "description": "Unique system-generated identifier for each diagnosis record.",
+    "table_description": "Stores medical diagnoses assigned during patient visits, including severity and diagnostic codes.",
+    "fqn": "healthcare_schema.diagnoses.diagnosis_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "severity_level",
+    "data_type": "character varying(20)",
+    "description": "Indicates the severity of the diagnosed condition (e.g., mild, moderate, severe).",
+    "table_description": "Stores medical diagnoses assigned during patient visits, including severity and diagnostic codes.",
+    "fqn": "healthcare_schema.diagnoses.severity_level"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "visit_id",
+    "data_type": "integer",
+    "description": "Foreign key referencing the visit during which the diagnosis was made.",
+    "table_description": "Stores medical diagnoses assigned during patient visits, including severity and diagnostic codes.",
+    "fqn": "healthcare_schema.diagnoses.visit_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "concept_name",
+    "data_type": "character varying(150)",
+    "description": "High-level healthcare concept or analytical theme represented by the rule, such as patient activity, treatment patterns, or healthcare service utilization.",
+    "table_description": "Stores healthcare domain business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe healthcare analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "fqn": "healthcare_schema.healthcare_business_rules.concept_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "description": "Timestamp indicating when the healthcare business rule was created. \nUseful for governance, auditing, and lifecycle management.",
+    "table_description": "Stores healthcare domain business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe healthcare analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "fqn": "healthcare_schema.healthcare_business_rules.created_at"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "description",
+    "data_type": "text",
+    "description": "Neutral natural-language explanation of the healthcare concept. \nThis field describes the concept without referencing database schema elements, implementation details, or SQL logic.",
+    "table_description": "Stores healthcare domain business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe healthcare analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "fqn": "healthcare_schema.healthcare_business_rules.description"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "insight",
+    "data_type": "text",
+    "description": "Healthcare insight explaining why the concept is important for analysis, reporting, or operational understanding.",
+    "table_description": "Stores healthcare domain business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe healthcare analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "fqn": "healthcare_schema.healthcare_business_rules.insight"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "keywords",
+    "data_type": "text[]",
+    "description": "List of keywords or phrases associated with the healthcare concept. \nThese keywords help semantic retrieval systems match user queries with relevant business rules.",
+    "table_description": "Stores healthcare domain business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe healthcare analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "fqn": "healthcare_schema.healthcare_business_rules.keywords"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "rule_id",
+    "data_type": "integer",
+    "description": "Unique identifier assigned to each healthcare business rule.",
+    "table_description": "Stores healthcare domain business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe healthcare analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "fqn": "healthcare_schema.healthcare_business_rules.rule_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "city",
+    "data_type": "character varying(100)",
+    "description": "City of residence of the patient.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.city"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "date_of_birth",
+    "data_type": "date",
+    "description": "Date of birth of the patient used for age-based analysis and eligibility checks.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.date_of_birth"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "first_name",
+    "data_type": "character varying(100)",
+    "description": "Patient's legal first name.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.first_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "gender",
+    "data_type": "character varying(20)",
+    "description": "Self-reported gender of the patient.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.gender"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "insurance_type",
+    "data_type": "character varying(50)",
+    "description": "Type of insurance coverage used by the patient (e.g., private, government, uninsured).",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.insurance_type"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "last_name",
+    "data_type": "character varying(100)",
+    "description": "Patient's legal last name.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.last_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "patient_id",
+    "data_type": "integer",
+    "description": "Unique system-generated identifier assigned to each patient.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.patient_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "registration_date",
+    "data_type": "date",
+    "description": "Date when the patient was first registered in the healthcare system.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.registration_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "state",
+    "data_type": "character varying(100)",
+    "description": "State of residence of the patient.",
+    "table_description": "Stores demographic and registration details of patients receiving healthcare services.",
+    "fqn": "healthcare_schema.patients.state"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "admission_date",
+    "data_type": "date",
+    "description": "Date when the patient was admitted for the visit.",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "fqn": "healthcare_schema.visits.admission_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "department",
+    "data_type": "character varying(100)",
+    "description": "Medical department responsible for the visit (e.g., cardiology, emergency, oncology).",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "fqn": "healthcare_schema.visits.department"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "discharge_date",
+    "data_type": "date",
+    "description": "Date when the patient was discharged from the visit.",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "fqn": "healthcare_schema.visits.discharge_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "patient_id",
+    "data_type": "integer",
+    "description": "Foreign key referencing the patient who attended the visit.",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "fqn": "healthcare_schema.visits.patient_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "total_cost",
+    "data_type": "numeric(12,2)",
+    "description": "Total billed cost associated with the visit, including treatments and services.",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "fqn": "healthcare_schema.visits.total_cost"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "visit_id",
+    "data_type": "integer",
+    "description": "Unique system-generated identifier for each patient visit.",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "fqn": "healthcare_schema.visits.visit_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "visit_type",
+    "data_type": "character varying(50)",
+    "description": "Classification of visit such as inpatient, outpatient, or emergency.",
+    "table_description": "Records individual hospital or clinic visits made by patients, including department, visit type, and associated costs.",
+    "fqn": "healthcare_schema.visits.visit_type"
+  }
+]
