@@ -112,3 +112,6 @@ USE_CASE_TO_SCHEMA = {
     "retail": "retail_schema",
     "finance": "finance_schema",
 }
+
+# Business domain schemas (FK metadata, embeddings, retrieval); same values as USE_CASE_TO_SCHEMA
+DOMAIN_SCHEMAS = tuple(USE_CASE_TO_SCHEMA.values())

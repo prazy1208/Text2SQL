@@ -1,9 +1,9 @@
 """
 Table Agent (Stage 2 — table selection).
 Inputs: use_case, rephrased_question, keywords (from Intent Agent).
-Outputs: selected_tables as fully-qualified names schema.table_name validated against candidates.
+Outputs: selected_tables as fully-qualified names schema.table_name validated against shortlist ∪ FK relationship tables.
 
-Flow: shortlist candidate tables (metadata + optional FAISS) → LLM picks subset → validate against candidate set.
+Flow: shortlist candidate tables (metadata + optional FAISS) → LLM picks subset → validate against allowed FQNs (candidates plus any schema.table that appears in FK relationships).
 """
 
 from __future__ import annotations
@@ -22,7 +22,8 @@ from backend.services.table_metadata_retrieval import (
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Table selection prompt (placeholders: rephrased_question, keywords_block, numbered_candidates)
+# Table selection prompt (placeholders: rephrased_question, keywords_block,
+# relationships_block, numbered_candidates)
 # ---------------------------------------------------------------------------
 TABLE_AGENT_PROMPT = """You are the Table Agent in a Natural Language to SQL system.
 
@@ -31,7 +32,8 @@ Your task is to select ALL database tables required to correctly answer the user
 You are given:
 1. The analytical question
 2. Relevant keywords
-3. A list of candidate tables
+3. Known foreign-key relationships between tables
+4. A list of candidate tables (may be incomplete due to pre-filtering)
 
 --------------------------------------------------
 ANALYTICAL QUESTION
@@ -44,6 +46,14 @@ KEYWORDS
 {keywords_block}
 
 --------------------------------------------------
+KNOWN FOREIGN KEY RELATIONSHIPS
+--------------------------------------------------
+{relationships_block}
+
+Each relationship is formatted as:
+schema.table.column -> schema.table.column
+
+--------------------------------------------------
 CANDIDATE TABLES
 --------------------------------------------------
 {numbered_candidates}
@@ -52,13 +62,29 @@ CANDIDATE TABLES
 SELECTION PRINCIPLES
 --------------------------------------------------
 
-- Select ALL tables that are necessary to answer the question correctly.
+- Select ALL tables necessary to correctly answer the question.
 - Do NOT omit required tables, even if multiple tables are needed.
-- If the question involves relationships between entities, include all relevant tables.
 - Prefer correctness over minimality.
 
 - Identify entities mentioned in the question (e.g., customers, accounts, patients, transactions, products, visits).
-- Ensure each entity is represented by a selected table if required for analysis.
+- Ensure each entity is represented by a selected table if required.
+
+--------------------------------------------------
+RELATIONSHIP-AWARE EXPANSION (CRITICAL)
+--------------------------------------------------
+
+- Use the provided relationships to understand how tables are connected.
+- If two selected tables are NOT directly related, you MUST include the intermediate table(s) that connect them.
+
+- If a required table is missing from the candidate list but is necessary to complete a relationship path:
+  → You MUST include it using the relationships provided.
+
+- Think in terms of join paths:
+  table A → table B → table C
+
+- NEVER assume direct relationships if they are not supported by the given relationships.
+
+- Only add tables that exist in the relationship list (do NOT invent tables).
 
 --------------------------------------------------
 EXAMPLES
@@ -80,7 +106,6 @@ Question: "Which patients had which diagnoses during their visits?"
 STRICT RULES
 --------------------------------------------------
 
-- Select tables ONLY from the candidate list.
 - Use exact table identifiers: schema_name.table_name
 - Do NOT invent or modify table names
 - Do NOT include column names
@@ -88,7 +113,10 @@ STRICT RULES
 
 - Do NOT include unrelated tables
 - Do NOT include all tables by default
-- Only include tables that are logically required
+
+- Tables may be selected from:
+  1. Candidate list
+  2. Relationship expansion (ONLY if required for joins)
 
 - If the query is ambiguous and no table can be confidently selected, return an empty list
 
@@ -120,8 +148,9 @@ FINAL VALIDATION
 
 Before responding, ensure:
 
-- All entities in the question are covered by selected tables
-- No required table is missing
+- All entities in the question are covered
+- All selected tables are connected via valid relationship paths
+- No required intermediate table is missing
 - No unrelated table is included
 - Output is valid JSON only"""
 
@@ -133,9 +162,37 @@ def _format_keywords(keywords: list[str] | None) -> str:
     return "\n".join(lines) if lines else "(none)"
 
 
+def _format_relationships_block(relationships: list[dict] | None) -> str:
+    if not relationships:
+        return "(none)"
+    lines: list[str] = []
+    for r in relationships:
+        rt = (r.get("relationship_text") or "").strip()
+        if rt:
+            lines.append(f"- {rt}")
+    return "\n".join(lines) if lines else "(none)"
+
+
 def _candidate_fqn(c: dict) -> str:
     """Fully-qualified table name as used in prompts and validation."""
     return f"{c['schema_name']}.{c['table_name']}"
+
+
+def _table_fqns_from_relationships(relationships: list[dict] | None) -> set[str]:
+    """Unique schema.table names appearing as FK source or target in relationship rows."""
+    if not relationships:
+        return set()
+    out: set[str] = set()
+    for r in relationships:
+        sn = (r.get("schema_name") or "").strip()
+        st = (r.get("source_table") or "").strip()
+        ts = (r.get("target_schema") or "").strip()
+        tt = (r.get("target_table") or "").strip()
+        if sn and st:
+            out.add(f"{sn}.{st}")
+        if ts and tt:
+            out.add(f"{ts}.{tt}")
+    return out
 
 
 def _build_numbered_candidates_text(candidates: list[dict]) -> str:
@@ -180,13 +237,17 @@ def _parse_table_agent_response(response_text: str) -> list[str] | None:
 
 def _validate_selected_tables(selected: list[str], allowed: set[str]) -> list[str]:
     """
-    Keep only entries that exactly match a candidate FQN. Preserves order, deduplicates.
+    Keep only entries that exactly match an allowed FQN (shortlist candidate and/or
+    schema.table from FK relationship rows). Preserves order, deduplicates.
     """
     seen: set[str] = set()
     result: list[str] = []
     for name in selected:
         if name not in allowed:
-            logger.info("Dropping invalid table selection (not in candidates): %r", name)
+            logger.info(
+                "Dropping invalid table selection (not in candidates or relationships): %r",
+                name,
+            )
             continue
         if name in seen:
             continue
@@ -200,12 +261,14 @@ def run_table_agent(
     rephrased_question: str,
     keywords: list[str] | None = None,
     top_k: int = DEFAULT_TOP_K,
+    *,
+    relationships: list[dict] | None = None,
 ) -> dict:
     """
     Select tables needed for the question using shortlist + LLM + validation.
 
     Returns:
-        { "selected_tables": list[str] }  # FQNs schema.table_name, subset of shortlist candidates
+        { "selected_tables": list[str] }  # FQNs schema.table_name; allowed = shortlist ∪ FK endpoints
     """
     rq = (rephrased_question or "").strip()
     candidates = shortlist_candidate_tables(
@@ -220,10 +283,12 @@ def run_table_agent(
         return {"selected_tables": []}
 
     allowed = {_candidate_fqn(c) for c in candidates}
+    allowed |= _table_fqns_from_relationships(relationships)
     numbered = _build_numbered_candidates_text(candidates)
     user_content = TABLE_AGENT_PROMPT.format(
         rephrased_question=rq or "(empty)",
         keywords_block=_format_keywords(keywords),
+        relationships_block=_format_relationships_block(relationships),
         numbered_candidates=numbered,
     )
 

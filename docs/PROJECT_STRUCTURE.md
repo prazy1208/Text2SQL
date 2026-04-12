@@ -14,6 +14,7 @@ Text2SQL project/
 │   ├── COLUMN_AGENT_5B_PLAN.md   # Column Agent implementation plan (5b)
 │   ├── INSTALLATION_REQUIREMENTS.md
 │   ├── SUPABASE_SETUP.md           # hosted Postgres: URI, password, schema, sessions
+│   ├── RELATIONSHIPS_PIPELINE.md   # FK table_relationships pipeline (per-domain schema)
 │   └── Text2SQL_PostgreSQL_Setup_Guide.md
 ├── requirements.txt
 ├── build_vector_store.py         # table/column metadata → FAISS + metadata_store
@@ -25,11 +26,7 @@ Text2SQL project/
 ├── metadata_store/               # table/column metadata JSON (per schema)
 ├── business_rules_store/         # business-rules metadata JSON (per schema)
 ├── backend/                      # API and pipeline
-<<<<<<< Updated upstream
-├── scripts/                      # create_app_schema.sql, migrations (e.g. migration_add_table_agent_output.sql)
-=======
-├── scripts/                      # create_app_schema.sql, domain/FK + few_shot DDL, insert_few_shot_examples.py, migrations
->>>>>>> Stashed changes
+├── scripts/                      # create_app_schema.sql, domain FK DDL, extract_and_load_relationships.py, few_shot DDL, migrations
 └── frontend/                     # Stage 1 UI: intent, selected_tables, selected_columns; index.html, styles.css, app.js; served at / by FastAPI
 ```
 
@@ -38,7 +35,7 @@ Text2SQL project/
 ```
 backend/
 ├── __init__.py
-├── config.py                     # PROJECT_ROOT, get_engine(), APP_SCHEMA, paths, USE_CASES
+├── config.py                     # PROJECT_ROOT, get_engine(), DOMAIN_SCHEMAS, paths, RELATIONSHIP_METADATA_NAMES, USE_CASES
 ├── agents/                       # one module per agent
 │   ├── __init__.py
 │   ├── intent_agent.py           # Stage 1: rephrase + keywords + business_insights
@@ -81,3 +78,4 @@ backend/
 - Table Agent (5a) — metadata shortlist, LLM selection, DB, API, UI: `docs/TABLE_AGENT_5A_PLAN.md`
 - Column Agent (5b) — column metadata, threshold/FAISS, LLM, DB, API: `docs/COLUMN_AGENT_5B_PLAN.md`
 - Full agent architecture (Phase 3): see plan referenced there (e.g. phase_3_agent_architecture in .cursor/plans).
+- FK relationships (per-domain `table_relationships`, extract, embeddings JSON, retrieval): `docs/RELATIONSHIPS_PIPELINE.md`.

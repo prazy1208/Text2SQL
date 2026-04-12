@@ -197,6 +197,52 @@ The script uses the same database settings as `build_vector_store.py` and create
 
 ------------------------------------------------------------------------
 
+## 7b. Legacy rollback: `system_schema.table_relationships` (optional)
+
+If you previously created the **centralized** FK metadata table under `system_schema` (older project scripts that are no longer in the repo), remove it before adopting **per-domain** `table_relationships` tables in each business schema. Run once on **text2sql_db** as superuser or owner:
+
+```sql
+DROP TABLE IF EXISTS system_schema.table_relationships;
+-- Optional: only if nothing else should live in system_schema
+-- DROP SCHEMA IF EXISTS system_schema CASCADE;
+```
+
+If other objects still use `system_schema`, omit `DROP SCHEMA` and only drop the table.
+
+------------------------------------------------------------------------
+
+## 7c. Domain schemas — FK metadata (`table_relationships`)
+
+After `healthcare_schema`, `retail_schema`, and `finance_schema` exist, add one **`table_relationships`** table per schema (referencing side is always in that domain; `target_schema` holds the referenced table’s schema for cross-schema FKs).
+
+**Option A — SQL file**
+
+Run `scripts/create_domain_schema_table_relationships.sql` in Query Tool on **text2sql_db**, or:
+
+**Option B — Python**
+
+From project root with `.env` configured:
+
+```bash
+python scripts/run_create_domain_schema_table_relationships.py
+```
+
+**Existing databases** missing these tables: run `scripts/migration_add_domain_schema_table_relationships.sql` once.
+
+**Populate from database FKs:** After the tables exist, extract constraints from `pg_catalog` and upsert into each domain’s `table_relationships`:
+
+```bash
+python scripts/extract_and_load_relationships.py
+```
+
+**Embeddings (optional, for analytics / future retrieval):** Precompute vectors for each `relationship_text` and write `metadata_store/relationships_{schema}_metadata.json`:
+
+```bash
+python build_relationship_embeddings.py
+```
+
+------------------------------------------------------------------------
+
 ## Architecture Summary
 
 Database: PostgreSQL\

@@ -17,7 +17,11 @@ from backend.api.db import (
     insert_table_agent_output,
     session_exists,
 )
-from backend.config import USE_CASES
+from backend.config import USE_CASE_TO_SCHEMA, USE_CASES
+from backend.services.relationship_retrieval import (
+    filter_relationships_for_selected_tables,
+    list_relationships_for_schema,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["query"])
@@ -89,6 +93,17 @@ def post_query(body: QueryRequest) -> QueryResponse:
             return _empty_response("", str(e))
 
     logger.info("Query request: use_case=%s", use_case)
+    schema_name = USE_CASE_TO_SCHEMA[use_case]
+    relationships: list[dict] = []
+    try:
+        relationships = list_relationships_for_schema(schema_name)
+    except Exception as e:
+        logger.warning(
+            "Could not load FK relationships for %s (table may be missing): %s",
+            schema_name,
+            e,
+        )
+
     try:
         intent = run_intent(body.message.strip(), use_case)
     except Exception as e:
@@ -127,7 +142,12 @@ def post_query(body: QueryRequest) -> QueryResponse:
     selected_tables: list[str] = []
     table_error: str | None = None
     try:
-        table_out = run_table_agent(use_case, rephrased, keywords)
+        table_out = run_table_agent(
+            use_case,
+            rephrased,
+            keywords,
+            relationships=relationships,
+        )
         selected_tables = table_out.get("selected_tables") or []
     except Exception as e:
         logger.exception("Table Agent failed")
@@ -146,7 +166,18 @@ def post_query(body: QueryRequest) -> QueryResponse:
     if table_agent_output_id is not None:
         if selected_tables:
             try:
-                col_out = run_column_agent(use_case, rephrased, keywords, selected_tables)
+                rel_for_columns = filter_relationships_for_selected_tables(
+                    schema_name,
+                    relationships,
+                    selected_tables,
+                )
+                col_out = run_column_agent(
+                    use_case,
+                    rephrased,
+                    keywords,
+                    selected_tables,
+                    relationships=rel_for_columns,
+                )
                 selected_columns = col_out.get("selected_columns") or {}
             except Exception as e:
                 logger.exception("Column Agent failed")
