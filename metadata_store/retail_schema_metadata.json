@@ -2,41 +2,41 @@
   {
     "schema_name": "retail_schema",
     "table_name": "customers",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "table_description": "Stores customer information.",
     "columns": [
       {
         "name": "customer_id",
-        "description": "Unique system-generated identifier assigned to each customer.",
+        "description": "Unique identifier for each customer.",
         "data_type": "integer"
       },
       {
         "name": "first_name",
-        "description": "Customer's first name as provided during registration.",
+        "description": "Customer first name.",
         "data_type": "character varying(100)"
       },
       {
         "name": "last_name",
-        "description": "Customer's last name as provided during registration.",
+        "description": "Customer last name.",
         "data_type": "character varying(100)"
       },
       {
         "name": "email",
-        "description": "Registered email address used for communication, promotions, and order notifications.",
+        "description": "Customer email.",
         "data_type": "character varying(150)"
       },
       {
         "name": "city",
-        "description": "City where the customer resides.",
+        "description": "City of residence.",
         "data_type": "character varying(100)"
       },
       {
         "name": "state",
-        "description": "State where the customer resides.",
+        "description": "State of residence.",
         "data_type": "character varying(100)"
       },
       {
         "name": "signup_date",
-        "description": "Date when the customer created their account in the retail system.",
+        "description": "Signup date.",
         "data_type": "date"
       }
     ]
@@ -44,36 +44,36 @@
   {
     "schema_name": "retail_schema",
     "table_name": "orders",
-    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "table_description": "Records customer orders.",
     "columns": [
       {
         "name": "order_id",
-        "description": "Unique system-generated identifier for each customer order.",
+        "description": "Unique identifier for each order.",
         "data_type": "integer"
       },
       {
         "name": "customer_id",
-        "description": "Foreign key referencing the customer who placed the order.",
+        "description": "Foreign key to customers.",
         "data_type": "integer"
       },
       {
         "name": "product_id",
-        "description": "Foreign key referencing the product that was purchased.",
+        "description": "Foreign key to products.",
         "data_type": "integer"
       },
       {
         "name": "order_date",
-        "description": "Date when the order was placed by the customer.",
+        "description": "Order date.",
         "data_type": "date"
       },
       {
         "name": "quantity",
-        "description": "Number of units of the product purchased in the order.",
+        "description": "Quantity ordered.",
         "data_type": "integer"
       },
       {
         "name": "total_amount",
-        "description": "Total monetary value of the order calculated as quantity multiplied by unit price.",
+        "description": "Total order amount.",
         "data_type": "numeric(12,2)"
       }
     ]
@@ -81,36 +81,36 @@
   {
     "schema_name": "retail_schema",
     "table_name": "products",
-    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "table_description": "Stores product catalog.",
     "columns": [
       {
         "name": "product_id",
-        "description": "Unique system-generated identifier assigned to each product.",
+        "description": "Unique identifier for each product.",
         "data_type": "integer"
       },
       {
         "name": "product_name",
-        "description": "Official name of the product available for sale.",
+        "description": "Product name.",
         "data_type": "character varying(150)"
       },
       {
         "name": "category",
-        "description": "Product category used for grouping similar items (e.g., electronics, apparel, home goods).",
+        "description": "Product category.",
         "data_type": "character varying(100)"
       },
       {
         "name": "brand",
-        "description": "Brand or manufacturer associated with the product.",
+        "description": "Product brand.",
         "data_type": "character varying(100)"
       },
       {
         "name": "price",
-        "description": "Current selling price of the product per unit.",
+        "description": "Product price.",
         "data_type": "numeric(10,2)"
       },
       {
         "name": "launch_date",
-        "description": "Date when the product was first introduced to the market.",
+        "description": "Launch date.",
         "data_type": "date"
       }
     ]
@@ -118,36 +118,36 @@
   {
     "schema_name": "retail_schema",
     "table_name": "retail_business_rules",
-    "table_description": "Stores domain-level business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe analytical business concepts related to the retail domain in natural language. \nThey intentionally avoid references to database tables, columns, or SQL logic to prevent biasing \ndownstream agents responsible for schema selection and SQL generation.",
+    "table_description": "",
     "columns": [
       {
         "name": "rule_id",
-        "description": "Unique identifier for each business rule.",
+        "description": "",
         "data_type": "integer"
       },
       {
         "name": "concept_name",
-        "description": "High-level business concept represented by the rule, such as customer acquisition, product demand, or sales trends.",
+        "description": "",
         "data_type": "character varying(150)"
       },
       {
         "name": "description",
-        "description": "Neutral explanation of the business concept in natural language. \nThis field defines the concept without referencing database schema, tables, columns, or SQL logic.",
+        "description": "",
         "data_type": "text"
       },
       {
         "name": "insight",
-        "description": "Business reasoning that explains why the concept is important for analytical use cases.",
+        "description": "",
         "data_type": "text"
       },
       {
         "name": "keywords",
-        "description": "List of keywords or phrases associated with the business concept. \nThese keywords help semantic retrieval systems match user queries with relevant business rules.",
+        "description": "",
         "data_type": "text[]"
       },
       {
         "name": "created_at",
-        "description": "Timestamp indicating when the business rule was created. Useful for rule governance and auditing.",
+        "description": "",
         "data_type": "timestamp without time zone"
       }
     ]

@@ -4,8 +4,8 @@
     "table_name": "accounts",
     "column_name": "account_id",
     "data_type": "integer",
-    "description": "Unique system-generated identifier assigned to each bank account.",
-    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "description": "Unique identifier for each account.",
+    "table_description": "Stores bank account information.",
     "fqn": "finance_schema.accounts.account_id"
   },
   {
@@ -13,8 +13,8 @@
     "table_name": "accounts",
     "column_name": "account_type",
     "data_type": "character varying(50)",
-    "description": "Type of bank account such as savings or checking.",
-    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "description": "Account type (savings, checking).",
+    "table_description": "Stores bank account information.",
     "fqn": "finance_schema.accounts.account_type"
   },
   {
@@ -22,8 +22,8 @@
     "table_name": "accounts",
     "column_name": "branch_city",
     "data_type": "character varying(100)",
-    "description": "City where the bank branch managing the account is located.",
-    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "description": "Branch city.",
+    "table_description": "Stores bank account information.",
     "fqn": "finance_schema.accounts.branch_city"
   },
   {
@@ -31,8 +31,8 @@
     "table_name": "accounts",
     "column_name": "current_balance",
     "data_type": "numeric(14,2)",
-    "description": "Current available balance in the account.",
-    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "description": "Current balance.",
+    "table_description": "Stores bank account information.",
     "fqn": "finance_schema.accounts.current_balance"
   },
   {
@@ -40,8 +40,8 @@
     "table_name": "accounts",
     "column_name": "customer_name",
     "data_type": "character varying(150)",
-    "description": "Full name of the customer who owns the bank account.",
-    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "description": "Customer name.",
+    "table_description": "Stores bank account information.",
     "fqn": "finance_schema.accounts.customer_name"
   },
   {
@@ -49,8 +49,8 @@
     "table_name": "accounts",
     "column_name": "opening_date",
     "data_type": "date",
-    "description": "Date when the bank account was opened.",
-    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "description": "Account opening date.",
+    "table_description": "Stores bank account information.",
     "fqn": "finance_schema.accounts.opening_date"
   },
   {
@@ -58,8 +58,8 @@
     "table_name": "finance_business_rules",
     "column_name": "concept_name",
     "data_type": "character varying(150)",
-    "description": "High-level financial concept or analytical theme represented by the rule, such as transaction activity, financial trends, or spending patterns.",
-    "table_description": "Stores domain-level financial business knowledge used by the Intent Agent to interpret user queries. \nThese rules describe financial analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic in order to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "finance_schema.finance_business_rules.concept_name"
   },
   {
@@ -67,8 +67,8 @@
     "table_name": "finance_business_rules",
     "column_name": "created_at",
     "data_type": "timestamp without time zone",
-    "description": "Timestamp indicating when the financial business rule was created. \nThis supports governance, auditing, and lifecycle management of rules.",
-    "table_description": "Stores domain-level financial business knowledge used by the Intent Agent to interpret user queries. \nThese rules describe financial analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic in order to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "finance_schema.finance_business_rules.created_at"
   },
   {
@@ -76,8 +76,8 @@
     "table_name": "finance_business_rules",
     "column_name": "description",
     "data_type": "text",
-    "description": "Neutral natural-language explanation of the financial concept. \nThis field describes the concept without referencing database schema elements, implementation details, or SQL logic.",
-    "table_description": "Stores domain-level financial business knowledge used by the Intent Agent to interpret user queries. \nThese rules describe financial analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic in order to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "finance_schema.finance_business_rules.description"
   },
   {
@@ -85,8 +85,8 @@
     "table_name": "finance_business_rules",
     "column_name": "insight",
     "data_type": "text",
-    "description": "Business insight explaining why the financial concept is important for analysis and decision-making.",
-    "table_description": "Stores domain-level financial business knowledge used by the Intent Agent to interpret user queries. \nThese rules describe financial analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic in order to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "finance_schema.finance_business_rules.insight"
   },
   {
@@ -94,8 +94,8 @@
     "table_name": "finance_business_rules",
     "column_name": "keywords",
     "data_type": "text[]",
-    "description": "List of keywords or phrases associated with the financial concept. \nThese keywords help semantic retrieval systems match user queries with relevant business rules.",
-    "table_description": "Stores domain-level financial business knowledge used by the Intent Agent to interpret user queries. \nThese rules describe financial analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic in order to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "finance_schema.finance_business_rules.keywords"
   },
   {
@@ -103,8 +103,8 @@
     "table_name": "finance_business_rules",
     "column_name": "rule_id",
     "data_type": "integer",
-    "description": "Unique identifier assigned to each financial business rule.",
-    "table_description": "Stores domain-level financial business knowledge used by the Intent Agent to interpret user queries. \nThese rules describe financial analytical concepts and insights in natural language. \nThey intentionally avoid referencing database tables, columns, or SQL logic in order to prevent \nbiasing downstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "finance_schema.finance_business_rules.rule_id"
   },
   {
@@ -112,8 +112,8 @@
     "table_name": "loans",
     "column_name": "account_id",
     "data_type": "integer",
-    "description": "Foreign key referencing the account associated with the loan.",
-    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "description": "Foreign key to accounts.",
+    "table_description": "Stores loan information.",
     "fqn": "finance_schema.loans.account_id"
   },
   {
@@ -121,8 +121,8 @@
     "table_name": "loans",
     "column_name": "interest_rate",
     "data_type": "numeric(5,2)",
-    "description": "Annual interest rate applied to the loan expressed as a percentage.",
-    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "description": "Annual interest rate.",
+    "table_description": "Stores loan information.",
     "fqn": "finance_schema.loans.interest_rate"
   },
   {
@@ -130,8 +130,8 @@
     "table_name": "loans",
     "column_name": "loan_amount",
     "data_type": "numeric(14,2)",
-    "description": "Total principal amount borrowed under the loan agreement.",
-    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "description": "Loan principal amount.",
+    "table_description": "Stores loan information.",
     "fqn": "finance_schema.loans.loan_amount"
   },
   {
@@ -139,8 +139,8 @@
     "table_name": "loans",
     "column_name": "loan_end_date",
     "data_type": "date",
-    "description": "Date when the loan is scheduled to be fully repaid.",
-    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "description": "Loan end date.",
+    "table_description": "Stores loan information.",
     "fqn": "finance_schema.loans.loan_end_date"
   },
   {
@@ -148,8 +148,8 @@
     "table_name": "loans",
     "column_name": "loan_id",
     "data_type": "integer",
-    "description": "Unique system-generated identifier for each loan record.",
-    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "description": "Unique identifier for each loan.",
+    "table_description": "Stores loan information.",
     "fqn": "finance_schema.loans.loan_id"
   },
   {
@@ -157,8 +157,8 @@
     "table_name": "loans",
     "column_name": "loan_start_date",
     "data_type": "date",
-    "description": "Date when the loan repayment period began.",
-    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "description": "Loan start date.",
+    "table_description": "Stores loan information.",
     "fqn": "finance_schema.loans.loan_start_date"
   },
   {
@@ -166,8 +166,8 @@
     "table_name": "loans",
     "column_name": "loan_type",
     "data_type": "character varying(100)",
-    "description": "Category of loan such as home loan, auto loan, or personal loan.",
-    "table_description": "Stores loan account information associated with customer accounts including loan type, principal amount, and repayment terms.",
+    "description": "Loan type (home, auto, personal).",
+    "table_description": "Stores loan information.",
     "fqn": "finance_schema.loans.loan_type"
   },
   {
@@ -175,8 +175,8 @@
     "table_name": "transactions",
     "column_name": "account_id",
     "data_type": "integer",
-    "description": "Foreign key referencing the account on which the transaction occurred.",
-    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "description": "Foreign key to accounts.",
+    "table_description": "Records financial transactions.",
     "fqn": "finance_schema.transactions.account_id"
   },
   {
@@ -184,8 +184,8 @@
     "table_name": "transactions",
     "column_name": "amount",
     "data_type": "numeric(14,2)",
-    "description": "Monetary value of the transaction.",
-    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "description": "Transaction amount.",
+    "table_description": "Records financial transactions.",
     "fqn": "finance_schema.transactions.amount"
   },
   {
@@ -193,8 +193,8 @@
     "table_name": "transactions",
     "column_name": "description",
     "data_type": "character varying(255)",
-    "description": "Short textual explanation describing the purpose or nature of the transaction.",
-    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "description": "Transaction description.",
+    "table_description": "Records financial transactions.",
     "fqn": "finance_schema.transactions.description"
   },
   {
@@ -202,8 +202,8 @@
     "table_name": "transactions",
     "column_name": "transaction_date",
     "data_type": "date",
-    "description": "Date when the transaction was executed.",
-    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "description": "Transaction date.",
+    "table_description": "Records financial transactions.",
     "fqn": "finance_schema.transactions.transaction_date"
   },
   {
@@ -211,8 +211,8 @@
     "table_name": "transactions",
     "column_name": "transaction_id",
     "data_type": "integer",
-    "description": "Unique system-generated identifier for each transaction.",
-    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "description": "Unique identifier for each transaction.",
+    "table_description": "Records financial transactions.",
     "fqn": "finance_schema.transactions.transaction_id"
   },
   {
@@ -220,8 +220,8 @@
     "table_name": "transactions",
     "column_name": "transaction_type",
     "data_type": "character varying(50)",
-    "description": "Type of transaction such as debit (money withdrawn) or credit (money deposited).",
-    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "description": "Transaction type (debit, credit).",
+    "table_description": "Records financial transactions.",
     "fqn": "finance_schema.transactions.transaction_type"
   }
 ]

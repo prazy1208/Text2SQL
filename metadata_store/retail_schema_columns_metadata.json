@@ -4,8 +4,8 @@
     "table_name": "customers",
     "column_name": "city",
     "data_type": "character varying(100)",
-    "description": "City where the customer resides.",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "description": "City of residence.",
+    "table_description": "Stores customer information.",
     "fqn": "retail_schema.customers.city"
   },
   {
@@ -13,8 +13,8 @@
     "table_name": "customers",
     "column_name": "customer_id",
     "data_type": "integer",
-    "description": "Unique system-generated identifier assigned to each customer.",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "description": "Unique identifier for each customer.",
+    "table_description": "Stores customer information.",
     "fqn": "retail_schema.customers.customer_id"
   },
   {
@@ -22,8 +22,8 @@
     "table_name": "customers",
     "column_name": "email",
     "data_type": "character varying(150)",
-    "description": "Registered email address used for communication, promotions, and order notifications.",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "description": "Customer email.",
+    "table_description": "Stores customer information.",
     "fqn": "retail_schema.customers.email"
   },
   {
@@ -31,8 +31,8 @@
     "table_name": "customers",
     "column_name": "first_name",
     "data_type": "character varying(100)",
-    "description": "Customer's first name as provided during registration.",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "description": "Customer first name.",
+    "table_description": "Stores customer information.",
     "fqn": "retail_schema.customers.first_name"
   },
   {
@@ -40,8 +40,8 @@
     "table_name": "customers",
     "column_name": "last_name",
     "data_type": "character varying(100)",
-    "description": "Customer's last name as provided during registration.",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "description": "Customer last name.",
+    "table_description": "Stores customer information.",
     "fqn": "retail_schema.customers.last_name"
   },
   {
@@ -49,8 +49,8 @@
     "table_name": "customers",
     "column_name": "signup_date",
     "data_type": "date",
-    "description": "Date when the customer created their account in the retail system.",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "description": "Signup date.",
+    "table_description": "Stores customer information.",
     "fqn": "retail_schema.customers.signup_date"
   },
   {
@@ -58,8 +58,8 @@
     "table_name": "customers",
     "column_name": "state",
     "data_type": "character varying(100)",
-    "description": "State where the customer resides.",
-    "table_description": "Stores customer demographic and account information for individuals who purchase products.",
+    "description": "State of residence.",
+    "table_description": "Stores customer information.",
     "fqn": "retail_schema.customers.state"
   },
   {
@@ -67,8 +67,8 @@
     "table_name": "orders",
     "column_name": "customer_id",
     "data_type": "integer",
-    "description": "Foreign key referencing the customer who placed the order.",
-    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "description": "Foreign key to customers.",
+    "table_description": "Records customer orders.",
     "fqn": "retail_schema.orders.customer_id"
   },
   {
@@ -76,8 +76,8 @@
     "table_name": "orders",
     "column_name": "order_date",
     "data_type": "date",
-    "description": "Date when the order was placed by the customer.",
-    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "description": "Order date.",
+    "table_description": "Records customer orders.",
     "fqn": "retail_schema.orders.order_date"
   },
   {
@@ -85,8 +85,8 @@
     "table_name": "orders",
     "column_name": "order_id",
     "data_type": "integer",
-    "description": "Unique system-generated identifier for each customer order.",
-    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "description": "Unique identifier for each order.",
+    "table_description": "Records customer orders.",
     "fqn": "retail_schema.orders.order_id"
   },
   {
@@ -94,8 +94,8 @@
     "table_name": "orders",
     "column_name": "product_id",
     "data_type": "integer",
-    "description": "Foreign key referencing the product that was purchased.",
-    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "description": "Foreign key to products.",
+    "table_description": "Records customer orders.",
     "fqn": "retail_schema.orders.product_id"
   },
   {
@@ -103,8 +103,8 @@
     "table_name": "orders",
     "column_name": "quantity",
     "data_type": "integer",
-    "description": "Number of units of the product purchased in the order.",
-    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "description": "Quantity ordered.",
+    "table_description": "Records customer orders.",
     "fqn": "retail_schema.orders.quantity"
   },
   {
@@ -112,8 +112,8 @@
     "table_name": "orders",
     "column_name": "total_amount",
     "data_type": "numeric(12,2)",
-    "description": "Total monetary value of the order calculated as quantity multiplied by unit price.",
-    "table_description": "Records customer purchase transactions including product ordered, quantity, and total transaction value.",
+    "description": "Total order amount.",
+    "table_description": "Records customer orders.",
     "fqn": "retail_schema.orders.total_amount"
   },
   {
@@ -121,8 +121,8 @@
     "table_name": "products",
     "column_name": "brand",
     "data_type": "character varying(100)",
-    "description": "Brand or manufacturer associated with the product.",
-    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "description": "Product brand.",
+    "table_description": "Stores product catalog.",
     "fqn": "retail_schema.products.brand"
   },
   {
@@ -130,8 +130,8 @@
     "table_name": "products",
     "column_name": "category",
     "data_type": "character varying(100)",
-    "description": "Product category used for grouping similar items (e.g., electronics, apparel, home goods).",
-    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "description": "Product category.",
+    "table_description": "Stores product catalog.",
     "fqn": "retail_schema.products.category"
   },
   {
@@ -139,8 +139,8 @@
     "table_name": "products",
     "column_name": "launch_date",
     "data_type": "date",
-    "description": "Date when the product was first introduced to the market.",
-    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "description": "Launch date.",
+    "table_description": "Stores product catalog.",
     "fqn": "retail_schema.products.launch_date"
   },
   {
@@ -148,8 +148,8 @@
     "table_name": "products",
     "column_name": "price",
     "data_type": "numeric(10,2)",
-    "description": "Current selling price of the product per unit.",
-    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "description": "Product price.",
+    "table_description": "Stores product catalog.",
     "fqn": "retail_schema.products.price"
   },
   {
@@ -157,8 +157,8 @@
     "table_name": "products",
     "column_name": "product_id",
     "data_type": "integer",
-    "description": "Unique system-generated identifier assigned to each product.",
-    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "description": "Unique identifier for each product.",
+    "table_description": "Stores product catalog.",
     "fqn": "retail_schema.products.product_id"
   },
   {
@@ -166,8 +166,8 @@
     "table_name": "products",
     "column_name": "product_name",
     "data_type": "character varying(150)",
-    "description": "Official name of the product available for sale.",
-    "table_description": "Stores product catalog information including category, brand, pricing, and launch details.",
+    "description": "Product name.",
+    "table_description": "Stores product catalog.",
     "fqn": "retail_schema.products.product_name"
   },
   {
@@ -175,8 +175,8 @@
     "table_name": "retail_business_rules",
     "column_name": "concept_name",
     "data_type": "character varying(150)",
-    "description": "High-level business concept represented by the rule, such as customer acquisition, product demand, or sales trends.",
-    "table_description": "Stores domain-level business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe analytical business concepts related to the retail domain in natural language. \nThey intentionally avoid references to database tables, columns, or SQL logic to prevent biasing \ndownstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "retail_schema.retail_business_rules.concept_name"
   },
   {
@@ -184,8 +184,8 @@
     "table_name": "retail_business_rules",
     "column_name": "created_at",
     "data_type": "timestamp without time zone",
-    "description": "Timestamp indicating when the business rule was created. Useful for rule governance and auditing.",
-    "table_description": "Stores domain-level business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe analytical business concepts related to the retail domain in natural language. \nThey intentionally avoid references to database tables, columns, or SQL logic to prevent biasing \ndownstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "retail_schema.retail_business_rules.created_at"
   },
   {
@@ -193,8 +193,8 @@
     "table_name": "retail_business_rules",
     "column_name": "description",
     "data_type": "text",
-    "description": "Neutral explanation of the business concept in natural language. \nThis field defines the concept without referencing database schema, tables, columns, or SQL logic.",
-    "table_description": "Stores domain-level business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe analytical business concepts related to the retail domain in natural language. \nThey intentionally avoid references to database tables, columns, or SQL logic to prevent biasing \ndownstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "retail_schema.retail_business_rules.description"
   },
   {
@@ -202,8 +202,8 @@
     "table_name": "retail_business_rules",
     "column_name": "insight",
     "data_type": "text",
-    "description": "Business reasoning that explains why the concept is important for analytical use cases.",
-    "table_description": "Stores domain-level business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe analytical business concepts related to the retail domain in natural language. \nThey intentionally avoid references to database tables, columns, or SQL logic to prevent biasing \ndownstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "retail_schema.retail_business_rules.insight"
   },
   {
@@ -211,8 +211,8 @@
     "table_name": "retail_business_rules",
     "column_name": "keywords",
     "data_type": "text[]",
-    "description": "List of keywords or phrases associated with the business concept. \nThese keywords help semantic retrieval systems match user queries with relevant business rules.",
-    "table_description": "Stores domain-level business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe analytical business concepts related to the retail domain in natural language. \nThey intentionally avoid references to database tables, columns, or SQL logic to prevent biasing \ndownstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "retail_schema.retail_business_rules.keywords"
   },
   {
@@ -220,8 +220,8 @@
     "table_name": "retail_business_rules",
     "column_name": "rule_id",
     "data_type": "integer",
-    "description": "Unique identifier for each business rule.",
-    "table_description": "Stores domain-level business knowledge used by the Intent Agent to interpret user queries. \nThe rules describe analytical business concepts related to the retail domain in natural language. \nThey intentionally avoid references to database tables, columns, or SQL logic to prevent biasing \ndownstream agents responsible for schema selection and SQL generation.",
+    "description": "",
+    "table_description": "",
     "fqn": "retail_schema.retail_business_rules.rule_id"
   }
 ]
