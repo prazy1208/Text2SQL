@@ -1,0 +1,227 @@
+[
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "account_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each account.",
+    "table_description": "Stores bank account information.",
+    "fqn": "finance_schema.accounts.account_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "account_type",
+    "data_type": "character varying(50)",
+    "description": "Account type (savings, checking).",
+    "table_description": "Stores bank account information.",
+    "fqn": "finance_schema.accounts.account_type"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "branch_city",
+    "data_type": "character varying(100)",
+    "description": "Branch city.",
+    "table_description": "Stores bank account information.",
+    "fqn": "finance_schema.accounts.branch_city"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "current_balance",
+    "data_type": "numeric(14,2)",
+    "description": "Current balance.",
+    "table_description": "Stores bank account information.",
+    "fqn": "finance_schema.accounts.current_balance"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "customer_name",
+    "data_type": "character varying(150)",
+    "description": "Customer name.",
+    "table_description": "Stores bank account information.",
+    "fqn": "finance_schema.accounts.customer_name"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "opening_date",
+    "data_type": "date",
+    "description": "Account opening date.",
+    "table_description": "Stores bank account information.",
+    "fqn": "finance_schema.accounts.opening_date"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "column_name": "concept_name",
+    "data_type": "character varying(150)",
+    "description": "",
+    "table_description": "",
+    "fqn": "finance_schema.finance_business_rules.concept_name"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "description": "",
+    "table_description": "",
+    "fqn": "finance_schema.finance_business_rules.created_at"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "column_name": "description",
+    "data_type": "text",
+    "description": "",
+    "table_description": "",
+    "fqn": "finance_schema.finance_business_rules.description"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "column_name": "insight",
+    "data_type": "text",
+    "description": "",
+    "table_description": "",
+    "fqn": "finance_schema.finance_business_rules.insight"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "column_name": "keywords",
+    "data_type": "text[]",
+    "description": "",
+    "table_description": "",
+    "fqn": "finance_schema.finance_business_rules.keywords"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "column_name": "rule_id",
+    "data_type": "integer",
+    "description": "",
+    "table_description": "",
+    "fqn": "finance_schema.finance_business_rules.rule_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "column_name": "account_id",
+    "data_type": "integer",
+    "description": "Foreign key to accounts.",
+    "table_description": "Stores loan information.",
+    "fqn": "finance_schema.loans.account_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "column_name": "interest_rate",
+    "data_type": "numeric(5,2)",
+    "description": "Annual interest rate.",
+    "table_description": "Stores loan information.",
+    "fqn": "finance_schema.loans.interest_rate"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "column_name": "loan_amount",
+    "data_type": "numeric(14,2)",
+    "description": "Loan principal amount.",
+    "table_description": "Stores loan information.",
+    "fqn": "finance_schema.loans.loan_amount"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "column_name": "loan_end_date",
+    "data_type": "date",
+    "description": "Loan end date.",
+    "table_description": "Stores loan information.",
+    "fqn": "finance_schema.loans.loan_end_date"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "column_name": "loan_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each loan.",
+    "table_description": "Stores loan information.",
+    "fqn": "finance_schema.loans.loan_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "column_name": "loan_start_date",
+    "data_type": "date",
+    "description": "Loan start date.",
+    "table_description": "Stores loan information.",
+    "fqn": "finance_schema.loans.loan_start_date"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "column_name": "loan_type",
+    "data_type": "character varying(100)",
+    "description": "Loan type (home, auto, personal).",
+    "table_description": "Stores loan information.",
+    "fqn": "finance_schema.loans.loan_type"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "column_name": "account_id",
+    "data_type": "integer",
+    "description": "Foreign key to accounts.",
+    "table_description": "Records financial transactions.",
+    "fqn": "finance_schema.transactions.account_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "column_name": "amount",
+    "data_type": "numeric(14,2)",
+    "description": "Transaction amount.",
+    "table_description": "Records financial transactions.",
+    "fqn": "finance_schema.transactions.amount"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "column_name": "description",
+    "data_type": "character varying(255)",
+    "description": "Transaction description.",
+    "table_description": "Records financial transactions.",
+    "fqn": "finance_schema.transactions.description"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "column_name": "transaction_date",
+    "data_type": "date",
+    "description": "Transaction date.",
+    "table_description": "Records financial transactions.",
+    "fqn": "finance_schema.transactions.transaction_date"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "column_name": "transaction_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each transaction.",
+    "table_description": "Records financial transactions.",
+    "fqn": "finance_schema.transactions.transaction_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "column_name": "transaction_type",
+    "data_type": "character varying(50)",
+    "description": "Transaction type (debit, credit).",
+    "table_description": "Records financial transactions.",
+    "fqn": "finance_schema.transactions.transaction_type"
+  }
+]

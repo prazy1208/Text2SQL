@@ -1,0 +1,23 @@
+# Text-to-SQL — Installation requirements only
+# Python 3.10+
+# PostgreSQL (SQLAlchemy, psycopg2) — integrate via .env / add when needed
+
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+faiss-cpu
+
+# Data generation and DB access
+faker
+pandas
+sqlalchemy
+psycopg2-binary
+
+# Vector store (metadata → embeddings → FAISS)
+numpy
+sentence-transformers
+
+# LLM (Intent Agent, Gen-SQL, etc.): OpenAI and/or Gemini
+openai
+google-genai

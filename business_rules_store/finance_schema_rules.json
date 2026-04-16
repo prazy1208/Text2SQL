@@ -1,0 +1,223 @@
+[
+  {
+    "index": 0,
+    "rule_id": 1,
+    "concept_name": "Transaction Activity",
+    "description": "Transaction activity represents the overall movement of financial operations occurring within a system.",
+    "insight": "Monitoring transaction activity helps organizations understand operational intensity and financial usage patterns.",
+    "keywords": [
+      "transactions",
+      "transaction activity",
+      "financial activity"
+    ],
+    "content": "Transaction Activity Transaction activity represents the overall movement of financial operations occurring within a system. Monitoring transaction activity helps organizations understand operational intensity and financial usage patterns. transactions transaction activity financial activity"
+  },
+  {
+    "index": 1,
+    "rule_id": 2,
+    "concept_name": "Transaction Volume Trends",
+    "description": "Transaction volume trends describe how the number of financial transactions changes over time.",
+    "insight": "Analyzing transaction volume helps identify periods of increased financial activity or operational demand.",
+    "keywords": [
+      "transaction trends",
+      "transaction volume",
+      "transaction increase"
+    ],
+    "content": "Transaction Volume Trends Transaction volume trends describe how the number of financial transactions changes over time. Analyzing transaction volume helps identify periods of increased financial activity or operational demand. transaction trends transaction volume transaction increase"
+  },
+  {
+    "index": 2,
+    "rule_id": 3,
+    "concept_name": "Account Activity",
+    "description": "Account activity reflects how actively financial accounts are used for transactions or operations.",
+    "insight": "Understanding account activity helps identify frequently used accounts and engagement patterns.",
+    "keywords": [
+      "account activity",
+      "active accounts",
+      "account usage"
+    ],
+    "content": "Account Activity Account activity reflects how actively financial accounts are used for transactions or operations. Understanding account activity helps identify frequently used accounts and engagement patterns. account activity active accounts account usage"
+  },
+  {
+    "index": 3,
+    "rule_id": 4,
+    "concept_name": "Account Distribution",
+    "description": "Account distribution describes how accounts are organized or spread across different categories or groups.",
+    "insight": "Analyzing distribution helps organizations understand structural patterns within the financial system.",
+    "keywords": [
+      "account distribution",
+      "account categories",
+      "account groups"
+    ],
+    "content": "Account Distribution Account distribution describes how accounts are organized or spread across different categories or groups. Analyzing distribution helps organizations understand structural patterns within the financial system. account distribution account categories account groups"
+  },
+  {
+    "index": 4,
+    "rule_id": 5,
+    "concept_name": "Financial Flow Analysis",
+    "description": "Financial flow analysis examines how value moves across the financial system through transactions.",
+    "insight": "Understanding flow patterns helps identify major channels of financial movement.",
+    "keywords": [
+      "financial flow",
+      "money movement",
+      "transaction flow"
+    ],
+    "content": "Financial Flow Analysis Financial flow analysis examines how value moves across the financial system through transactions. Understanding flow patterns helps identify major channels of financial movement. financial flow money movement transaction flow"
+  },
+  {
+    "index": 5,
+    "rule_id": 6,
+    "concept_name": "Spending Patterns",
+    "description": "Spending patterns describe how financial resources are utilized across various activities.",
+    "insight": "Analyzing spending behavior helps organizations identify common expenditure trends.",
+    "keywords": [
+      "spending patterns",
+      "financial spending",
+      "expense behavior"
+    ],
+    "content": "Spending Patterns Spending patterns describe how financial resources are utilized across various activities. Analyzing spending behavior helps organizations identify common expenditure trends. spending patterns financial spending expense behavior"
+  },
+  {
+    "index": 6,
+    "rule_id": 7,
+    "concept_name": "Revenue Activity",
+    "description": "Revenue activity represents financial inflows generated through operational or business activities.",
+    "insight": "Monitoring revenue activity helps organizations track financial performance over time.",
+    "keywords": [
+      "revenue activity",
+      "income generation",
+      "financial inflow"
+    ],
+    "content": "Revenue Activity Revenue activity represents financial inflows generated through operational or business activities. Monitoring revenue activity helps organizations track financial performance over time. revenue activity income generation financial inflow"
+  },
+  {
+    "index": 7,
+    "rule_id": 8,
+    "concept_name": "Expense Activity",
+    "description": "Expense activity reflects financial outflows resulting from operational or business expenditures.",
+    "insight": "Tracking expense patterns helps organizations understand cost distribution and spending behavior.",
+    "keywords": [
+      "expenses",
+      "cost activity",
+      "financial outflow"
+    ],
+    "content": "Expense Activity Expense activity reflects financial outflows resulting from operational or business expenditures. Tracking expense patterns helps organizations understand cost distribution and spending behavior. expenses cost activity financial outflow"
+  },
+  {
+    "index": 8,
+    "rule_id": 9,
+    "concept_name": "Financial Balance Monitoring",
+    "description": "Balance monitoring focuses on tracking the financial position of accounts or entities over time.",
+    "insight": "Understanding balance patterns helps identify financial stability and resource availability.",
+    "keywords": [
+      "balance monitoring",
+      "account balances",
+      "financial position"
+    ],
+    "content": "Financial Balance Monitoring Balance monitoring focuses on tracking the financial position of accounts or entities over time. Understanding balance patterns helps identify financial stability and resource availability. balance monitoring account balances financial position"
+  },
+  {
+    "index": 9,
+    "rule_id": 10,
+    "concept_name": "Customer Financial Behavior",
+    "description": "Customer financial behavior reflects how customers interact with financial services or perform financial operations.",
+    "insight": "Studying financial behavior helps organizations understand customer engagement with financial systems.",
+    "keywords": [
+      "financial behavior",
+      "customer transactions",
+      "customer financial activity"
+    ],
+    "content": "Customer Financial Behavior Customer financial behavior reflects how customers interact with financial services or perform financial operations. Studying financial behavior helps organizations understand customer engagement with financial systems. financial behavior customer transactions customer financial activity"
+  },
+  {
+    "index": 10,
+    "rule_id": 11,
+    "concept_name": "Transaction Frequency",
+    "description": "Transaction frequency measures how often financial operations occur within a defined period.",
+    "insight": "Monitoring frequency helps organizations detect changes in system usage patterns.",
+    "keywords": [
+      "transaction frequency",
+      "transaction rate",
+      "financial operations"
+    ],
+    "content": "Transaction Frequency Transaction frequency measures how often financial operations occur within a defined period. Monitoring frequency helps organizations detect changes in system usage patterns. transaction frequency transaction rate financial operations"
+  },
+  {
+    "index": 11,
+    "rule_id": 12,
+    "concept_name": "Financial Activity Distribution",
+    "description": "Financial activity distribution describes how financial operations are spread across different entities or accounts.",
+    "insight": "Understanding distribution helps identify concentration of financial activity.",
+    "keywords": [
+      "financial distribution",
+      "activity spread",
+      "transaction concentration"
+    ],
+    "content": "Financial Activity Distribution Financial activity distribution describes how financial operations are spread across different entities or accounts. Understanding distribution helps identify concentration of financial activity. financial distribution activity spread transaction concentration"
+  },
+  {
+    "index": 12,
+    "rule_id": 13,
+    "concept_name": "Financial Trends Over Time",
+    "description": "Financial trends describe how financial activity evolves across different time periods.",
+    "insight": "Trend analysis helps organizations identify growth patterns and financial cycles.",
+    "keywords": [
+      "financial trends",
+      "transaction trends",
+      "activity trends"
+    ],
+    "content": "Financial Trends Over Time Financial trends describe how financial activity evolves across different time periods. Trend analysis helps organizations identify growth patterns and financial cycles. financial trends transaction trends activity trends"
+  },
+  {
+    "index": 13,
+    "rule_id": 14,
+    "concept_name": "High Activity Entities",
+    "description": "High activity entities represent accounts or participants that show elevated levels of financial operations.",
+    "insight": "Identifying high activity entities helps organizations monitor major contributors to financial activity.",
+    "keywords": [
+      "high activity accounts",
+      "active entities",
+      "frequent transactions"
+    ],
+    "content": "High Activity Entities High activity entities represent accounts or participants that show elevated levels of financial operations. Identifying high activity entities helps organizations monitor major contributors to financial activity. high activity accounts active entities frequent transactions"
+  },
+  {
+    "index": 14,
+    "rule_id": 15,
+    "concept_name": "Financial Participation",
+    "description": "Financial participation reflects how widely financial services or operations are used among participants.",
+    "insight": "Analyzing participation helps understand adoption and engagement levels.",
+    "keywords": [
+      "financial participation",
+      "system usage",
+      "participant activity"
+    ],
+    "content": "Financial Participation Financial participation reflects how widely financial services or operations are used among participants. Analyzing participation helps understand adoption and engagement levels. financial participation system usage participant activity"
+  },
+  {
+    "index": 15,
+    "rule_id": 16,
+    "concept_name": "Financial Growth Patterns",
+    "description": "Financial growth patterns describe increases or decreases in financial activity levels over time.",
+    "insight": "Understanding growth patterns helps organizations assess expansion or contraction in operations.",
+    "keywords": [
+      "financial growth",
+      "activity growth",
+      "transaction growth"
+    ],
+    "content": "Financial Growth Patterns Financial growth patterns describe increases or decreases in financial activity levels over time. Understanding growth patterns helps organizations assess expansion or contraction in operations. financial growth activity growth transaction growth"
+  },
+  {
+    "index": 16,
+    "rule_id": 17,
+    "concept_name": "Operational Financial Insights",
+    "description": "Operational financial insights focus on understanding the behavior and structure of financial operations within a system.",
+    "insight": "These insights help organizations make informed decisions about financial management and operational efficiency.",
+    "keywords": [
+      "financial insights",
+      "operational finance",
+      "financial analytics"
+    ],
+    "content": "Operational Financial Insights Operational financial insights focus on understanding the behavior and structure of financial operations within a system. These insights help organizations make informed decisions about financial management and operational efficiency. financial insights operational finance financial analytics"
+  }
+]

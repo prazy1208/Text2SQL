@@ -1,0 +1,155 @@
+[
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "table_description": "Stores customer information.",
+    "columns": [
+      {
+        "name": "customer_id",
+        "description": "Unique identifier for each customer.",
+        "data_type": "integer"
+      },
+      {
+        "name": "first_name",
+        "description": "Customer first name.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "last_name",
+        "description": "Customer last name.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "email",
+        "description": "Customer email.",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "city",
+        "description": "City of residence.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "state",
+        "description": "State of residence.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "signup_date",
+        "description": "Signup date.",
+        "data_type": "date"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "table_description": "Records customer orders.",
+    "columns": [
+      {
+        "name": "order_id",
+        "description": "Unique identifier for each order.",
+        "data_type": "integer"
+      },
+      {
+        "name": "customer_id",
+        "description": "Foreign key to customers.",
+        "data_type": "integer"
+      },
+      {
+        "name": "product_id",
+        "description": "Foreign key to products.",
+        "data_type": "integer"
+      },
+      {
+        "name": "order_date",
+        "description": "Order date.",
+        "data_type": "date"
+      },
+      {
+        "name": "quantity",
+        "description": "Quantity ordered.",
+        "data_type": "integer"
+      },
+      {
+        "name": "total_amount",
+        "description": "Total order amount.",
+        "data_type": "numeric(12,2)"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "table_description": "Stores product catalog.",
+    "columns": [
+      {
+        "name": "product_id",
+        "description": "Unique identifier for each product.",
+        "data_type": "integer"
+      },
+      {
+        "name": "product_name",
+        "description": "Product name.",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "category",
+        "description": "Product category.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "brand",
+        "description": "Product brand.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "price",
+        "description": "Product price.",
+        "data_type": "numeric(10,2)"
+      },
+      {
+        "name": "launch_date",
+        "description": "Launch date.",
+        "data_type": "date"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "retail_business_rules",
+    "table_description": "",
+    "columns": [
+      {
+        "name": "rule_id",
+        "description": "",
+        "data_type": "integer"
+      },
+      {
+        "name": "concept_name",
+        "description": "",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "description",
+        "description": "",
+        "data_type": "text"
+      },
+      {
+        "name": "insight",
+        "description": "",
+        "data_type": "text"
+      },
+      {
+        "name": "keywords",
+        "description": "",
+        "data_type": "text[]"
+      },
+      {
+        "name": "created_at",
+        "description": "",
+        "data_type": "timestamp without time zone"
+      }
+    ]
+  }
+]

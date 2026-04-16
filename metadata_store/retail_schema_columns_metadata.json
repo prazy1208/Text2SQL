@@ -1,0 +1,227 @@
+[
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "column_name": "city",
+    "data_type": "character varying(100)",
+    "description": "City of residence.",
+    "table_description": "Stores customer information.",
+    "fqn": "retail_schema.customers.city"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "column_name": "customer_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each customer.",
+    "table_description": "Stores customer information.",
+    "fqn": "retail_schema.customers.customer_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "column_name": "email",
+    "data_type": "character varying(150)",
+    "description": "Customer email.",
+    "table_description": "Stores customer information.",
+    "fqn": "retail_schema.customers.email"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "column_name": "first_name",
+    "data_type": "character varying(100)",
+    "description": "Customer first name.",
+    "table_description": "Stores customer information.",
+    "fqn": "retail_schema.customers.first_name"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "column_name": "last_name",
+    "data_type": "character varying(100)",
+    "description": "Customer last name.",
+    "table_description": "Stores customer information.",
+    "fqn": "retail_schema.customers.last_name"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "column_name": "signup_date",
+    "data_type": "date",
+    "description": "Signup date.",
+    "table_description": "Stores customer information.",
+    "fqn": "retail_schema.customers.signup_date"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "customers",
+    "column_name": "state",
+    "data_type": "character varying(100)",
+    "description": "State of residence.",
+    "table_description": "Stores customer information.",
+    "fqn": "retail_schema.customers.state"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "column_name": "customer_id",
+    "data_type": "integer",
+    "description": "Foreign key to customers.",
+    "table_description": "Records customer orders.",
+    "fqn": "retail_schema.orders.customer_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "column_name": "order_date",
+    "data_type": "date",
+    "description": "Order date.",
+    "table_description": "Records customer orders.",
+    "fqn": "retail_schema.orders.order_date"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "column_name": "order_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each order.",
+    "table_description": "Records customer orders.",
+    "fqn": "retail_schema.orders.order_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "column_name": "product_id",
+    "data_type": "integer",
+    "description": "Foreign key to products.",
+    "table_description": "Records customer orders.",
+    "fqn": "retail_schema.orders.product_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "column_name": "quantity",
+    "data_type": "integer",
+    "description": "Quantity ordered.",
+    "table_description": "Records customer orders.",
+    "fqn": "retail_schema.orders.quantity"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "column_name": "total_amount",
+    "data_type": "numeric(12,2)",
+    "description": "Total order amount.",
+    "table_description": "Records customer orders.",
+    "fqn": "retail_schema.orders.total_amount"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "column_name": "brand",
+    "data_type": "character varying(100)",
+    "description": "Product brand.",
+    "table_description": "Stores product catalog.",
+    "fqn": "retail_schema.products.brand"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "column_name": "category",
+    "data_type": "character varying(100)",
+    "description": "Product category.",
+    "table_description": "Stores product catalog.",
+    "fqn": "retail_schema.products.category"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "column_name": "launch_date",
+    "data_type": "date",
+    "description": "Launch date.",
+    "table_description": "Stores product catalog.",
+    "fqn": "retail_schema.products.launch_date"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "column_name": "price",
+    "data_type": "numeric(10,2)",
+    "description": "Product price.",
+    "table_description": "Stores product catalog.",
+    "fqn": "retail_schema.products.price"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "column_name": "product_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each product.",
+    "table_description": "Stores product catalog.",
+    "fqn": "retail_schema.products.product_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "column_name": "product_name",
+    "data_type": "character varying(150)",
+    "description": "Product name.",
+    "table_description": "Stores product catalog.",
+    "fqn": "retail_schema.products.product_name"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "retail_business_rules",
+    "column_name": "concept_name",
+    "data_type": "character varying(150)",
+    "description": "",
+    "table_description": "",
+    "fqn": "retail_schema.retail_business_rules.concept_name"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "retail_business_rules",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "description": "",
+    "table_description": "",
+    "fqn": "retail_schema.retail_business_rules.created_at"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "retail_business_rules",
+    "column_name": "description",
+    "data_type": "text",
+    "description": "",
+    "table_description": "",
+    "fqn": "retail_schema.retail_business_rules.description"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "retail_business_rules",
+    "column_name": "insight",
+    "data_type": "text",
+    "description": "",
+    "table_description": "",
+    "fqn": "retail_schema.retail_business_rules.insight"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "retail_business_rules",
+    "column_name": "keywords",
+    "data_type": "text[]",
+    "description": "",
+    "table_description": "",
+    "fqn": "retail_schema.retail_business_rules.keywords"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "retail_business_rules",
+    "column_name": "rule_id",
+    "data_type": "integer",
+    "description": "",
+    "table_description": "",
+    "fqn": "retail_schema.retail_business_rules.rule_id"
+  }
+]

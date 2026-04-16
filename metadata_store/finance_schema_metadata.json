@@ -1,0 +1,155 @@
+[
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "table_description": "Stores bank account information.",
+    "columns": [
+      {
+        "name": "account_id",
+        "description": "Unique identifier for each account.",
+        "data_type": "integer"
+      },
+      {
+        "name": "customer_name",
+        "description": "Customer name.",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "account_type",
+        "description": "Account type (savings, checking).",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "branch_city",
+        "description": "Branch city.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "opening_date",
+        "description": "Account opening date.",
+        "data_type": "date"
+      },
+      {
+        "name": "current_balance",
+        "description": "Current balance.",
+        "data_type": "numeric(14,2)"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "finance_business_rules",
+    "table_description": "",
+    "columns": [
+      {
+        "name": "rule_id",
+        "description": "",
+        "data_type": "integer"
+      },
+      {
+        "name": "concept_name",
+        "description": "",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "description",
+        "description": "",
+        "data_type": "text"
+      },
+      {
+        "name": "insight",
+        "description": "",
+        "data_type": "text"
+      },
+      {
+        "name": "keywords",
+        "description": "",
+        "data_type": "text[]"
+      },
+      {
+        "name": "created_at",
+        "description": "",
+        "data_type": "timestamp without time zone"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "loans",
+    "table_description": "Stores loan information.",
+    "columns": [
+      {
+        "name": "loan_id",
+        "description": "Unique identifier for each loan.",
+        "data_type": "integer"
+      },
+      {
+        "name": "account_id",
+        "description": "Foreign key to accounts.",
+        "data_type": "integer"
+      },
+      {
+        "name": "loan_type",
+        "description": "Loan type (home, auto, personal).",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "loan_amount",
+        "description": "Loan principal amount.",
+        "data_type": "numeric(14,2)"
+      },
+      {
+        "name": "interest_rate",
+        "description": "Annual interest rate.",
+        "data_type": "numeric(5,2)"
+      },
+      {
+        "name": "loan_start_date",
+        "description": "Loan start date.",
+        "data_type": "date"
+      },
+      {
+        "name": "loan_end_date",
+        "description": "Loan end date.",
+        "data_type": "date"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "table_description": "Records financial transactions.",
+    "columns": [
+      {
+        "name": "transaction_id",
+        "description": "Unique identifier for each transaction.",
+        "data_type": "integer"
+      },
+      {
+        "name": "account_id",
+        "description": "Foreign key to accounts.",
+        "data_type": "integer"
+      },
+      {
+        "name": "transaction_date",
+        "description": "Transaction date.",
+        "data_type": "date"
+      },
+      {
+        "name": "transaction_type",
+        "description": "Transaction type (debit, credit).",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "amount",
+        "description": "Transaction amount.",
+        "data_type": "numeric(14,2)"
+      },
+      {
+        "name": "description",
+        "description": "Transaction description.",
+        "data_type": "character varying(255)"
+      }
+    ]
+  }
+]

@@ -1,0 +1,165 @@
+[
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "table_description": "Stores diagnosis information.",
+    "columns": [
+      {
+        "name": "diagnosis_id",
+        "description": "Unique identifier for each diagnosis.",
+        "data_type": "integer"
+      },
+      {
+        "name": "visit_id",
+        "description": "Foreign key to visits.",
+        "data_type": "integer"
+      },
+      {
+        "name": "diagnosis_code",
+        "description": "ICD diagnosis code.",
+        "data_type": "character varying(20)"
+      },
+      {
+        "name": "diagnosis_description",
+        "description": "Diagnosis description.",
+        "data_type": "character varying(255)"
+      },
+      {
+        "name": "severity_level",
+        "description": "Severity (Low, Medium, High, Critical).",
+        "data_type": "character varying(20)"
+      }
+    ]
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "table_description": "",
+    "columns": [
+      {
+        "name": "rule_id",
+        "description": "",
+        "data_type": "integer"
+      },
+      {
+        "name": "concept_name",
+        "description": "",
+        "data_type": "character varying(150)"
+      },
+      {
+        "name": "description",
+        "description": "",
+        "data_type": "text"
+      },
+      {
+        "name": "insight",
+        "description": "",
+        "data_type": "text"
+      },
+      {
+        "name": "keywords",
+        "description": "",
+        "data_type": "text[]"
+      },
+      {
+        "name": "created_at",
+        "description": "",
+        "data_type": "timestamp without time zone"
+      }
+    ]
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "table_description": "Stores patient demographic information.",
+    "columns": [
+      {
+        "name": "patient_id",
+        "description": "Unique identifier for each patient.",
+        "data_type": "integer"
+      },
+      {
+        "name": "first_name",
+        "description": "Patient first name.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "last_name",
+        "description": "Patient last name.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "date_of_birth",
+        "description": "Date of birth.",
+        "data_type": "date"
+      },
+      {
+        "name": "gender",
+        "description": "Gender (Male, Female, Other).",
+        "data_type": "character varying(20)"
+      },
+      {
+        "name": "city",
+        "description": "City of residence.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "state",
+        "description": "State of residence.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "insurance_type",
+        "description": "Insurance type (Medicare, Medicaid, Private, etc.).",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "registration_date",
+        "description": "Registration date.",
+        "data_type": "date"
+      }
+    ]
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "table_description": "Records patient visits.",
+    "columns": [
+      {
+        "name": "visit_id",
+        "description": "Unique identifier for each visit.",
+        "data_type": "integer"
+      },
+      {
+        "name": "patient_id",
+        "description": "Foreign key to patients.",
+        "data_type": "integer"
+      },
+      {
+        "name": "admission_date",
+        "description": "Admission date.",
+        "data_type": "date"
+      },
+      {
+        "name": "discharge_date",
+        "description": "Discharge date.",
+        "data_type": "date"
+      },
+      {
+        "name": "department",
+        "description": "Hospital department.",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "visit_type",
+        "description": "Visit type (Inpatient, Outpatient, Emergency).",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "total_cost",
+        "description": "Total visit cost.",
+        "data_type": "numeric(12,2)"
+      }
+    ]
+  }
+]

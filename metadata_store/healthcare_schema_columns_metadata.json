@@ -1,0 +1,245 @@
+[
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "diagnosis_code",
+    "data_type": "character varying(20)",
+    "description": "ICD diagnosis code.",
+    "table_description": "Stores diagnosis information.",
+    "fqn": "healthcare_schema.diagnoses.diagnosis_code"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "diagnosis_description",
+    "data_type": "character varying(255)",
+    "description": "Diagnosis description.",
+    "table_description": "Stores diagnosis information.",
+    "fqn": "healthcare_schema.diagnoses.diagnosis_description"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "diagnosis_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each diagnosis.",
+    "table_description": "Stores diagnosis information.",
+    "fqn": "healthcare_schema.diagnoses.diagnosis_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "severity_level",
+    "data_type": "character varying(20)",
+    "description": "Severity (Low, Medium, High, Critical).",
+    "table_description": "Stores diagnosis information.",
+    "fqn": "healthcare_schema.diagnoses.severity_level"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "diagnoses",
+    "column_name": "visit_id",
+    "data_type": "integer",
+    "description": "Foreign key to visits.",
+    "table_description": "Stores diagnosis information.",
+    "fqn": "healthcare_schema.diagnoses.visit_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "concept_name",
+    "data_type": "character varying(150)",
+    "description": "",
+    "table_description": "",
+    "fqn": "healthcare_schema.healthcare_business_rules.concept_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "description": "",
+    "table_description": "",
+    "fqn": "healthcare_schema.healthcare_business_rules.created_at"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "description",
+    "data_type": "text",
+    "description": "",
+    "table_description": "",
+    "fqn": "healthcare_schema.healthcare_business_rules.description"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "insight",
+    "data_type": "text",
+    "description": "",
+    "table_description": "",
+    "fqn": "healthcare_schema.healthcare_business_rules.insight"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "keywords",
+    "data_type": "text[]",
+    "description": "",
+    "table_description": "",
+    "fqn": "healthcare_schema.healthcare_business_rules.keywords"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "healthcare_business_rules",
+    "column_name": "rule_id",
+    "data_type": "integer",
+    "description": "",
+    "table_description": "",
+    "fqn": "healthcare_schema.healthcare_business_rules.rule_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "city",
+    "data_type": "character varying(100)",
+    "description": "City of residence.",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.city"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "date_of_birth",
+    "data_type": "date",
+    "description": "Date of birth.",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.date_of_birth"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "first_name",
+    "data_type": "character varying(100)",
+    "description": "Patient first name.",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.first_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "gender",
+    "data_type": "character varying(20)",
+    "description": "Gender (Male, Female, Other).",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.gender"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "insurance_type",
+    "data_type": "character varying(50)",
+    "description": "Insurance type (Medicare, Medicaid, Private, etc.).",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.insurance_type"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "last_name",
+    "data_type": "character varying(100)",
+    "description": "Patient last name.",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.last_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "patient_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each patient.",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.patient_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "registration_date",
+    "data_type": "date",
+    "description": "Registration date.",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.registration_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "patients",
+    "column_name": "state",
+    "data_type": "character varying(100)",
+    "description": "State of residence.",
+    "table_description": "Stores patient demographic information.",
+    "fqn": "healthcare_schema.patients.state"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "admission_date",
+    "data_type": "date",
+    "description": "Admission date.",
+    "table_description": "Records patient visits.",
+    "fqn": "healthcare_schema.visits.admission_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "department",
+    "data_type": "character varying(100)",
+    "description": "Hospital department.",
+    "table_description": "Records patient visits.",
+    "fqn": "healthcare_schema.visits.department"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "discharge_date",
+    "data_type": "date",
+    "description": "Discharge date.",
+    "table_description": "Records patient visits.",
+    "fqn": "healthcare_schema.visits.discharge_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "patient_id",
+    "data_type": "integer",
+    "description": "Foreign key to patients.",
+    "table_description": "Records patient visits.",
+    "fqn": "healthcare_schema.visits.patient_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "total_cost",
+    "data_type": "numeric(12,2)",
+    "description": "Total visit cost.",
+    "table_description": "Records patient visits.",
+    "fqn": "healthcare_schema.visits.total_cost"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "visit_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each visit.",
+    "table_description": "Records patient visits.",
+    "fqn": "healthcare_schema.visits.visit_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "visit_type",
+    "data_type": "character varying(50)",
+    "description": "Visit type (Inpatient, Outpatient, Emergency).",
+    "table_description": "Records patient visits.",
+    "fqn": "healthcare_schema.visits.visit_type"
+  }
+]
