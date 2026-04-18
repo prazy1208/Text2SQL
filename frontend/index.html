@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>Text2SQL — Intent, tables & columns</title>
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <title>Text2SQL — Intent, few-shot, tables & columns</title>
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <div class="layout">
@@ -30,7 +30,7 @@
       </section>
       <section class="card output-card" id="output-section">
         <h2>Query output</h2>
-        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, business insights, selected tables, and selected columns.</div>
+        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, and selected columns.</div>
         <div id="output-content" class="output-content hidden">
           <div class="output-block">
             <h3>Rephrased question</h3>
@@ -43,6 +43,11 @@
           <div class="output-block">
             <h3>Business insights</h3>
             <ul id="out-insights" class="out-list"></ul>
+          </div>
+          <div class="output-block">
+            <h3>Few-shot patterns</h3>
+            <p class="output-hint">Selected by id (LLM sees question + type only); SQL shown for Gen-SQL.</p>
+            <div id="out-few-shot" class="out-few-shot"></div>
           </div>
           <div class="output-block">
             <h3>Selected tables</h3>
@@ -60,6 +65,6 @@
     </main>
     <footer class="footer"><span>Session: <code id="session-id">—</code></span></footer>
   </div>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -71,6 +71,16 @@ BUSINESS_RULES_METADATA_NAMES = {
     "finance_schema": "finance_schema_rules.json",
 }
 
+# Few-shot SQL pattern catalog (system_schema.few_shot_examples → JSON via build_few_shot_metadata_store.py)
+FEWSHOT_METADATA_NAME = os.getenv("FEWSHOT_METADATA_NAME", "few_shot_examples_metadata.json")
+FEWSHOT_METADATA_PATH = METADATA_STORE_DIR / FEWSHOT_METADATA_NAME
+
+# FK relationship embeddings metadata (build_relationship_embeddings.py; no FAISS in v1)
+RELATIONSHIP_METADATA_NAMES = {
+    "healthcare_schema": "relationships_healthcare_schema_metadata.json",
+    "retail_schema": "relationships_retail_schema_metadata.json",
+    "finance_schema": "relationships_finance_schema_metadata.json",
+}
 
 # ---------------------------------------------------------------------------
 # Use cases (for dropdown and validation)

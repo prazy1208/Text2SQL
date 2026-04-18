@@ -1,4 +1,4 @@
-"""Routes: POST /query (Intent + Table + Column Agent), GET /use-cases."""
+"""Routes: POST /query (Intent + Few-Shot + Table + Column Agent), GET /use-cases."""
 
 import logging
 
@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.agents.column_agent import run_column_agent
+from backend.agents.few_shot_agent import run_few_shot_agent
 from backend.agents.intent_agent import run_intent
 from backend.agents.table_agent import run_table_agent
 from backend.api.db import (
@@ -32,6 +33,7 @@ class QueryResponse(BaseModel):
     rephrased_question: str
     keywords: list[str]
     business_insights: list[str]
+    few_shot_examples: list[dict] = Field(default_factory=list)
     selected_tables: list[str] = Field(default_factory=list)
     selected_columns: dict[str, list[str]] = Field(default_factory=dict)
     error: str | None = None
@@ -43,6 +45,7 @@ def _empty_response(session_id: str, error: str) -> QueryResponse:
         rephrased_question="",
         keywords=[],
         business_insights=[],
+        few_shot_examples=[],
         selected_tables=[],
         selected_columns={},
         error=error,
@@ -82,6 +85,14 @@ def post_query(body: QueryRequest) -> QueryResponse:
     keywords = intent.get("keywords") or []
     business_insights = intent.get("business_insights") or []
 
+    few_shot_examples: list[dict] = []
+    try:
+        fs_out = run_few_shot_agent(rephrased, keywords, business_insights)
+        few_shot_examples = fs_out.get("few_shot_examples") or []
+    except Exception as e:
+        logger.exception("Few-Shot Agent failed")
+        few_shot_examples = []
+
     try:
         intent_output_id = insert_intent_output(
             session_id=session_id,
@@ -98,6 +109,7 @@ def post_query(body: QueryRequest) -> QueryResponse:
             rephrased_question=rephrased,
             keywords=keywords,
             business_insights=business_insights,
+            few_shot_examples=few_shot_examples,
             selected_tables=[],
             selected_columns={},
             error=f"Save failed: {e}",
@@ -147,6 +159,7 @@ def post_query(body: QueryRequest) -> QueryResponse:
         rephrased_question=rephrased,
         keywords=keywords,
         business_insights=business_insights,
+        few_shot_examples=few_shot_examples,
         selected_tables=selected_tables,
         selected_columns=selected_columns,
         error=err,

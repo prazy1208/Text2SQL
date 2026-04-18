@@ -16,13 +16,19 @@ Text2SQL project/
 │   └── Text2SQL_PostgreSQL_Setup_Guide.md
 ├── requirements.txt
 ├── build_vector_store.py         # table/column metadata → FAISS + metadata_store
+├── build_relationship_embeddings.py  # FK table_relationships → embeddings JSON (no FAISS)
+├── build_few_shot_metadata_store.py  # system_schema.few_shot_examples → metadata_store JSON
 ├── build_business_rules_vector_store.py   # business rules → FAISS + business_rules_store
 ├── generate_data.py
 ├── faiss_indexes/                # FAISS indexes (schema + business_rules_*)
 ├── metadata_store/               # table/column metadata JSON (per schema)
 ├── business_rules_store/         # business-rules metadata JSON (per schema)
 ├── backend/                      # API and pipeline
+<<<<<<< Updated upstream
 ├── scripts/                      # create_app_schema.sql, migrations (e.g. migration_add_table_agent_output.sql)
+=======
+├── scripts/                      # create_app_schema.sql, domain/FK + few_shot DDL, insert_few_shot_examples.py, migrations
+>>>>>>> Stashed changes
 └── frontend/                     # Stage 1 UI: intent, selected_tables, selected_columns; index.html, styles.css, app.js; served at / by FastAPI
 ```
 
@@ -35,9 +41,10 @@ backend/
 ├── agents/                       # one module per agent
 │   ├── __init__.py
 │   ├── intent_agent.py           # Stage 1: rephrase + keywords + business_insights
+│   ├── few_shot_agent.py         # LLM picks pattern ids (id + question + type); returns full rows for Gen-SQL
 │   ├── table_agent.py            # Table selection: shortlist + LLM → selected_tables (schema.table)
 │   ├── column_agent.py           # Column selection: shortlist + LLM → selected_columns per table
-│   │   # (later) few_shot_agent.py, gen_sql_agent.py, sql_validator.py
+│   │   # (later) gen_sql_agent.py, sql_validator.py
 │   └── ...
 ├── services/                     # shared services used by agents
 │   ├── __init__.py
@@ -45,6 +52,8 @@ backend/
 │   ├── llm_client.py                 # OpenAI / Gemini chat_completion
 │   ├── table_metadata_retrieval.py   # table metadata + optional FAISS shortlist
 │   ├── column_metadata_retrieval.py # column candidates for selected tables; threshold + column FAISS
+│   ├── relationship_retrieval.py     # FK rows from {schema}.table_relationships (full list)
+│   ├── fewshot_retrieval.py          # few_shot catalog JSON (+ optional DB fallback)
 │   └── ...
 └── api/                          # FastAPI app and routes
     ├── __init__.py
@@ -52,7 +61,7 @@ backend/
     ├── db.py                     # Session, intent_agent_output, table_agent_output, column_agent_output
     └── routes/                   # One module per agent/flow
         ├── __init__.py
-        ├── query.py              # GET /use-cases, POST /query (Intent + Table + Column Agent)
+        ├── query.py              # GET /use-cases, POST /query (Intent + Few-Shot + Table + Column)
         └── ...                   # (later) sql.py for Gen-SQL, etc.
 ```
 

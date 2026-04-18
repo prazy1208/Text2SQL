@@ -13,6 +13,7 @@ const outputError = document.getElementById('output-error');
 const outRephrased = document.getElementById('out-rephrased');
 const outKeywords = document.getElementById('out-keywords');
 const outInsights = document.getElementById('out-insights');
+const outFewShot = document.getElementById('out-few-shot');
 const outTables = document.getElementById('out-tables');
 const outColumns = document.getElementById('out-columns');
 const sessionIdEl = document.getElementById('session-id');
@@ -67,6 +68,7 @@ function persistLastOutput(useCase, message, data) {
       rephrased_question: data.rephrased_question || '',
       keywords: data.keywords || [],
       business_insights: data.business_insights || [],
+      few_shot_examples: data.few_shot_examples || [],
       selected_tables: data.selected_tables || [],
       selected_columns: data.selected_columns || {},
       error: data.error || null,
@@ -99,6 +101,7 @@ function restoreLastOutput() {
       (pack.rephrased_question && String(pack.rephrased_question).trim()) ||
       (pack.keywords && pack.keywords.length) ||
       (pack.business_insights && pack.business_insights.length) ||
+      (pack.few_shot_examples && pack.few_shot_examples.length) ||
       (pack.selected_tables && pack.selected_tables.length) ||
       Object.keys(normalizeSelectedColumns(pack.selected_columns)).length ||
       (pack.error && String(pack.error).trim());
@@ -124,6 +127,22 @@ function showOutput(data) {
   outInsights.innerHTML = (data.business_insights && data.business_insights.length)
     ? data.business_insights.map(b => `<li>${escapeHtml(b)}</li>`).join('')
     : '<li>—</li>';
+
+  if (outFewShot) {
+    const fs = data.few_shot_examples;
+    if (fs && fs.length) {
+      outFewShot.innerHTML = fs.map((ex) => {
+        const id = ex.id != null ? ex.id : '—';
+        const qt = escapeHtml(String(ex.query_type || ''));
+        const qn = escapeHtml(String(ex.question_text || ''));
+        const sql = escapeHtml(String(ex.sql_query || ''));
+        return `<div class="out-few-shot-item"><div class="out-few-shot-head"><span class="out-few-shot-id">#${id}</span> <code>${qt}</code></div><p class="out-few-shot-q">${qn}</p><pre class="out-sql"><code>${sql}</code></pre></div>`;
+      }).join('');
+    } else {
+      outFewShot.innerHTML = '<p class="out-text-muted">—</p>';
+    }
+  }
+
   outTables.innerHTML = (data.selected_tables && data.selected_tables.length)
     ? data.selected_tables.map(t => `<li><code>${escapeHtml(t)}</code></li>`).join('')
     : '<li>—</li>';
@@ -194,6 +213,7 @@ form.addEventListener('submit', async (e) => {
         rephrased_question: '',
         keywords: [],
         business_insights: [],
+        few_shot_examples: [],
         selected_tables: [],
         selected_columns: {},
         error: errText,
@@ -210,6 +230,7 @@ form.addEventListener('submit', async (e) => {
       rephrased_question: '',
       keywords: [],
       business_insights: [],
+      few_shot_examples: [],
       selected_tables: [],
       selected_columns: {},
       error: err.message || 'Request failed',
@@ -218,7 +239,7 @@ form.addEventListener('submit', async (e) => {
     persistLastOutput(useCase, message, errPayload);
   } finally {
     submitBtn.disabled = false;
-    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, selected tables, and selected columns.';
+    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, and selected columns.';
   }
 });
 

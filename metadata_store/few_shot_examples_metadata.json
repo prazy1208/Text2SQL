@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "question_text": "Retrieve specific columns from a dataset",
+    "sql_query": "SELECT column1, column2 FROM table_name;",
+    "query_type": "select"
+  },
+  {
+    "id": 2,
+    "question_text": "Filter records based on a specific condition",
+    "sql_query": "SELECT * FROM table_name WHERE column = value;",
+    "query_type": "filter"
+  },
+  {
+    "id": 3,
+    "question_text": "Filter records using multiple conditions",
+    "sql_query": "SELECT * FROM table_name WHERE column1 = value1 AND column2 = value2;",
+    "query_type": "filter_multiple"
+  },
+  {
+    "id": 4,
+    "question_text": "Retrieve records where a column value falls within a range",
+    "sql_query": "SELECT * FROM table_name WHERE column BETWEEN value1 AND value2;",
+    "query_type": "filter_range"
+  },
+  {
+    "id": 5,
+    "question_text": "Calculate the total value of a numeric column",
+    "sql_query": "SELECT SUM(numeric_column) FROM table_name;",
+    "query_type": "aggregation_sum"
+  },
+  {
+    "id": 6,
+    "question_text": "Count the number of records",
+    "sql_query": "SELECT COUNT(*) FROM table_name;",
+    "query_type": "aggregation_count"
+  },
+  {
+    "id": 7,
+    "question_text": "Calculate average value of a numeric column",
+    "sql_query": "SELECT AVG(numeric_column) FROM table_name;",
+    "query_type": "aggregation_avg"
+  },
+  {
+    "id": 8,
+    "question_text": "Group data by a category and calculate total values",
+    "sql_query": "SELECT category, SUM(numeric_column) FROM table_name GROUP BY category;",
+    "query_type": "aggregation_groupby"
+  },
+  {
+    "id": 9,
+    "question_text": "Filter grouped results based on aggregated values",
+    "sql_query": "SELECT category, SUM(numeric_column) FROM table_name GROUP BY category HAVING SUM(numeric_column) > threshold;",
+    "query_type": "having"
+  },
+  {
+    "id": 10,
+    "question_text": "Sort records in descending order based on a metric",
+    "sql_query": "SELECT * FROM table_name ORDER BY metric DESC;",
+    "query_type": "ordering"
+  },
+  {
+    "id": 11,
+    "question_text": "Retrieve top N records based on a metric",
+    "sql_query": "SELECT column_name FROM table_name ORDER BY metric DESC LIMIT 5;",
+    "query_type": "ranking_limit"
+  },
+  {
+    "id": 12,
+    "question_text": "Retrieve distinct values from a column",
+    "sql_query": "SELECT DISTINCT column_name FROM table_name;",
+    "query_type": "distinct"
+  },
+  {
+    "id": 13,
+    "question_text": "Join two related datasets using a common identifier",
+    "sql_query": "SELECT a.column1, b.column2 FROM table_a a JOIN table_b b ON a.id = b.id;",
+    "query_type": "join"
+  },
+  {
+    "id": 14,
+    "question_text": "Combine multiple related datasets through chained joins",
+    "sql_query": "SELECT a.column1, b.column2, c.column3 FROM table_a a JOIN table_b b ON a.id = b.id JOIN table_c c ON b.id = c.id;",
+    "query_type": "multi_join"
+  },
+  {
+    "id": 15,
+    "question_text": "Filter records based on a date range",
+    "sql_query": "SELECT * FROM table_name WHERE date_column >= 'start_date' AND date_column <= 'end_date';",
+    "query_type": "time_filter"
+  },
+  {
+    "id": 16,
+    "question_text": "Compare aggregated values across two time periods",
+    "sql_query": "SELECT SUM(CASE WHEN date_column >= period1_start AND date_column <= period1_end THEN value END) AS period1_total, SUM(CASE WHEN date_column >= period2_start AND date_column <= period2_end THEN value END) AS period2_total FROM table_name;",
+    "query_type": "time_comparison"
+  },
+  {
+    "id": 17,
+    "question_text": "Create conditional labels based on column values",
+    "sql_query": "SELECT column_name, CASE WHEN condition THEN 'Category A' ELSE 'Category B' END FROM table_name;",
+    "query_type": "case_when"
+  },
+  {
+    "id": 18,
+    "question_text": "Use a subquery to filter results",
+    "sql_query": "SELECT * FROM table_name WHERE column IN (SELECT column FROM another_table);",
+    "query_type": "subquery"
+  },
+  {
+    "id": 19,
+    "question_text": "Rank records within groups based on a metric",
+    "sql_query": "SELECT column_name, ROW_NUMBER() OVER (PARTITION BY group_column ORDER BY metric DESC) FROM table_name;",
+    "query_type": "window_function"
+  },
+  {
+    "id": 20,
+    "question_text": "Handle missing values in a column",
+    "sql_query": "SELECT COALESCE(column_name, default_value) FROM table_name;",
+    "query_type": "null_handling"
+  }
+]

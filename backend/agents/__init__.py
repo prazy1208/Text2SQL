@@ -1,1 +1,1 @@
-# Agents: Intent, Table, Column, (later) Few-Shot, Gen-SQL, SQL Validator.
+# Agents: Intent, Few-Shot, Table, Column, (later) Gen-SQL, SQL Validator.
