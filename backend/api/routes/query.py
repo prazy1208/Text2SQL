@@ -12,6 +12,7 @@ from backend.agents.table_agent import run_table_agent
 from backend.api.db import (
     create_session,
     insert_column_agent_output,
+    insert_few_shot_agent_output,
     insert_intent_output,
     insert_table_agent_output,
     session_exists,
@@ -115,6 +116,13 @@ def post_query(body: QueryRequest) -> QueryResponse:
             error=f"Save failed: {e}",
         )
 
+    few_shot_error: str | None = None
+    try:
+        insert_few_shot_agent_output(intent_output_id, few_shot_examples)
+    except Exception as e:
+        logger.exception("Failed to persist few-shot agent output")
+        few_shot_error = f"Few-shot save failed: {e}"
+
     selected_tables: list[str] = []
     table_error: str | None = None
     try:
@@ -150,7 +158,9 @@ def post_query(body: QueryRequest) -> QueryResponse:
             persist_col = f"Column selection save failed: {e}"
             column_error = f"{column_error}; {persist_col}" if column_error else persist_col
 
-    err = table_error
+    err = few_shot_error
+    if table_error:
+        err = f"{err}; {table_error}" if err else table_error
     if column_error:
         err = f"{err}; {column_error}" if err else column_error
 

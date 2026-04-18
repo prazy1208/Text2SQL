@@ -13,6 +13,7 @@ Text2SQL project/
 │   ├── TABLE_AGENT_5A_PLAN.md    # Table Agent implementation plan (5a)
 │   ├── COLUMN_AGENT_5B_PLAN.md   # Column Agent implementation plan (5b)
 │   ├── INSTALLATION_REQUIREMENTS.md
+│   ├── SUPABASE_SETUP.md           # hosted Postgres: URI, password, schema, sessions
 │   └── Text2SQL_PostgreSQL_Setup_Guide.md
 ├── requirements.txt
 ├── build_vector_store.py         # table/column metadata → FAISS + metadata_store
@@ -75,6 +76,7 @@ backend/
 
 ## Reference
 
+- Supabase (hosted DB) from scratch: `docs/SUPABASE_SETUP.md`
 - Stage 1 scope and order: `docs/STAGE1_FINALIZED_PLAN.md`
 - Table Agent (5a) — metadata shortlist, LLM selection, DB, API, UI: `docs/TABLE_AGENT_5A_PLAN.md`
 - Column Agent (5b) — column metadata, threshold/FAISS, LLM, DB, API: `docs/COLUMN_AGENT_5B_PLAN.md`

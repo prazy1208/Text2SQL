@@ -255,11 +255,20 @@ CREATE TABLE IF NOT EXISTS app_schema.column_agent_output (
     UNIQUE (table_agent_output_id)
 );
 
+CREATE TABLE IF NOT EXISTS app_schema.few_shot_agent_output (
+    id SERIAL PRIMARY KEY,
+    intent_output_id INT NOT NULL REFERENCES app_schema.intent_agent_output(id) ON DELETE CASCADE,
+    few_shot_examples JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (intent_output_id)
+);
+
 COMMENT ON SCHEMA app_schema IS 'Application/session data for Text2SQL';
 COMMENT ON TABLE app_schema.sessions IS 'One row per chat session';
 COMMENT ON TABLE app_schema.intent_agent_output IS 'Intent Agent output per query';
 COMMENT ON TABLE app_schema.table_agent_output IS 'Table Agent: selected tables';
 COMMENT ON TABLE app_schema.column_agent_output IS 'Column Agent: selected columns';
+COMMENT ON TABLE app_schema.few_shot_agent_output IS 'Few-Shot Agent: selected few_shot_examples';
 
 -- ============================================================================
 -- DONE - Schemas and tables created!

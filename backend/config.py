@@ -20,20 +20,39 @@ def _load_dotenv():
 # ---------------------------------------------------------------------------
 APP_SCHEMA = "app_schema"
 
+
+def _prepare_postgres_url(url: str) -> str:
+    """
+    Strip whitespace (avoids CRLF breaking URLs from .env on Windows) and require SSL for
+    Supabase hosts. Hosted Postgres expects TLS; omitting sslmode often fails silently or with SSL errors.
+    """
+    url = (url or "").strip()
+    if not url:
+        return url
+    low = url.lower()
+    if "supabase.co" in low or "pooler.supabase.com" in low:
+        if "sslmode=" not in low:
+            sep = "&" if "?" in url else "?"
+            url = f"{url}{sep}sslmode=require"
+    return url
+
+
 def get_engine():
     """Build SQLAlchemy engine from .env (DATABASE_URL or DB_*). Call after dotenv is loaded."""
     _load_dotenv()
     from sqlalchemy import create_engine
+
     database_url = os.getenv("DATABASE_URL")
     if database_url:
-        return create_engine(database_url)
-    host = os.getenv("DB_HOST", "localhost")
+        return create_engine(_prepare_postgres_url(database_url), pool_pre_ping=True)
+
+    host = (os.getenv("DB_HOST", "localhost") or "").strip()
     port = os.getenv("DB_PORT", "5432")
     user = os.getenv("DB_USER", "postgres")
     password = os.getenv("DB_PASSWORD", "")
     dbname = os.getenv("DB_NAME", "text2sql_db")
     url = f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
-    return create_engine(url)
+    return create_engine(_prepare_postgres_url(url), pool_pre_ping=True)
 
 
 # ---------------------------------------------------------------------------
