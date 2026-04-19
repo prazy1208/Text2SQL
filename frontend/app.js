@@ -60,6 +60,25 @@ function setStoredSessionId(id) {
   sessionIdEl.textContent = id || '—';
 }
 
+function clearStoredSessionId() {
+  localStorage.removeItem(SESSION_KEY);
+  sessionIdEl.textContent = '—';
+}
+
+async function bootstrapFreshSession() {
+  const res = await fetch(`${API_BASE}/session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const data = await res.json();
+  if (!res.ok || !data?.session_id) {
+    const detail = data?.detail != null ? data.detail : res.statusText;
+    throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+  }
+  setStoredSessionId(String(data.session_id));
+  return data.session_id;
+}
+
 /** Save last /query response + form context so a hard refresh can restore the panel. */
 function persistLastOutput(useCase, message, data) {
   try {
@@ -199,12 +218,30 @@ form.addEventListener('submit', async (e) => {
       use_case: useCase,
       session_id: getStoredSessionId(),
     };
-    const res = await fetch(`${API_BASE}/query`, {
+    let res = await fetch(`${API_BASE}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    const data = await res.json();
+    let data = await res.json();
+
+    const invalidSession =
+      !res.ok &&
+      data?.detail &&
+      String(data.detail).toLowerCase().includes('invalid or unknown session_id');
+    if (invalidSession) {
+      await bootstrapFreshSession();
+      const retryBody = {
+        ...body,
+        session_id: getStoredSessionId(),
+      };
+      res = await fetch(`${API_BASE}/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(retryBody),
+      });
+      data = await res.json();
+    }
 
     if (!res.ok) {
       const detail = data.detail != null ? data.detail : res.statusText;
@@ -244,8 +281,24 @@ form.addEventListener('submit', async (e) => {
 });
 
 async function init() {
+  submitBtn.disabled = true;
   await loadUseCases();
-  restoreLastOutput();
-  setStoredSessionId(getStoredSessionId());
+  localStorage.removeItem(LAST_OUTPUT_KEY);
+  clearStoredSessionId();
+  outputError.classList.add('hidden');
+  outputError.textContent = '';
+  outputPlaceholder.classList.remove('hidden');
+  outputPlaceholder.textContent = 'Starting a fresh session...';
+  outputContent.classList.add('hidden');
+
+  try {
+    await bootstrapFreshSession();
+    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, and selected columns.';
+    submitBtn.disabled = false;
+  } catch (e) {
+    outputPlaceholder.textContent = 'Could not create a session. Refresh to retry.';
+    outputError.textContent = e.message || 'Failed to initialize session';
+    outputError.classList.remove('hidden');
+  }
 }
 init();

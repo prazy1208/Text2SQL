@@ -1,4 +1,4 @@
-"""Routes: POST /query (Intent + Few-Shot + Table + Column Agent), GET /use-cases."""
+"""Routes: POST /session, POST /query, GET /use-cases."""
 
 import logging
 
@@ -40,6 +40,10 @@ class QueryResponse(BaseModel):
     error: str | None = None
 
 
+class SessionResponse(BaseModel):
+    session_id: str
+
+
 def _empty_response(session_id: str, error: str) -> QueryResponse:
     return QueryResponse(
         session_id=session_id,
@@ -56,6 +60,15 @@ def _empty_response(session_id: str, error: str) -> QueryResponse:
 @router.get("/use-cases")
 def get_use_cases() -> list[str]:
     return USE_CASES
+
+
+@router.post("/session", response_model=SessionResponse)
+def create_fresh_session() -> SessionResponse:
+    try:
+        return SessionResponse(session_id=create_session())
+    except Exception as e:
+        logger.exception("Failed to create session")
+        raise HTTPException(status_code=500, detail=f"Failed to create session: {e}") from e
 
 
 @router.post("/query", response_model=QueryResponse)
@@ -86,14 +99,6 @@ def post_query(body: QueryRequest) -> QueryResponse:
     keywords = intent.get("keywords") or []
     business_insights = intent.get("business_insights") or []
 
-    few_shot_examples: list[dict] = []
-    try:
-        fs_out = run_few_shot_agent(rephrased, keywords, business_insights)
-        few_shot_examples = fs_out.get("few_shot_examples") or []
-    except Exception as e:
-        logger.exception("Few-Shot Agent failed")
-        few_shot_examples = []
-
     try:
         intent_output_id = insert_intent_output(
             session_id=session_id,
@@ -110,18 +115,14 @@ def post_query(body: QueryRequest) -> QueryResponse:
             rephrased_question=rephrased,
             keywords=keywords,
             business_insights=business_insights,
-            few_shot_examples=few_shot_examples,
+            few_shot_examples=[],
             selected_tables=[],
             selected_columns={},
             error=f"Save failed: {e}",
         )
 
+    few_shot_examples: list[dict] = []
     few_shot_error: str | None = None
-    try:
-        insert_few_shot_agent_output(intent_output_id, few_shot_examples)
-    except Exception as e:
-        logger.exception("Failed to persist few-shot agent output")
-        few_shot_error = f"Few-shot save failed: {e}"
 
     selected_tables: list[str] = []
     table_error: str | None = None
@@ -157,6 +158,21 @@ def post_query(body: QueryRequest) -> QueryResponse:
             logger.exception("Failed to persist column agent output")
             persist_col = f"Column selection save failed: {e}"
             column_error = f"{column_error}; {persist_col}" if column_error else persist_col
+
+    try:
+        fs_out = run_few_shot_agent(rephrased, keywords, business_insights)
+        few_shot_examples = fs_out.get("few_shot_examples") or []
+    except Exception as e:
+        logger.exception("Few-Shot Agent failed")
+        few_shot_examples = []
+        few_shot_error = f"Few-Shot Agent failed: {e}"
+
+    try:
+        insert_few_shot_agent_output(intent_output_id, few_shot_examples)
+    except Exception as e:
+        logger.exception("Failed to persist few-shot agent output")
+        persist_fs = f"Few-shot save failed: {e}"
+        few_shot_error = f"{few_shot_error}; {persist_fs}" if few_shot_error else persist_fs
 
     err = few_shot_error
     if table_error:
