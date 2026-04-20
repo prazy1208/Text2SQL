@@ -213,29 +213,47 @@ If other objects still use `system_schema`, omit `DROP SCHEMA` and only drop the
 
 ## 7c. Domain schemas — FK metadata (`table_relationships`)
 
-After `healthcare_schema`, `retail_schema`, and `finance_schema` exist, add one **`table_relationships`** table per schema (referencing side is always in that domain; `target_schema` holds the referenced table’s schema for cross-schema FKs).
+**Runtime (`POST /query`):** FK edges are read from **`metadata_store/relationships_{schema}_metadata.json`** (`list_relationships_from_metadata`). Regenerate those files after changing the database: `python build_relationship_embeddings.py`. **Postgres `table_relationships` tables** are still required for `extract_and_load_relationships.py` and the embedding build; create/load them as below if rows are missing or stale.
+
+After `healthcare_schema`, `retail_schema`, and `finance_schema` exist, add one **`table_relationships`** table per domain schema (referencing side is always in that domain; `target_schema` holds the referenced table’s schema for cross-schema FKs).
+
+### One-shot setup (recommended for new databases)
+
+Run the full script in the **Supabase SQL Editor** (or pgAdmin against your DB): `scripts/complete_setup.sql`. It creates domain tables, `app_schema`, and **all three** `table_relationships` tables in one go. Safe to re-run: DDL uses `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS`.
+
+### If you already ran an older `complete_setup.sql` without FK tables
+
+Apply only the FK block using either:
 
 **Option A — SQL file**
 
-Run `scripts/create_domain_schema_table_relationships.sql` in Query Tool on **text2sql_db**, or:
+Run `scripts/create_domain_schema_table_relationships.sql` in the SQL editor (same DDL as the FK section at the end of `complete_setup.sql`), or:
 
-**Option B — Python**
+**Option B — Migration file**
 
-From project root with `.env` configured:
+Run `scripts/migration_add_domain_schema_table_relationships.sql` once (equivalent `CREATE TABLE IF NOT EXISTS`).
+
+**Option C — Python**
+
+From project root with `.env` pointing at the database:
 
 ```bash
 python scripts/run_create_domain_schema_table_relationships.py
 ```
 
-**Existing databases** missing these tables: run `scripts/migration_add_domain_schema_table_relationships.sql` once.
+### Load rows from actual foreign keys
 
-**Populate from database FKs:** After the tables exist, extract constraints from `pg_catalog` and upsert into each domain’s `table_relationships`:
+Empty `table_relationships` tables are not enough: populate them from `pg_catalog` so each row has `relationship_text` for the LLM.
 
 ```bash
 python scripts/extract_and_load_relationships.py
 ```
 
-**Embeddings (optional, for analytics / future retrieval):** Precompute vectors for each `relationship_text` and write `metadata_store/relationships_{schema}_metadata.json`:
+Requires the domain business tables and FK constraints to exist (e.g. `retail_schema.orders` → `customers`, `products`). After loading, `POST /query` with `use_case: retail` will load `retail_schema.table_relationships`.
+
+### Optional: embeddings JSON
+
+Precompute vectors for each `relationship_text` and write `metadata_store/relationships_{schema}_metadata.json`:
 
 ```bash
 python build_relationship_embeddings.py

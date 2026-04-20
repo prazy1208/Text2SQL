@@ -40,9 +40,9 @@ backend/
 │   ├── __init__.py
 │   ├── intent_agent.py           # Stage 1: rephrase + keywords + business_insights
 │   ├── few_shot_agent.py         # LLM picks pattern ids (id + question + type); returns full rows for Gen-SQL
-│   ├── table_agent.py            # Table selection: shortlist + LLM → selected_tables (schema.table)
-│   ├── column_agent.py           # Column selection: shortlist + LLM → selected_columns per table
-│   │   # (later) gen_sql_agent.py, sql_validator.py
+│   ├── table_agent.py            # Table selection: shortlist + LLM → selected_tables (schema.table); FK-aware
+│   ├── column_agent.py           # Column selection: shortlist + LLM → selected_columns per table; FK-aware
+│   ├── gen_sql_agent.py          # SQL synthesis from context + few-shot; optional relationship_text lines
 │   └── ...
 ├── services/                     # shared services used by agents
 │   ├── __init__.py
@@ -50,8 +50,9 @@ backend/
 │   ├── llm_client.py                 # OpenAI / Gemini chat_completion
 │   ├── table_metadata_retrieval.py   # table metadata + optional FAISS shortlist
 │   ├── column_metadata_retrieval.py # column candidates for selected tables; threshold + column FAISS
-│   ├── relationship_retrieval.py     # FK rows from {schema}.table_relationships (full list)
+│   ├── relationship_retrieval.py     # FK rows from metadata JSON (API); DB list helper for build scripts
 │   ├── fewshot_retrieval.py          # few_shot catalog JSON (+ optional DB fallback)
+│   ├── sql_validator.py              # rule-based checks on generated SQL (Gen-SQL pipeline)
 │   └── ...
 └── api/                          # FastAPI app and routes
     ├── __init__.py
@@ -59,8 +60,8 @@ backend/
     ├── db.py                     # Session, intent_agent_output, table_agent_output, column_agent_output
     └── routes/                   # One module per agent/flow
         ├── __init__.py
-        ├── query.py              # GET /use-cases, POST /query (Intent + Few-Shot + Table + Column)
-        └── ...                   # (later) sql.py for Gen-SQL, etc.
+        ├── query.py              # GET /use-cases, POST /session, POST /query (full pipeline incl. Gen-SQL + validation)
+        └── ...
 ```
 
 ## Conventions

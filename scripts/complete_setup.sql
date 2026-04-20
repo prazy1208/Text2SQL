@@ -263,13 +263,105 @@ CREATE TABLE IF NOT EXISTS app_schema.few_shot_agent_output (
     UNIQUE (intent_output_id)
 );
 
+CREATE TABLE IF NOT EXISTS app_schema.gen_sql_agent_output (
+    id SERIAL PRIMARY KEY,
+    intent_output_id INT NOT NULL REFERENCES app_schema.intent_agent_output(id) ON DELETE CASCADE,
+    generated_sql TEXT NOT NULL DEFAULT '',
+    reasoning_summary TEXT,
+    validation_passed BOOLEAN NOT NULL DEFAULT FALSE,
+    validation_error_codes TEXT NOT NULL DEFAULT '',
+    validation_error_message TEXT NOT NULL DEFAULT '',
+    blocked_keywords TEXT NOT NULL DEFAULT '',
+    is_single_statement BOOLEAN NOT NULL DEFAULT FALSE,
+    is_select_only BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (intent_output_id)
+);
+
 COMMENT ON SCHEMA app_schema IS 'Application/session data for Text2SQL';
 COMMENT ON TABLE app_schema.sessions IS 'One row per chat session';
 COMMENT ON TABLE app_schema.intent_agent_output IS 'Intent Agent output per query';
 COMMENT ON TABLE app_schema.table_agent_output IS 'Table Agent: selected tables';
 COMMENT ON TABLE app_schema.column_agent_output IS 'Column Agent: selected columns';
 COMMENT ON TABLE app_schema.few_shot_agent_output IS 'Few-Shot Agent: selected few_shot_examples';
+COMMENT ON TABLE app_schema.gen_sql_agent_output IS 'Gen-SQL Agent: generated SQL and validation';
 
 -- ============================================================================
--- DONE - Schemas and tables created!
+-- DOMAIN FK METADATA (table_relationships) — required for Table / Column / Gen-SQL agents
+-- Same DDL as scripts/create_domain_schema_table_relationships.sql
+-- Populate rows with: python scripts/extract_and_load_relationships.py
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS healthcare_schema.table_relationships (
+    id                  SERIAL PRIMARY KEY,
+    source_table        TEXT NOT NULL,
+    source_column       TEXT NOT NULL,
+    target_schema       TEXT NOT NULL,
+    target_table        TEXT NOT NULL,
+    target_column       TEXT NOT NULL,
+    relationship_text   TEXT NOT NULL,
+    constraint_name     VARCHAR(256),
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_healthcare_table_relationships_edge
+        UNIQUE (source_table, source_column, target_schema, target_table, target_column)
+);
+
+CREATE INDEX IF NOT EXISTS idx_healthcare_table_relationships_source
+    ON healthcare_schema.table_relationships (source_table);
+CREATE INDEX IF NOT EXISTS idx_healthcare_table_relationships_source_col
+    ON healthcare_schema.table_relationships (source_table, source_column);
+
+COMMENT ON TABLE healthcare_schema.table_relationships IS 'Foreign keys with referencing tables in healthcare_schema; target_schema for referenced side';
+COMMENT ON COLUMN healthcare_schema.table_relationships.target_schema IS 'Schema of the referenced (target) table';
+COMMENT ON COLUMN healthcare_schema.table_relationships.relationship_text IS 'Canonical line for LLM context';
+
+CREATE TABLE IF NOT EXISTS retail_schema.table_relationships (
+    id                  SERIAL PRIMARY KEY,
+    source_table        TEXT NOT NULL,
+    source_column       TEXT NOT NULL,
+    target_schema       TEXT NOT NULL,
+    target_table        TEXT NOT NULL,
+    target_column       TEXT NOT NULL,
+    relationship_text   TEXT NOT NULL,
+    constraint_name     VARCHAR(256),
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_retail_table_relationships_edge
+        UNIQUE (source_table, source_column, target_schema, target_table, target_column)
+);
+
+CREATE INDEX IF NOT EXISTS idx_retail_table_relationships_source
+    ON retail_schema.table_relationships (source_table);
+CREATE INDEX IF NOT EXISTS idx_retail_table_relationships_source_col
+    ON retail_schema.table_relationships (source_table, source_column);
+
+COMMENT ON TABLE retail_schema.table_relationships IS 'Foreign keys with referencing tables in retail_schema; target_schema for referenced side';
+COMMENT ON COLUMN retail_schema.table_relationships.target_schema IS 'Schema of the referenced (target) table';
+COMMENT ON COLUMN retail_schema.table_relationships.relationship_text IS 'Canonical line for LLM context';
+
+CREATE TABLE IF NOT EXISTS finance_schema.table_relationships (
+    id                  SERIAL PRIMARY KEY,
+    source_table        TEXT NOT NULL,
+    source_column       TEXT NOT NULL,
+    target_schema       TEXT NOT NULL,
+    target_table        TEXT NOT NULL,
+    target_column       TEXT NOT NULL,
+    relationship_text   TEXT NOT NULL,
+    constraint_name     VARCHAR(256),
+    created_at          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_finance_table_relationships_edge
+        UNIQUE (source_table, source_column, target_schema, target_table, target_column)
+);
+
+CREATE INDEX IF NOT EXISTS idx_finance_table_relationships_source
+    ON finance_schema.table_relationships (source_table);
+CREATE INDEX IF NOT EXISTS idx_finance_table_relationships_source_col
+    ON finance_schema.table_relationships (source_table, source_column);
+
+COMMENT ON TABLE finance_schema.table_relationships IS 'Foreign keys with referencing tables in finance_schema; target_schema for referenced side';
+COMMENT ON COLUMN finance_schema.table_relationships.target_schema IS 'Schema of the referenced (target) table';
+COMMENT ON COLUMN finance_schema.table_relationships.relationship_text IS 'Canonical line for LLM context';
+
+-- ============================================================================
+-- DONE - Schemas, business tables, app_schema, and FK metadata tables created.
+-- Next: load FK rows — python scripts/extract_and_load_relationships.py (requires .env DB access)
 -- ============================================================================

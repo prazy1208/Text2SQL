@@ -16,6 +16,7 @@ const outInsights = document.getElementById('out-insights');
 const outFewShot = document.getElementById('out-few-shot');
 const outTables = document.getElementById('out-tables');
 const outColumns = document.getElementById('out-columns');
+const outGeneratedSql = document.getElementById('out-generated-sql');
 const sessionIdEl = document.getElementById('session-id');
 
 /**
@@ -90,6 +91,7 @@ function persistLastOutput(useCase, message, data) {
       few_shot_examples: data.few_shot_examples || [],
       selected_tables: data.selected_tables || [],
       selected_columns: data.selected_columns || {},
+      generated_sql: data.generated_sql || '',
       error: data.error || null,
       _use_case: useCase || '',
       _message: message || '',
@@ -123,6 +125,7 @@ function restoreLastOutput() {
       (pack.few_shot_examples && pack.few_shot_examples.length) ||
       (pack.selected_tables && pack.selected_tables.length) ||
       Object.keys(normalizeSelectedColumns(pack.selected_columns)).length ||
+      (pack.generated_sql && String(pack.generated_sql).trim()) ||
       (pack.error && String(pack.error).trim());
     if (hasContent) {
       showOutput(pack);
@@ -185,6 +188,11 @@ function showOutput(data) {
     }
   } else {
     console.error('text2sql UI: missing #out-columns in index.html — hard refresh (Ctrl+Shift+R) or clear cache.');
+  }
+
+  if (outGeneratedSql) {
+    const sql = (data.generated_sql && String(data.generated_sql).trim()) || '';
+    outGeneratedSql.innerHTML = `<code>${sql ? escapeHtml(sql) : '—'}</code>`;
   }
 
   if (data.session_id) setStoredSessionId(data.session_id);
@@ -253,6 +261,7 @@ form.addEventListener('submit', async (e) => {
         few_shot_examples: [],
         selected_tables: [],
         selected_columns: {},
+        generated_sql: '',
         error: errText,
       };
       showOutput(errPayload);
@@ -270,13 +279,14 @@ form.addEventListener('submit', async (e) => {
       few_shot_examples: [],
       selected_tables: [],
       selected_columns: {},
+      generated_sql: '',
       error: err.message || 'Request failed',
     };
     showOutput(errPayload);
     persistLastOutput(useCase, message, errPayload);
   } finally {
     submitBtn.disabled = false;
-    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, and selected columns.';
+    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, selected columns, and generated SQL.';
   }
 });
 
@@ -293,7 +303,7 @@ async function init() {
 
   try {
     await bootstrapFreshSession();
-    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, and selected columns.';
+    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, selected columns, and generated SQL.';
     submitBtn.disabled = false;
   } catch (e) {
     outputPlaceholder.textContent = 'Could not create a session. Refresh to retry.';

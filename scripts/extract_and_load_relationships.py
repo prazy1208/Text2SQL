@@ -2,7 +2,8 @@
 Extract foreign keys from pg_catalog for DOMAIN_SCHEMAS and upsert each row into
 {schema}.table_relationships (trusted schema names from config only).
 
-Requires: scripts/create_domain_schema_table_relationships.sql applied.
+Before upserting, ensures each domain has table_relationships by running
+scripts/create_domain_schema_table_relationships.sql (CREATE TABLE IF NOT EXISTS).
 
 Run from project root: python scripts/extract_and_load_relationships.py
 """
@@ -106,6 +107,21 @@ def get_engine():
     return create_engine(url)
 
 
+def ensure_relationship_tables(engine) -> None:
+    """Create healthcare/retail/finance table_relationships if missing (idempotent)."""
+    sql_file = PROJECT_ROOT / "scripts" / "create_domain_schema_table_relationships.sql"
+    if not sql_file.exists():
+        raise FileNotFoundError(f"Missing DDL file: {sql_file}")
+    sql = sql_file.read_text(encoding="utf-8")
+    raw_conn = engine.raw_connection()
+    try:
+        cur = raw_conn.cursor()
+        cur.execute(sql)
+        raw_conn.commit()
+    finally:
+        raw_conn.close()
+
+
 def relationship_text(
     source_schema: str,
     source_table: str,
@@ -166,6 +182,8 @@ def upsert_all(engine, pg_rows: list[dict]) -> dict[str, int]:
 
 def main():
     engine = get_engine()
+    print("Ensuring domain table_relationships tables exist...")
+    ensure_relationship_tables(engine)
     pg_rows = fetch_foreign_key_rows(engine, DOMAIN_SCHEMAS)
     by_schema = Counter(r["source_schema"] for r in pg_rows)
     print(f"Found {len(pg_rows)} FK column reference(s) from pg_catalog.")
