@@ -1,6 +1,6 @@
 """
-Database helpers for Stage 1 API: sessions, intent_agent_output, table_agent_output,
-column_agent_output.
+Database helpers for Stage 1 API: sessions, intent_agent_output, few_shot_agent_output,
+table_agent_output, column_agent_output, gen_sql_agent_output.
 """
 
 import json
@@ -95,6 +95,32 @@ def insert_table_agent_output(intent_output_id: int, selected_tables: list[str])
     return int(row[0])
 
 
+def insert_few_shot_agent_output(intent_output_id: int, few_shot_examples: list[dict]) -> int:
+    """
+    Insert one row into app_schema.few_shot_agent_output; return new row id.
+    few_shot_examples: list of dicts (id, question_text, sql_query, query_type), stored as JSONB.
+    """
+    engine = get_engine()
+    payload = json.dumps(few_shot_examples or [])
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(f"""
+                INSERT INTO {APP_SCHEMA}.few_shot_agent_output (intent_output_id, few_shot_examples)
+                VALUES (:intent_output_id, CAST(:few_shot_examples AS jsonb))
+                RETURNING id
+            """),
+            {
+                "intent_output_id": intent_output_id,
+                "few_shot_examples": payload,
+            },
+        )
+        row = result.fetchone()
+        conn.commit()
+    if not row:
+        raise RuntimeError("INSERT few_shot_agent_output did not return id")
+    return int(row[0])
+
+
 def insert_column_agent_output(table_agent_output_id: int, selected_columns: dict) -> int:
     """
     Insert one row into app_schema.column_agent_output; return new row id.
@@ -118,4 +144,67 @@ def insert_column_agent_output(table_agent_output_id: int, selected_columns: dic
         conn.commit()
     if not row:
         raise RuntimeError("INSERT column_agent_output did not return id")
+    return int(row[0])
+
+
+def insert_gen_sql_agent_output(
+    intent_output_id: int,
+    generated_sql: str,
+    reasoning_summary: str | None,
+    validation_passed: bool,
+    validation_error_codes: str,
+    validation_error_message: str,
+    blocked_keywords: str,
+    is_single_statement: bool,
+    is_select_only: bool,
+) -> int:
+    """
+    Insert one row into app_schema.gen_sql_agent_output; return new row id.
+    Validation fields are stored in separate columns (no JSON blob).
+    """
+    engine = get_engine()
+    rs = (reasoning_summary or "").strip() or None
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(f"""
+                INSERT INTO {APP_SCHEMA}.gen_sql_agent_output (
+                    intent_output_id,
+                    generated_sql,
+                    reasoning_summary,
+                    validation_passed,
+                    validation_error_codes,
+                    validation_error_message,
+                    blocked_keywords,
+                    is_single_statement,
+                    is_select_only
+                )
+                VALUES (
+                    :intent_output_id,
+                    :generated_sql,
+                    :reasoning_summary,
+                    :validation_passed,
+                    :validation_error_codes,
+                    :validation_error_message,
+                    :blocked_keywords,
+                    :is_single_statement,
+                    :is_select_only
+                )
+                RETURNING id
+            """),
+            {
+                "intent_output_id": intent_output_id,
+                "generated_sql": generated_sql or "",
+                "reasoning_summary": rs,
+                "validation_passed": validation_passed,
+                "validation_error_codes": validation_error_codes or "",
+                "validation_error_message": validation_error_message or "",
+                "blocked_keywords": blocked_keywords or "",
+                "is_single_statement": is_single_statement,
+                "is_select_only": is_select_only,
+            },
+        )
+        row = result.fetchone()
+        conn.commit()
+    if not row:
+        raise RuntimeError("INSERT gen_sql_agent_output did not return id")
     return int(row[0])

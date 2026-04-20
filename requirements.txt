@@ -5,6 +5,8 @@
 fastapi
 uvicorn[standard]
 pydantic
+pytest
+httpx
 python-dotenv
 faiss-cpu
 

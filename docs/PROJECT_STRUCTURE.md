@@ -13,16 +13,20 @@ Text2SQL project/
 │   ├── TABLE_AGENT_5A_PLAN.md    # Table Agent implementation plan (5a)
 │   ├── COLUMN_AGENT_5B_PLAN.md   # Column Agent implementation plan (5b)
 │   ├── INSTALLATION_REQUIREMENTS.md
+│   ├── SUPABASE_SETUP.md           # hosted Postgres: URI, password, schema, sessions
+│   ├── RELATIONSHIPS_PIPELINE.md   # FK table_relationships pipeline (per-domain schema)
 │   └── Text2SQL_PostgreSQL_Setup_Guide.md
 ├── requirements.txt
 ├── build_vector_store.py         # table/column metadata → FAISS + metadata_store
+├── build_relationship_embeddings.py  # FK table_relationships → embeddings JSON (no FAISS)
+├── build_few_shot_metadata_store.py  # system_schema.few_shot_examples → metadata_store JSON
 ├── build_business_rules_vector_store.py   # business rules → FAISS + business_rules_store
 ├── generate_data.py
 ├── faiss_indexes/                # FAISS indexes (schema + business_rules_*)
 ├── metadata_store/               # table/column metadata JSON (per schema)
 ├── business_rules_store/         # business-rules metadata JSON (per schema)
 ├── backend/                      # API and pipeline
-├── scripts/                      # create_app_schema.sql, migrations (e.g. migration_add_table_agent_output.sql)
+├── scripts/                      # create_app_schema.sql, domain FK DDL, extract_and_load_relationships.py, few_shot DDL, migrations
 └── frontend/                     # Stage 1 UI: intent, selected_tables, selected_columns; index.html, styles.css, app.js; served at / by FastAPI
 ```
 
@@ -31,13 +35,14 @@ Text2SQL project/
 ```
 backend/
 ├── __init__.py
-├── config.py                     # PROJECT_ROOT, get_engine(), APP_SCHEMA, paths, USE_CASES
+├── config.py                     # PROJECT_ROOT, get_engine(), DOMAIN_SCHEMAS, paths, RELATIONSHIP_METADATA_NAMES, USE_CASES
 ├── agents/                       # one module per agent
 │   ├── __init__.py
 │   ├── intent_agent.py           # Stage 1: rephrase + keywords + business_insights
-│   ├── table_agent.py            # Table selection: shortlist + LLM → selected_tables (schema.table)
-│   ├── column_agent.py           # Column selection: shortlist + LLM → selected_columns per table
-│   │   # (later) few_shot_agent.py, gen_sql_agent.py, sql_validator.py
+│   ├── few_shot_agent.py         # LLM picks pattern ids (id + question + type); returns full rows for Gen-SQL
+│   ├── table_agent.py            # Table selection: shortlist + LLM → selected_tables (schema.table); FK-aware
+│   ├── column_agent.py           # Column selection: shortlist + LLM → selected_columns per table; FK-aware
+│   ├── gen_sql_agent.py          # SQL synthesis from context + few-shot; optional relationship_text lines
 │   └── ...
 ├── services/                     # shared services used by agents
 │   ├── __init__.py
@@ -45,6 +50,9 @@ backend/
 │   ├── llm_client.py                 # OpenAI / Gemini chat_completion
 │   ├── table_metadata_retrieval.py   # table metadata + optional FAISS shortlist
 │   ├── column_metadata_retrieval.py # column candidates for selected tables; threshold + column FAISS
+│   ├── relationship_retrieval.py     # FK rows from metadata JSON (API); DB list helper for build scripts
+│   ├── fewshot_retrieval.py          # few_shot catalog JSON (+ optional DB fallback)
+│   ├── sql_validator.py              # rule-based checks on generated SQL (Gen-SQL pipeline)
 │   └── ...
 └── api/                          # FastAPI app and routes
     ├── __init__.py
@@ -52,8 +60,8 @@ backend/
     ├── db.py                     # Session, intent_agent_output, table_agent_output, column_agent_output
     └── routes/                   # One module per agent/flow
         ├── __init__.py
-        ├── query.py              # GET /use-cases, POST /query (Intent + Table + Column Agent)
-        └── ...                   # (later) sql.py for Gen-SQL, etc.
+        ├── query.py              # GET /use-cases, POST /session, POST /query (full pipeline incl. Gen-SQL + validation)
+        └── ...
 ```
 
 ## Conventions
@@ -66,7 +74,9 @@ backend/
 
 ## Reference
 
+- Supabase (hosted DB) from scratch: `docs/SUPABASE_SETUP.md`
 - Stage 1 scope and order: `docs/STAGE1_FINALIZED_PLAN.md`
 - Table Agent (5a) — metadata shortlist, LLM selection, DB, API, UI: `docs/TABLE_AGENT_5A_PLAN.md`
 - Column Agent (5b) — column metadata, threshold/FAISS, LLM, DB, API: `docs/COLUMN_AGENT_5B_PLAN.md`
 - Full agent architecture (Phase 3): see plan referenced there (e.g. phase_3_agent_architecture in .cursor/plans).
+- FK relationships (per-domain `table_relationships`, extract, embeddings JSON, retrieval): `docs/RELATIONSHIPS_PIPELINE.md`.

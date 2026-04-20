@@ -1,4 +1,4 @@
-"""Routes: POST /query (Intent + Table + Column Agent), GET /use-cases."""
+"""Routes: POST /session, POST /query (full pipeline incl. Gen-SQL), GET /use-cases."""
 
 import logging
 
@@ -6,16 +6,25 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.agents.column_agent import run_column_agent
+from backend.agents.few_shot_agent import run_few_shot_agent
+from backend.agents.gen_sql_agent import run_gen_sql
 from backend.agents.intent_agent import run_intent
 from backend.agents.table_agent import run_table_agent
 from backend.api.db import (
     create_session,
     insert_column_agent_output,
+    insert_few_shot_agent_output,
+    insert_gen_sql_agent_output,
     insert_intent_output,
     insert_table_agent_output,
     session_exists,
 )
-from backend.config import USE_CASES
+from backend.config import USE_CASE_TO_SCHEMA, USE_CASES
+from backend.services.relationship_retrieval import (
+    filter_relationships_for_selected_tables,
+    list_relationships_from_metadata,
+)
+from backend.services.sql_validator import validate_generated_sql
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["query"])
@@ -32,9 +41,15 @@ class QueryResponse(BaseModel):
     rephrased_question: str
     keywords: list[str]
     business_insights: list[str]
+    few_shot_examples: list[dict] = Field(default_factory=list)
     selected_tables: list[str] = Field(default_factory=list)
     selected_columns: dict[str, list[str]] = Field(default_factory=dict)
+    generated_sql: str = Field(default="", description="Synthesized SQL from Gen-SQL Agent")
     error: str | None = None
+
+
+class SessionResponse(BaseModel):
+    session_id: str
 
 
 def _empty_response(session_id: str, error: str) -> QueryResponse:
@@ -43,8 +58,10 @@ def _empty_response(session_id: str, error: str) -> QueryResponse:
         rephrased_question="",
         keywords=[],
         business_insights=[],
+        few_shot_examples=[],
         selected_tables=[],
         selected_columns={},
+        generated_sql="",
         error=error,
     )
 
@@ -52,6 +69,15 @@ def _empty_response(session_id: str, error: str) -> QueryResponse:
 @router.get("/use-cases")
 def get_use_cases() -> list[str]:
     return USE_CASES
+
+
+@router.post("/session", response_model=SessionResponse)
+def create_fresh_session() -> SessionResponse:
+    try:
+        return SessionResponse(session_id=create_session())
+    except Exception as e:
+        logger.exception("Failed to create session")
+        raise HTTPException(status_code=500, detail=f"Failed to create session: {e}") from e
 
 
 @router.post("/query", response_model=QueryResponse)
@@ -72,6 +98,17 @@ def post_query(body: QueryRequest) -> QueryResponse:
             return _empty_response("", str(e))
 
     logger.info("Query request: use_case=%s", use_case)
+    schema_name = USE_CASE_TO_SCHEMA[use_case]
+    relationships: list[dict] = []
+    try:
+        relationships = list_relationships_from_metadata(schema_name)
+    except Exception as e:
+        logger.warning(
+            "Could not load FK relationships from metadata for %s: %s",
+            schema_name,
+            e,
+        )
+
     try:
         intent = run_intent(body.message.strip(), use_case)
     except Exception as e:
@@ -98,15 +135,25 @@ def post_query(body: QueryRequest) -> QueryResponse:
             rephrased_question=rephrased,
             keywords=keywords,
             business_insights=business_insights,
+            few_shot_examples=[],
             selected_tables=[],
             selected_columns={},
+            generated_sql="",
             error=f"Save failed: {e}",
         )
+
+    few_shot_examples: list[dict] = []
+    few_shot_error: str | None = None
 
     selected_tables: list[str] = []
     table_error: str | None = None
     try:
-        table_out = run_table_agent(use_case, rephrased, keywords)
+        table_out = run_table_agent(
+            use_case,
+            rephrased,
+            keywords,
+            relationships=relationships,
+        )
         selected_tables = table_out.get("selected_tables") or []
     except Exception as e:
         logger.exception("Table Agent failed")
@@ -125,7 +172,18 @@ def post_query(body: QueryRequest) -> QueryResponse:
     if table_agent_output_id is not None:
         if selected_tables:
             try:
-                col_out = run_column_agent(use_case, rephrased, keywords, selected_tables)
+                rel_for_columns = filter_relationships_for_selected_tables(
+                    schema_name,
+                    relationships,
+                    selected_tables,
+                )
+                col_out = run_column_agent(
+                    use_case,
+                    rephrased,
+                    keywords,
+                    selected_tables,
+                    relationships=rel_for_columns,
+                )
                 selected_columns = col_out.get("selected_columns") or {}
             except Exception as e:
                 logger.exception("Column Agent failed")
@@ -138,16 +196,103 @@ def post_query(body: QueryRequest) -> QueryResponse:
             persist_col = f"Column selection save failed: {e}"
             column_error = f"{column_error}; {persist_col}" if column_error else persist_col
 
-    err = table_error
+    try:
+        fs_out = run_few_shot_agent(rephrased, keywords, business_insights)
+        few_shot_examples = fs_out.get("few_shot_examples") or []
+    except Exception as e:
+        logger.exception("Few-Shot Agent failed")
+        few_shot_examples = []
+        few_shot_error = f"Few-Shot Agent failed: {e}"
+
+    try:
+        insert_few_shot_agent_output(intent_output_id, few_shot_examples)
+    except Exception as e:
+        logger.exception("Failed to persist few-shot agent output")
+        persist_fs = f"Few-shot save failed: {e}"
+        few_shot_error = f"{few_shot_error}; {persist_fs}" if few_shot_error else persist_fs
+
+    generated_sql = ""
+    reasoning_summary = ""
+    gen_sql_error: str | None = None
+
+    try:
+        gen_out = run_gen_sql(
+            use_case,
+            rephrased,
+            business_insights,
+            few_shot_examples,
+            selected_tables,
+            selected_columns,
+            relationships=relationships,
+        )
+        generated_sql = (gen_out.get("generated_sql") or "").strip()
+        reasoning_summary = (gen_out.get("reasoning_summary") or "").strip()
+    except Exception as e:
+        logger.exception("Gen-SQL Agent failed")
+        gen_sql_error = f"Gen-SQL Agent failed: {e}"
+
+    try:
+        validation = validate_generated_sql(
+            generated_sql,
+            selected_tables=selected_tables or None,
+            selected_columns=selected_columns or None,
+        )
+    except Exception as e:
+        logger.exception("SQL validator failed")
+        validation = {
+            "validation_passed": False,
+            "validation_error_codes": "VALIDATOR_EXCEPTION",
+            "validation_error_message": str(e),
+            "blocked_keywords": "",
+            "is_single_statement": False,
+            "is_select_only": False,
+        }
+
+    if not validation.get("validation_passed"):
+        msg = (validation.get("validation_error_message") or "").strip() or "SQL validation failed"
+        codes = (validation.get("validation_error_codes") or "").strip()
+        blocked = (validation.get("blocked_keywords") or "").strip()
+        parts = [f"SQL validation: {msg}"]
+        if codes:
+            parts.append(f"({codes})")
+        if blocked:
+            parts.append(f"[blocked: {blocked}]")
+        val_err = " ".join(parts)
+        gen_sql_error = f"{gen_sql_error}; {val_err}" if gen_sql_error else val_err
+
+    err = few_shot_error
+    if table_error:
+        err = f"{err}; {table_error}" if err else table_error
     if column_error:
         err = f"{err}; {column_error}" if err else column_error
+    if gen_sql_error:
+        err = f"{err}; {gen_sql_error}" if err else gen_sql_error
+
+    try:
+        insert_gen_sql_agent_output(
+            intent_output_id,
+            generated_sql,
+            reasoning_summary if reasoning_summary else None,
+            bool(validation.get("validation_passed")),
+            str(validation.get("validation_error_codes") or ""),
+            str(validation.get("validation_error_message") or ""),
+            str(validation.get("blocked_keywords") or ""),
+            bool(validation.get("is_single_statement")),
+            bool(validation.get("is_select_only")),
+        )
+    except Exception as e:
+        logger.exception("Failed to persist gen-sql agent output")
+        persist_gen = f"Gen-SQL save failed: {e}"
+        err = f"{err}; {persist_gen}" if err else persist_gen
 
     return QueryResponse(
         session_id=session_id,
         rephrased_question=rephrased,
         keywords=keywords,
         business_insights=business_insights,
+        few_shot_examples=few_shot_examples,
         selected_tables=selected_tables,
         selected_columns=selected_columns,
+        generated_sql=generated_sql,
         error=err,
     )

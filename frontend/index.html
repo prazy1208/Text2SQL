@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>Text2SQL — Intent, tables & columns</title>
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <title>Text2SQL — Intent through generated SQL</title>
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <div class="layout">
     <header class="header">
       <h1>Text2SQL</h1>
-      <p class="tagline">Natural language to intent, table, and column selection</p>
+      <p class="tagline">Natural language to intent, schema selection, and generated SQL</p>
     </header>
     <main class="main">
       <section class="card form-card">
@@ -30,7 +30,7 @@
       </section>
       <section class="card output-card" id="output-section">
         <h2>Query output</h2>
-        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, business insights, selected tables, and selected columns.</div>
+        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, selected columns, and generated SQL.</div>
         <div id="output-content" class="output-content hidden">
           <div class="output-block">
             <h3>Rephrased question</h3>
@@ -45,6 +45,11 @@
             <ul id="out-insights" class="out-list"></ul>
           </div>
           <div class="output-block">
+            <h3>Few-shot patterns</h3>
+            <p class="output-hint">Selected by id (LLM sees question + type only); SQL shown for Gen-SQL.</p>
+            <div id="out-few-shot" class="out-few-shot"></div>
+          </div>
+          <div class="output-block">
             <h3>Selected tables</h3>
             <p class="output-hint">Schema-qualified names chosen for SQL generation.</p>
             <ul id="out-tables" class="out-list out-list-mono"></ul>
@@ -54,12 +59,17 @@
             <p class="output-hint">Per table, from the Column Agent (metadata only).</p>
             <div id="out-columns" class="out-columns"></div>
           </div>
+          <div class="output-block">
+            <h3>Generated SQL</h3>
+            <p class="output-hint">From the Gen-SQL agent (PostgreSQL / Supabase-style). Validation messages may appear in the error area below.</p>
+            <pre id="out-generated-sql" class="out-sql"><code>—</code></pre>
+          </div>
         </div>
         <div id="output-error" class="output-error hidden"></div>
       </section>
     </main>
     <footer class="footer"><span>Session: <code id="session-id">—</code></span></footer>
   </div>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

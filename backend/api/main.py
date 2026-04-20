@@ -23,7 +23,7 @@ logging.basicConfig(
 
 app = FastAPI(
     title="Text2SQL API",
-    description="Intent Agent (Stage 1); more agents (Table, Column, Gen-SQL, etc.) as routes are added.",
+    description="Text2SQL pipeline: Intent, Table/Column (FK-aware), Few-Shot, Gen-SQL, SQL validation.",
     version="0.1.0",
 )
 app.add_middleware(

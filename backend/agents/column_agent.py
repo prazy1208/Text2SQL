@@ -1,9 +1,9 @@
 """
 Column Agent (Stage 2b — column selection).
 Inputs: use_case, rephrased_question, keywords (same as Table Agent), plus selected_tables from Table Agent.
-Outputs: selected_columns as { "schema.table": ["col1", ...] } validated against shortlist candidates.
+Outputs: selected_columns as { "schema.table": ["col1", ...] } validated against shortlist ∪ FK join columns.
 
-Flow: shortlist candidate columns (nested metadata + optional column FAISS) → LLM picks subset → validate.
+Flow: shortlist candidate columns (nested metadata + optional column FAISS) → LLM picks subset → validate (candidates plus source/target columns from relationship rows).
 """
 
 from __future__ import annotations
@@ -20,12 +20,13 @@ logger = logging.getLogger(__name__)
 COLUMN_AGENT_PROMPT = """You are the Column Agent in a Natural Language to SQL system.
 
 Your task is to select ALL necessary columns required to correctly answer the analytical question,
-while keeping the selection lean, complete, and interpretable, using only the candidate columns provided.
+while keeping the selection lean, complete, and interpretable.
 
 You are given:
 1. The analytical question
 2. Relevant keywords
-3. Numbered candidate columns (each is schema.table.column)
+3. Foreign-key relationships between selected tables
+4. Numbered candidate columns (each is schema.table.column)
 
 --------------------------------------------------
 ANALYTICAL QUESTION
@@ -36,6 +37,14 @@ ANALYTICAL QUESTION
 KEYWORDS
 --------------------------------------------------
 {keywords_block}
+
+--------------------------------------------------
+FOREIGN KEY RELATIONSHIPS
+--------------------------------------------------
+{relationships_block}
+
+Each relationship is formatted as:
+schema.table.column -> schema.table.column
 
 --------------------------------------------------
 CANDIDATE COLUMNS
@@ -55,51 +64,80 @@ SELECTION PRINCIPLES
 
 - ALWAYS include identifier columns (e.g., *_id) for every table used.
 - Include human-readable columns (e.g., name, category) when the query refers to entities like customers, products, or patients.
-- If the output represents entities (customers, patients, products), include both ID and descriptive fields.
+- If the output represents entities, include both ID and descriptive fields.
+
+--------------------------------------------------
+RELATIONSHIP-AWARE COLUMN COMPLETENESS (CRITICAL)
+--------------------------------------------------
+
+- Use the provided relationships to understand how tables connect at the column level.
+
+- If multiple tables are involved:
+  → You MUST include join key columns from BOTH sides of each relationship.
+
+- If two tables are indirectly related:
+  → Include join keys for ALL intermediate relationships in the chain.
+
+- Think in join paths:
+  table A.column → table B.column → table C.column
+
+- NEVER skip join keys required to connect tables.
+
+- If a required join column is NOT present in the candidate list:
+  → You MUST still include it if it exists in the relationship definitions.
+
+- Only include columns that exist in:
+  1. Candidate columns OR
+  2. Relationship definitions (for join completeness)
 
 --------------------------------------------------
 CRITICAL RULES
 --------------------------------------------------
 
 1. JOIN HANDLING (STRICT):
-- If multiple tables are involved, you MUST include join keys.
-- Join keys are mandatory and typically include *_id columns.
-- If two tables are indirectly related, include the intermediate table's join keys as well.
-- NEVER skip join paths between tables.
+- Join keys are MANDATORY when multiple tables are involved.
+- Include both sides of the join (e.g., account_id in both tables).
+- Ensure join paths are fully connected (no broken joins).
 
 2. AGGREGATION (STRICT):
-- For COUNT → include an identifier column (e.g., transaction_id, visit_id)
+- For COUNT → include identifier column (e.g., transaction_id, visit_id)
 - For SUM/AVG → include numeric columns (e.g., amount, total_cost)
-- For GROUP BY → include entity identifiers (e.g., account_id, product_id)
-- ALWAYS include identifier columns even in aggregation queries for completeness
+- For GROUP BY → include grouping identifiers (e.g., account_id, product_id)
+- ALWAYS include identifier columns even in aggregation queries
 
 3. FILTERS / CONDITIONS:
-- Include columns required for filtering (e.g., dates, categories, status)
+- Include columns needed for filtering (dates, categories, status, etc.)
 
 4. OUTPUT FIELDS:
-- Include human-readable columns when needed (e.g., names, categories)
-- Include identifier columns (e.g., *_id) to uniquely represent results
+- Include human-readable columns when needed (names, categories)
+- Include identifier columns for uniqueness
 
 5. RELATIONSHIP COMPLETENESS:
-- If the query involves entities connected through another table, include all necessary tables and their key columns.
-- Example: patients → visits → diagnoses requires visit_id to connect them.
-- Do NOT skip intermediate relationships.
+- If entities are connected through intermediate tables:
+  → Include all required join columns across the chain
+- Example:
+  patients → visits → diagnoses
+  requires:
+  patient_id (patients + visits)
+  visit_id (visits + diagnoses)
 
 --------------------------------------------------
 STRICT RULES
 --------------------------------------------------
 
-- Select columns ONLY from the candidate list.
 - Use exact table keys: schema_name.table_name
-- Use exact column names (only column_name in arrays).
-- Do NOT invent or modify column names.
-- Do NOT include columns from tables not present in candidates.
-- Do NOT include explanations or extra text.
+- Use exact column names (only column_name in arrays)
+- Do NOT invent or modify column names
+- Do NOT include explanations or extra text
 
-- Do NOT include all columns by default.
-- Do NOT include unrelated columns.
+- Do NOT include all columns by default
+- Do NOT include unrelated columns
 
-- If the query is ambiguous or required columns cannot be determined, return an empty object.
+- Columns may be selected from:
+  1. Candidate list
+  2. Relationship expansion (ONLY for required join keys)
+
+- If the query is ambiguous or required columns cannot be determined, return an empty object
 
 --------------------------------------------------
 OUTPUT FORMAT
@@ -134,18 +172,32 @@ Or if nothing applies:
 FINAL VALIDATION
 --------------------------------------------------
 
-- Ensure all required join keys are included if multiple tables are involved (no skipped join paths)
-- Ensure intermediate / bridge tables have their key columns when relationships are indirect
-- Ensure required columns for aggregation/grouping/filtering are included
-- Ensure identifier or human-readable columns are included for interpretability
-- Ensure no unrelated columns are selected
-- Ensure output is valid JSON only"""
+Before responding, ensure:
+
+- All join paths are fully connected via required columns
+- No join key is missing if multiple tables are involved
+- Intermediate relationships have their key columns included
+- Aggregation, grouping, and filtering columns are present
+- Identifier and human-readable columns are included where needed
+- No unrelated columns are selected
+- Output is valid JSON only"""
 
 
 def _format_keywords(keywords: list[str] | None) -> str:
     if not keywords:
         return "(none)"
     lines = [f"- {k}" for k in keywords if k and str(k).strip()]
+    return "\n".join(lines) if lines else "(none)"
+
+
+def _format_relationships_block(relationships: list[dict] | None) -> str:
+    if not relationships:
+        return "(none)"
+    lines: list[str] = []
+    for r in relationships:
+        rt = (r.get("relationship_text") or "").strip()
+        if rt:
+            lines.append(f"- {rt}")
     return "\n".join(lines) if lines else "(none)"
 
 
@@ -180,6 +232,26 @@ def _allowed_columns_by_table(candidates: list[dict]) -> dict[str, set[str]]:
         t = _table_fqn(c)
         out.setdefault(t, set()).add(c["column_name"])
     return out
+
+
+def _merge_relationship_join_columns_into_allowed(
+    allowed_by_table: dict[str, set[str]],
+    relationships: list[dict] | None,
+) -> None:
+    """Add source_column / target_column from FK rows so join keys validate if missing from shortlist."""
+    if not relationships:
+        return
+    for r in relationships:
+        sn = (r.get("schema_name") or "").strip()
+        st = (r.get("source_table") or "").strip()
+        sc = (r.get("source_column") or "").strip()
+        ts = (r.get("target_schema") or "").strip()
+        tt = (r.get("target_table") or "").strip()
+        tc = (r.get("target_column") or "").strip()
+        if sn and st and sc:
+            allowed_by_table.setdefault(f"{sn}.{st}", set()).add(sc)
+        if ts and tt and tc:
+            allowed_by_table.setdefault(f"{ts}.{tt}", set()).add(tc)
 
 
 def _parse_column_agent_response(response_text: str) -> dict[str, list[str]] | None:
@@ -223,7 +295,7 @@ def _validate_selected_columns(
     parsed: dict[str, list[str]],
     allowed_by_table: dict[str, set[str]],
 ) -> dict[str, list[str]]:
-    """Keep only tables and columns that appear in candidates. Preserves order, dedupes columns."""
+    """Keep only tables/columns allowed (shortlist + FK relationship columns). Preserves order, dedupes."""
     result: dict[str, list[str]] = {}
     for table_fqn, cols in parsed.items():
         allowed_cols = allowed_by_table.get(table_fqn)
@@ -252,6 +324,7 @@ def run_column_agent(
     selected_tables: list[str],
     *,
     faiss_top_k: int | None = None,
+    relationships: list[dict] | None = None,
 ) -> dict:
     """
     Select columns for selected_tables using shortlist + LLM + validation.
@@ -276,10 +349,12 @@ def run_column_agent(
         return {"selected_columns": {}}
 
     allowed_by_table = _allowed_columns_by_table(candidates)
+    _merge_relationship_join_columns_into_allowed(allowed_by_table, relationships)
     numbered = _build_numbered_candidates_text(candidates)
     user_content = COLUMN_AGENT_PROMPT.format(
         rephrased_question=rq or "(empty)",
         keywords_block=_format_keywords(keywords),
+        relationships_block=_format_relationships_block(relationships),
         numbered_candidates=numbered,
     )
     messages = [{"role": "user", "content": user_content}]

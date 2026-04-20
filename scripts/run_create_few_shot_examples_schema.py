@@ -1,15 +1,9 @@
-"""
-Create app_schema and tables (sessions, intent_agent_output, table_agent_output,
-column_agent_output, few_shot_agent_output, gen_sql_agent_output) in text2sql_db.
-Uses .env from project root: DATABASE_URL or DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME.
-Run from project root: python scripts/run_create_app_schema.py
-"""
+"""Apply scripts/create_system_schema_few_shot_examples.sql. Run from project root."""
 
 import os
 import sys
 from pathlib import Path
 
-# Project root = parent of scripts/
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -23,7 +17,6 @@ load_dotenv()
 
 
 def get_engine():
-    """Build SQLAlchemy engine from .env (same pattern as build_vector_store.py)."""
     database_url = os.getenv("DATABASE_URL")
     if database_url:
         return create_engine(database_url)
@@ -37,14 +30,12 @@ def get_engine():
 
 
 def main():
-    sql_file = PROJECT_ROOT / "scripts" / "create_app_schema.sql"
+    sql_file = PROJECT_ROOT / "scripts" / "create_system_schema_few_shot_examples.sql"
     if not sql_file.exists():
         print(f"SQL file not found: {sql_file}")
         sys.exit(1)
-
     sql = sql_file.read_text(encoding="utf-8")
     engine = get_engine()
-    # Use raw connection so multiple statements in one execute() work (psycopg2 supports this)
     raw_conn = engine.raw_connection()
     try:
         cur = raw_conn.cursor()
@@ -52,8 +43,7 @@ def main():
         raw_conn.commit()
     finally:
         raw_conn.close()
-
-    print("Done. app_schema and agent output tables (including gen_sql_agent_output) applied.")
+    print("Done. system_schema.few_shot_examples created.")
 
 
 if __name__ == "__main__":
