@@ -217,6 +217,28 @@ If other objects still use `system_schema`, omit `DROP SCHEMA` and only drop the
 
 After `healthcare_schema`, `retail_schema`, and `finance_schema` exist, add one **`table_relationships`** table per domain schema (referencing side is always in that domain; `target_schema` holds the referenced table’s schema for cross-schema FKs).
 
+### One-command refresh (recommended after schema/table changes)
+
+From project root, run:
+
+```bash
+python scripts/run_full_schema_refresh.py
+```
+
+This runs the full refresh pipeline in order:
+1. Applies `scripts/create_domain_schemas.sql` (domain tables + comments + safe alter/constraint updates).
+2. Ensures domain `table_relationships` tables exist.
+3. Extracts FK relationships from `pg_catalog` and upserts into domain `table_relationships`.
+4. Rebuilds relationship metadata JSON:
+   - `metadata_store/relationships_healthcare_schema_metadata.json`
+   - `metadata_store/relationships_retail_schema_metadata.json`
+   - `metadata_store/relationships_finance_schema_metadata.json`
+5. Rebuilds domain metadata + FAISS indexes:
+   - `metadata_store/{schema}_metadata.json`
+   - `metadata_store/{schema}_columns_metadata.json`
+   - `faiss_indexes/{schema}.index`
+   - `faiss_indexes/{schema}_columns.index`
+
 ### One-shot setup (recommended for new databases)
 
 Run the full script in the **Supabase SQL Editor** (or pgAdmin against your DB): `scripts/complete_setup.sql`. It creates domain tables, `app_schema`, and **all three** `table_relationships` tables in one go. Safe to re-run: DDL uses `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS`.

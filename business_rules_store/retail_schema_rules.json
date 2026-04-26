@@ -234,5 +234,265 @@
       "purchase timing"
     ],
     "content": "Customer Activity Over Time Customer activity over time measures how purchasing engagement changes across different time periods. Observing activity patterns helps identify periods of high or low customer interaction. customer activity trends shopping activity purchase timing"
+  },
+  {
+    "index": 18,
+    "rule_id": 19,
+    "concept_name": "Inventory Stock Health",
+    "description": "Monitors stock_quantity levels in inventory table by product_id and store_id to identify low stock, overstock, and optimal inventory positions.",
+    "insight": "Enables Text2SQL to answer queries about stockouts, replenishment needs, and inventory optimization across store locations.",
+    "keywords": [
+      "stock levels",
+      "inventory status",
+      "out of stock"
+    ],
+    "content": "Inventory Stock Health Monitors stock_quantity levels in inventory table by product_id and store_id to identify low stock, overstock, and optimal inventory positions. Enables Text2SQL to answer queries about stockouts, replenishment needs, and inventory optimization across store locations. stock levels inventory status out of stock"
+  },
+  {
+    "index": 19,
+    "rule_id": 20,
+    "concept_name": "Product Review Sentiment",
+    "description": "Analyzes rating distribution and review_text from reviews table by product_id to measure customer satisfaction and product quality perception.",
+    "insight": "Supports queries about product ratings, customer feedback trends, and identifies products needing quality improvements or promotion.",
+    "keywords": [
+      "product ratings",
+      "customer reviews",
+      "review scores"
+    ],
+    "content": "Product Review Sentiment Analyzes rating distribution and review_text from reviews table by product_id to measure customer satisfaction and product quality perception. Supports queries about product ratings, customer feedback trends, and identifies products needing quality improvements or promotion. product ratings customer reviews review scores"
+  },
+  {
+    "index": 20,
+    "rule_id": 21,
+    "concept_name": "Shipment Delivery Performance",
+    "description": "Calculates delivery time by comparing shipment_date and delivery_date in shipments table to measure fulfillment speed and reliability.",
+    "insight": "Enables delivery performance analysis, identifies shipping delays, and supports logistics optimization queries.",
+    "keywords": [
+      "delivery time",
+      "shipping speed",
+      "fulfillment performance"
+    ],
+    "content": "Shipment Delivery Performance Calculates delivery time by comparing shipment_date and delivery_date in shipments table to measure fulfillment speed and reliability. Enables delivery performance analysis, identifies shipping delays, and supports logistics optimization queries. delivery time shipping speed fulfillment performance"
+  },
+  {
+    "index": 21,
+    "rule_id": 22,
+    "concept_name": "Promotion Effectiveness",
+    "description": "Links promotion_id with order_date to measure sales lift during promotion periods by analyzing discount_percentage impact from promotions table.",
+    "insight": "Supports ROI analysis of promotional campaigns, identifies most effective discounts, and guides pricing strategy decisions.",
+    "keywords": [
+      "promotion impact",
+      "discount effectiveness",
+      "campaign performance"
+    ],
+    "content": "Promotion Effectiveness Links promotion_id with order_date to measure sales lift during promotion periods by analyzing discount_percentage impact from promotions table. Supports ROI analysis of promotional campaigns, identifies most effective discounts, and guides pricing strategy decisions. promotion impact discount effectiveness campaign performance"
+  },
+  {
+    "index": 22,
+    "rule_id": 23,
+    "concept_name": "Store Performance Comparison",
+    "description": "Aggregates orders and inventory metrics by store_id from stores table to compare sales and stock efficiency across locations and store_type.",
+    "insight": "Enables geographic performance queries, identifies top-performing stores, and supports expansion or closure decisions.",
+    "keywords": [
+      "store performance",
+      "location comparison",
+      "store sales"
+    ],
+    "content": "Store Performance Comparison Aggregates orders and inventory metrics by store_id from stores table to compare sales and stock efficiency across locations and store_type. Enables geographic performance queries, identifies top-performing stores, and supports expansion or closure decisions. store performance location comparison store sales"
+  },
+  {
+    "index": 23,
+    "rule_id": 24,
+    "concept_name": "Category Hierarchy Navigation",
+    "description": "Uses parent_category_id relationships in categories table to analyze product distribution and sales across category levels and subcategories.",
+    "insight": "Supports hierarchical category queries, identifies category performance at different levels, and enables drill-down analysis.",
+    "keywords": [
+      "category hierarchy",
+      "subcategories",
+      "category levels"
+    ],
+    "content": "Category Hierarchy Navigation Uses parent_category_id relationships in categories table to analyze product distribution and sales across category levels and subcategories. Supports hierarchical category queries, identifies category performance at different levels, and enables drill-down analysis. category hierarchy subcategories category levels"
+  },
+  {
+    "index": 24,
+    "rule_id": 25,
+    "concept_name": "Supplier Geographic Distribution",
+    "description": "Analyzes supplier locations by city and state from suppliers table to measure supply chain geographic diversity and regional dependencies.",
+    "insight": "Enables supply chain risk assessment, identifies geographic concentration, and supports supplier diversification strategies.",
+    "keywords": [
+      "supplier locations",
+      "supplier geography",
+      "supply chain distribution"
+    ],
+    "content": "Supplier Geographic Distribution Analyzes supplier locations by city and state from suppliers table to measure supply chain geographic diversity and regional dependencies. Enables supply chain risk assessment, identifies geographic concentration, and supports supplier diversification strategies. supplier locations supplier geography supply chain distribution"
+  },
+  {
+    "index": 25,
+    "rule_id": 26,
+    "concept_name": "Inventory Freshness Tracking",
+    "description": "Monitors last_updated timestamps in inventory table to identify stale inventory records and data accuracy across stores.",
+    "insight": "Supports inventory data quality queries, identifies stores with outdated records, and ensures real-time stock visibility.",
+    "keywords": [
+      "inventory updates",
+      "stock freshness",
+      "last updated"
+    ],
+    "content": "Inventory Freshness Tracking Monitors last_updated timestamps in inventory table to identify stale inventory records and data accuracy across stores. Supports inventory data quality queries, identifies stores with outdated records, and ensures real-time stock visibility. inventory updates stock freshness last updated"
+  },
+  {
+    "index": 26,
+    "rule_id": 27,
+    "concept_name": "Customer Review Engagement",
+    "description": "Calculates review submission rates by comparing customers who purchased versus those who left reviews using customer_id from reviews table.",
+    "insight": "Enables engagement analysis, identifies products generating buzz, and measures customer feedback participation rates.",
+    "keywords": [
+      "review participation",
+      "customer feedback rate",
+      "review engagement"
+    ],
+    "content": "Customer Review Engagement Calculates review submission rates by comparing customers who purchased versus those who left reviews using customer_id from reviews table. Enables engagement analysis, identifies products generating buzz, and measures customer feedback participation rates. review participation customer feedback rate review engagement"
+  },
+  {
+    "index": 27,
+    "rule_id": 28,
+    "concept_name": "Order Fulfillment Status",
+    "description": "Tracks shipment_status from shipments table linked to order_id to monitor pending, shipped, and delivered order completion rates.",
+    "insight": "Supports operational queries about order pipeline, identifies fulfillment bottlenecks, and measures customer service efficiency.",
+    "keywords": [
+      "order status",
+      "fulfillment tracking",
+      "shipment progress"
+    ],
+    "content": "Order Fulfillment Status Tracks shipment_status from shipments table linked to order_id to monitor pending, shipped, and delivered order completion rates. Supports operational queries about order pipeline, identifies fulfillment bottlenecks, and measures customer service efficiency. order status fulfillment tracking shipment progress"
+  },
+  {
+    "index": 28,
+    "rule_id": 29,
+    "concept_name": "Product Launch Success",
+    "description": "Analyzes order volume and review ratings for products within periods after launch_date from products table to measure new product adoption.",
+    "insight": "Enables new product performance queries, identifies successful launches, and guides future product development priorities.",
+    "keywords": [
+      "new product performance",
+      "launch success",
+      "product adoption"
+    ],
+    "content": "Product Launch Success Analyzes order volume and review ratings for products within periods after launch_date from products table to measure new product adoption. Enables new product performance queries, identifies successful launches, and guides future product development priorities. new product performance launch success product adoption"
+  },
+  {
+    "index": 29,
+    "rule_id": 30,
+    "concept_name": "Multi-Store Inventory Distribution",
+    "description": "Compares stock_quantity across store_id in inventory table for same product_id to identify inventory allocation imbalances.",
+    "insight": "Supports inventory rebalancing queries, identifies overstocked and understocked locations, and optimizes stock distribution.",
+    "keywords": [
+      "inventory allocation",
+      "stock distribution",
+      "multi-location inventory"
+    ],
+    "content": "Multi-Store Inventory Distribution Compares stock_quantity across store_id in inventory table for same product_id to identify inventory allocation imbalances. Supports inventory rebalancing queries, identifies overstocked and understocked locations, and optimizes stock distribution. inventory allocation stock distribution multi-location inventory"
+  },
+  {
+    "index": 30,
+    "rule_id": 31,
+    "concept_name": "Customer Geographic Penetration",
+    "description": "Maps customer distribution by city and state from customers table against store locations to identify underserved markets.",
+    "insight": "Enables market gap analysis, supports expansion planning, and identifies opportunities for new store openings.",
+    "keywords": [
+      "customer geography",
+      "market coverage",
+      "regional customers"
+    ],
+    "content": "Customer Geographic Penetration Maps customer distribution by city and state from customers table against store locations to identify underserved markets. Enables market gap analysis, supports expansion planning, and identifies opportunities for new store openings. customer geography market coverage regional customers"
+  },
+  {
+    "index": 31,
+    "rule_id": 32,
+    "concept_name": "Average Order Value Trends",
+    "description": "Calculates mean total_amount from orders table over time periods to track customer spending patterns and basket size evolution.",
+    "insight": "Supports pricing strategy queries, identifies upselling opportunities, and measures promotional impact on transaction size.",
+    "keywords": [
+      "average order value",
+      "basket size",
+      "transaction amount"
+    ],
+    "content": "Average Order Value Trends Calculates mean total_amount from orders table over time periods to track customer spending patterns and basket size evolution. Supports pricing strategy queries, identifies upselling opportunities, and measures promotional impact on transaction size. average order value basket size transaction amount"
+  },
+  {
+    "index": 32,
+    "rule_id": 33,
+    "concept_name": "Product Price Positioning",
+    "description": "Analyzes price distribution within category_id and brand from products table to identify premium, mid-range, and budget positioning.",
+    "insight": "Enables competitive pricing queries, identifies pricing gaps, and supports assortment strategy and margin optimization.",
+    "keywords": [
+      "price points",
+      "pricing tiers",
+      "product pricing"
+    ],
+    "content": "Product Price Positioning Analyzes price distribution within category_id and brand from products table to identify premium, mid-range, and budget positioning. Enables competitive pricing queries, identifies pricing gaps, and supports assortment strategy and margin optimization. price points pricing tiers product pricing"
+  },
+  {
+    "index": 33,
+    "rule_id": 34,
+    "concept_name": "Promotion Timing Patterns",
+    "description": "Examines start_date and end_date patterns in promotions table to identify seasonal promotion strategies and campaign frequency.",
+    "insight": "Supports promotional calendar analysis, identifies optimal timing windows, and guides future campaign scheduling.",
+    "keywords": [
+      "promotion schedule",
+      "campaign timing",
+      "promotional periods"
+    ],
+    "content": "Promotion Timing Patterns Examines start_date and end_date patterns in promotions table to identify seasonal promotion strategies and campaign frequency. Supports promotional calendar analysis, identifies optimal timing windows, and guides future campaign scheduling. promotion schedule campaign timing promotional periods"
+  },
+  {
+    "index": 34,
+    "rule_id": 35,
+    "concept_name": "Customer Lifetime Value",
+    "description": "Aggregates total_amount from orders table by customer_id over their tenure since signup_date to calculate cumulative customer value.",
+    "insight": "Enables customer segmentation queries, identifies high-value customers, and supports retention investment prioritization.",
+    "keywords": [
+      "customer value",
+      "lifetime spending",
+      "customer worth"
+    ],
+    "content": "Customer Lifetime Value Aggregates total_amount from orders table by customer_id over their tenure since signup_date to calculate cumulative customer value. Enables customer segmentation queries, identifies high-value customers, and supports retention investment prioritization. customer value lifetime spending customer worth"
+  },
+  {
+    "index": 35,
+    "rule_id": 36,
+    "concept_name": "Review Recency Analysis",
+    "description": "Tracks time since last review_date by product_id from reviews table to identify products with recent feedback versus stale reviews.",
+    "insight": "Supports review freshness queries, identifies products needing review solicitation, and measures ongoing customer engagement.",
+    "keywords": [
+      "recent reviews",
+      "review freshness",
+      "latest feedback"
+    ],
+    "content": "Review Recency Analysis Tracks time since last review_date by product_id from reviews table to identify products with recent feedback versus stale reviews. Supports review freshness queries, identifies products needing review solicitation, and measures ongoing customer engagement. recent reviews review freshness latest feedback"
+  },
+  {
+    "index": 36,
+    "rule_id": 37,
+    "concept_name": "Store Type Performance Segmentation",
+    "description": "Compares sales metrics and inventory turnover by store_type from stores table to analyze performance across different retail formats.",
+    "insight": "Enables retail format comparison, identifies optimal store models, and guides format expansion or conversion strategies.",
+    "keywords": [
+      "store format",
+      "store type performance",
+      "retail format"
+    ],
+    "content": "Store Type Performance Segmentation Compares sales metrics and inventory turnover by store_type from stores table to analyze performance across different retail formats. Enables retail format comparison, identifies optimal store models, and guides format expansion or conversion strategies. store format store type performance retail format"
+  },
+  {
+    "index": 37,
+    "rule_id": 38,
+    "concept_name": "Supplier Contact Accessibility",
+    "description": "Evaluates contact_email and phone completeness in suppliers table to measure supplier communication readiness and data quality.",
+    "insight": "Supports supply chain communication queries, identifies suppliers needing updated contact information, and ensures procurement efficiency.",
+    "keywords": [
+      "supplier contacts",
+      "supplier reachability",
+      "contact completeness"
+    ],
+    "content": "Supplier Contact Accessibility Evaluates contact_email and phone completeness in suppliers table to measure supplier communication readiness and data quality. Supports supply chain communication queries, identifies suppliers needing updated contact information, and ensures procurement efficiency. supplier contacts supplier reachability contact completeness"
   }
 ]

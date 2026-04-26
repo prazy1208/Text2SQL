@@ -1,11 +1,92 @@
 [
   {
     "schema_name": "healthcare_schema",
+    "table_name": "billing",
+    "column_name": "billing_date",
+    "data_type": "date",
+    "description": "Billing date",
+    "table_description": "Billing details for each visit",
+    "fqn": "healthcare_schema.billing.billing_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "billing",
+    "column_name": "billing_id",
+    "data_type": "integer",
+    "description": "Unique billing identifier",
+    "table_description": "Billing details for each visit",
+    "fqn": "healthcare_schema.billing.billing_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "billing",
+    "column_name": "insurance_covered_amount",
+    "data_type": "numeric(12,2)",
+    "description": "Amount covered by insurance",
+    "table_description": "Billing details for each visit",
+    "fqn": "healthcare_schema.billing.insurance_covered_amount"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "billing",
+    "column_name": "out_of_pocket_amount",
+    "data_type": "numeric(12,2)",
+    "description": "Amount paid by patient",
+    "table_description": "Billing details for each visit",
+    "fqn": "healthcare_schema.billing.out_of_pocket_amount"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "billing",
+    "column_name": "total_amount",
+    "data_type": "numeric(12,2)",
+    "description": "Total billed amount",
+    "table_description": "Billing details for each visit",
+    "fqn": "healthcare_schema.billing.total_amount"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "billing",
+    "column_name": "visit_id",
+    "data_type": "integer",
+    "description": "Visit being billed",
+    "table_description": "Billing details for each visit",
+    "fqn": "healthcare_schema.billing.visit_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "departments",
+    "column_name": "department_id",
+    "data_type": "integer",
+    "description": "Unique identifier for each department",
+    "table_description": "Hospital departments such as Cardiology, Emergency, etc.",
+    "fqn": "healthcare_schema.departments.department_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "departments",
+    "column_name": "department_name",
+    "data_type": "character varying(100)",
+    "description": "Name of the department",
+    "table_description": "Hospital departments such as Cardiology, Emergency, etc.",
+    "fqn": "healthcare_schema.departments.department_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "departments",
+    "column_name": "location",
+    "data_type": "character varying(100)",
+    "description": "Physical location within hospital",
+    "table_description": "Hospital departments such as Cardiology, Emergency, etc.",
+    "fqn": "healthcare_schema.departments.location"
+  },
+  {
+    "schema_name": "healthcare_schema",
     "table_name": "diagnoses",
     "column_name": "diagnosis_code",
     "data_type": "character varying(20)",
-    "description": "ICD diagnosis code.",
-    "table_description": "Stores diagnosis information.",
+    "description": "ICD-10 or similar diagnosis code.",
+    "table_description": "Stores diagnosis information linked to patient visits.",
     "fqn": "healthcare_schema.diagnoses.diagnosis_code"
   },
   {
@@ -13,8 +94,8 @@
     "table_name": "diagnoses",
     "column_name": "diagnosis_description",
     "data_type": "character varying(255)",
-    "description": "Diagnosis description.",
-    "table_description": "Stores diagnosis information.",
+    "description": "Human-readable description of the diagnosis.",
+    "table_description": "Stores diagnosis information linked to patient visits.",
     "fqn": "healthcare_schema.diagnoses.diagnosis_description"
   },
   {
@@ -22,8 +103,8 @@
     "table_name": "diagnoses",
     "column_name": "diagnosis_id",
     "data_type": "integer",
-    "description": "Unique identifier for each diagnosis.",
-    "table_description": "Stores diagnosis information.",
+    "description": "Unique system-generated identifier for each diagnosis.",
+    "table_description": "Stores diagnosis information linked to patient visits.",
     "fqn": "healthcare_schema.diagnoses.diagnosis_id"
   },
   {
@@ -31,8 +112,8 @@
     "table_name": "diagnoses",
     "column_name": "severity_level",
     "data_type": "character varying(20)",
-    "description": "Severity (Low, Medium, High, Critical).",
-    "table_description": "Stores diagnosis information.",
+    "description": "Severity level (Low, Medium, High, Critical).",
+    "table_description": "Stores diagnosis information linked to patient visits.",
     "fqn": "healthcare_schema.diagnoses.severity_level"
   },
   {
@@ -40,71 +121,116 @@
     "table_name": "diagnoses",
     "column_name": "visit_id",
     "data_type": "integer",
-    "description": "Foreign key to visits.",
-    "table_description": "Stores diagnosis information.",
+    "description": "Foreign key referencing the visit associated with this diagnosis.",
+    "table_description": "Stores diagnosis information linked to patient visits.",
     "fqn": "healthcare_schema.diagnoses.visit_id"
   },
   {
     "schema_name": "healthcare_schema",
-    "table_name": "healthcare_business_rules",
-    "column_name": "concept_name",
-    "data_type": "character varying(150)",
-    "description": "",
-    "table_description": "",
-    "fqn": "healthcare_schema.healthcare_business_rules.concept_name"
+    "table_name": "insurance_claims",
+    "column_name": "approved_amount",
+    "data_type": "numeric(12,2)",
+    "description": "Approved amount",
+    "table_description": "Insurance claim processing details",
+    "fqn": "healthcare_schema.insurance_claims.approved_amount"
   },
   {
     "schema_name": "healthcare_schema",
-    "table_name": "healthcare_business_rules",
-    "column_name": "created_at",
-    "data_type": "timestamp without time zone",
-    "description": "",
-    "table_description": "",
-    "fqn": "healthcare_schema.healthcare_business_rules.created_at"
+    "table_name": "insurance_claims",
+    "column_name": "claim_amount",
+    "data_type": "numeric(12,2)",
+    "description": "Requested claim amount",
+    "table_description": "Insurance claim processing details",
+    "fqn": "healthcare_schema.insurance_claims.claim_amount"
   },
   {
     "schema_name": "healthcare_schema",
-    "table_name": "healthcare_business_rules",
-    "column_name": "description",
-    "data_type": "text",
-    "description": "",
-    "table_description": "",
-    "fqn": "healthcare_schema.healthcare_business_rules.description"
+    "table_name": "insurance_claims",
+    "column_name": "claim_date",
+    "data_type": "date",
+    "description": "Date of claim submission",
+    "table_description": "Insurance claim processing details",
+    "fqn": "healthcare_schema.insurance_claims.claim_date"
   },
   {
     "schema_name": "healthcare_schema",
-    "table_name": "healthcare_business_rules",
-    "column_name": "insight",
-    "data_type": "text",
-    "description": "",
-    "table_description": "",
-    "fqn": "healthcare_schema.healthcare_business_rules.insight"
-  },
-  {
-    "schema_name": "healthcare_schema",
-    "table_name": "healthcare_business_rules",
-    "column_name": "keywords",
-    "data_type": "text[]",
-    "description": "",
-    "table_description": "",
-    "fqn": "healthcare_schema.healthcare_business_rules.keywords"
-  },
-  {
-    "schema_name": "healthcare_schema",
-    "table_name": "healthcare_business_rules",
-    "column_name": "rule_id",
+    "table_name": "insurance_claims",
+    "column_name": "claim_id",
     "data_type": "integer",
-    "description": "",
-    "table_description": "",
-    "fqn": "healthcare_schema.healthcare_business_rules.rule_id"
+    "description": "Unique claim identifier",
+    "table_description": "Insurance claim processing details",
+    "fqn": "healthcare_schema.insurance_claims.claim_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "insurance_claims",
+    "column_name": "claim_status",
+    "data_type": "character varying(50)",
+    "description": "Status (Pending, Approved, Rejected)",
+    "table_description": "Insurance claim processing details",
+    "fqn": "healthcare_schema.insurance_claims.claim_status"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "insurance_claims",
+    "column_name": "patient_id",
+    "data_type": "integer",
+    "description": "Patient filing claim",
+    "table_description": "Insurance claim processing details",
+    "fqn": "healthcare_schema.insurance_claims.patient_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "insurance_claims",
+    "column_name": "visit_id",
+    "data_type": "integer",
+    "description": "Associated visit",
+    "table_description": "Insurance claim processing details",
+    "fqn": "healthcare_schema.insurance_claims.visit_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "medications",
+    "column_name": "manufacturer",
+    "data_type": "character varying(100)",
+    "description": "Manufacturer name",
+    "table_description": "Master list of medications",
+    "fqn": "healthcare_schema.medications.manufacturer"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "medications",
+    "column_name": "medication_id",
+    "data_type": "integer",
+    "description": "Unique medication identifier",
+    "table_description": "Master list of medications",
+    "fqn": "healthcare_schema.medications.medication_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "medications",
+    "column_name": "medication_name",
+    "data_type": "character varying(100)",
+    "description": "Name of medication",
+    "table_description": "Master list of medications",
+    "fqn": "healthcare_schema.medications.medication_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "medications",
+    "column_name": "unit_cost",
+    "data_type": "numeric(10,2)",
+    "description": "Cost per unit",
+    "table_description": "Master list of medications",
+    "fqn": "healthcare_schema.medications.unit_cost"
   },
   {
     "schema_name": "healthcare_schema",
     "table_name": "patients",
     "column_name": "city",
     "data_type": "character varying(100)",
-    "description": "City of residence.",
-    "table_description": "Stores patient demographic information.",
+    "description": "City where the patient resides.",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.city"
   },
   {
@@ -112,8 +238,8 @@
     "table_name": "patients",
     "column_name": "date_of_birth",
     "data_type": "date",
-    "description": "Date of birth.",
-    "table_description": "Stores patient demographic information.",
+    "description": "Date of birth of the patient.",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.date_of_birth"
   },
   {
@@ -121,8 +247,8 @@
     "table_name": "patients",
     "column_name": "first_name",
     "data_type": "character varying(100)",
-    "description": "Patient first name.",
-    "table_description": "Stores patient demographic information.",
+    "description": "First name of the patient.",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.first_name"
   },
   {
@@ -130,8 +256,8 @@
     "table_name": "patients",
     "column_name": "gender",
     "data_type": "character varying(20)",
-    "description": "Gender (Male, Female, Other).",
-    "table_description": "Stores patient demographic information.",
+    "description": "Gender of the patient (Male, Female, Other).",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.gender"
   },
   {
@@ -139,8 +265,8 @@
     "table_name": "patients",
     "column_name": "insurance_type",
     "data_type": "character varying(50)",
-    "description": "Insurance type (Medicare, Medicaid, Private, etc.).",
-    "table_description": "Stores patient demographic information.",
+    "description": "Type of health insurance (Medicare, Medicaid, Private, Employer, Uninsured).",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.insurance_type"
   },
   {
@@ -148,8 +274,8 @@
     "table_name": "patients",
     "column_name": "last_name",
     "data_type": "character varying(100)",
-    "description": "Patient last name.",
-    "table_description": "Stores patient demographic information.",
+    "description": "Last name of the patient.",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.last_name"
   },
   {
@@ -157,8 +283,8 @@
     "table_name": "patients",
     "column_name": "patient_id",
     "data_type": "integer",
-    "description": "Unique identifier for each patient.",
-    "table_description": "Stores patient demographic information.",
+    "description": "Unique system-generated identifier for each patient.",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.patient_id"
   },
   {
@@ -166,8 +292,8 @@
     "table_name": "patients",
     "column_name": "registration_date",
     "data_type": "date",
-    "description": "Registration date.",
-    "table_description": "Stores patient demographic information.",
+    "description": "Date when the patient was registered in the system.",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.registration_date"
   },
   {
@@ -175,17 +301,188 @@
     "table_name": "patients",
     "column_name": "state",
     "data_type": "character varying(100)",
-    "description": "State of residence.",
-    "table_description": "Stores patient demographic information.",
+    "description": "State abbreviation where the patient resides.",
+    "table_description": "Stores patient demographic information including name, date of birth, location, and insurance details.",
     "fqn": "healthcare_schema.patients.state"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "prescriptions",
+    "column_name": "dosage",
+    "data_type": "character varying(50)",
+    "description": "Dosage instructions",
+    "table_description": "Prescribed medications for patients",
+    "fqn": "healthcare_schema.prescriptions.dosage"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "prescriptions",
+    "column_name": "end_date",
+    "data_type": "date",
+    "description": "Prescription end date",
+    "table_description": "Prescribed medications for patients",
+    "fqn": "healthcare_schema.prescriptions.end_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "prescriptions",
+    "column_name": "medication_id",
+    "data_type": "integer",
+    "description": "Medication prescribed",
+    "table_description": "Prescribed medications for patients",
+    "fqn": "healthcare_schema.prescriptions.medication_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "prescriptions",
+    "column_name": "patient_id",
+    "data_type": "integer",
+    "description": "Patient receiving medication",
+    "table_description": "Prescribed medications for patients",
+    "fqn": "healthcare_schema.prescriptions.patient_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "prescriptions",
+    "column_name": "prescription_id",
+    "data_type": "integer",
+    "description": "Unique prescription identifier",
+    "table_description": "Prescribed medications for patients",
+    "fqn": "healthcare_schema.prescriptions.prescription_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "prescriptions",
+    "column_name": "provider_id",
+    "data_type": "integer",
+    "description": "Provider prescribing medication",
+    "table_description": "Prescribed medications for patients",
+    "fqn": "healthcare_schema.prescriptions.provider_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "prescriptions",
+    "column_name": "start_date",
+    "data_type": "date",
+    "description": "Prescription start date",
+    "table_description": "Prescribed medications for patients",
+    "fqn": "healthcare_schema.prescriptions.start_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "procedures",
+    "column_name": "cost",
+    "data_type": "numeric(10,2)",
+    "description": "Cost of procedure",
+    "table_description": "Medical procedures performed during patient visits",
+    "fqn": "healthcare_schema.procedures.cost"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "procedures",
+    "column_name": "procedure_date",
+    "data_type": "date",
+    "description": "Date performed",
+    "table_description": "Medical procedures performed during patient visits",
+    "fqn": "healthcare_schema.procedures.procedure_date"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "procedures",
+    "column_name": "procedure_id",
+    "data_type": "integer",
+    "description": "Unique procedure identifier",
+    "table_description": "Medical procedures performed during patient visits",
+    "fqn": "healthcare_schema.procedures.procedure_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "procedures",
+    "column_name": "procedure_name",
+    "data_type": "character varying(100)",
+    "description": "Name of procedure",
+    "table_description": "Medical procedures performed during patient visits",
+    "fqn": "healthcare_schema.procedures.procedure_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "procedures",
+    "column_name": "provider_id",
+    "data_type": "integer",
+    "description": "Provider performing procedure",
+    "table_description": "Medical procedures performed during patient visits",
+    "fqn": "healthcare_schema.procedures.provider_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "procedures",
+    "column_name": "visit_id",
+    "data_type": "integer",
+    "description": "Associated visit",
+    "table_description": "Medical procedures performed during patient visits",
+    "fqn": "healthcare_schema.procedures.visit_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "providers",
+    "column_name": "department_id",
+    "data_type": "integer",
+    "description": "Department provider belongs to",
+    "table_description": "Healthcare professionals including doctors and nurses",
+    "fqn": "healthcare_schema.providers.department_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "providers",
+    "column_name": "first_name",
+    "data_type": "character varying(50)",
+    "description": "Provider first name",
+    "table_description": "Healthcare professionals including doctors and nurses",
+    "fqn": "healthcare_schema.providers.first_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "providers",
+    "column_name": "last_name",
+    "data_type": "character varying(50)",
+    "description": "Provider last name",
+    "table_description": "Healthcare professionals including doctors and nurses",
+    "fqn": "healthcare_schema.providers.last_name"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "providers",
+    "column_name": "provider_id",
+    "data_type": "integer",
+    "description": "Unique identifier for provider",
+    "table_description": "Healthcare professionals including doctors and nurses",
+    "fqn": "healthcare_schema.providers.provider_id"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "providers",
+    "column_name": "specialty",
+    "data_type": "character varying(100)",
+    "description": "Medical specialization",
+    "table_description": "Healthcare professionals including doctors and nurses",
+    "fqn": "healthcare_schema.providers.specialty"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "providers",
+    "column_name": "years_of_experience",
+    "data_type": "integer",
+    "description": "Years of professional experience",
+    "table_description": "Healthcare professionals including doctors and nurses",
+    "fqn": "healthcare_schema.providers.years_of_experience"
   },
   {
     "schema_name": "healthcare_schema",
     "table_name": "visits",
     "column_name": "admission_date",
     "data_type": "date",
-    "description": "Admission date.",
-    "table_description": "Records patient visits.",
+    "description": "Date when the patient was admitted.",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
     "fqn": "healthcare_schema.visits.admission_date"
   },
   {
@@ -193,17 +490,26 @@
     "table_name": "visits",
     "column_name": "department",
     "data_type": "character varying(100)",
-    "description": "Hospital department.",
-    "table_description": "Records patient visits.",
+    "description": "Legacy text department name (kept for backward compatibility).",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
     "fqn": "healthcare_schema.visits.department"
+  },
+  {
+    "schema_name": "healthcare_schema",
+    "table_name": "visits",
+    "column_name": "department_id",
+    "data_type": "integer",
+    "description": "Foreign key to departments master table.",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
+    "fqn": "healthcare_schema.visits.department_id"
   },
   {
     "schema_name": "healthcare_schema",
     "table_name": "visits",
     "column_name": "discharge_date",
     "data_type": "date",
-    "description": "Discharge date.",
-    "table_description": "Records patient visits.",
+    "description": "Date when the patient was discharged.",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
     "fqn": "healthcare_schema.visits.discharge_date"
   },
   {
@@ -211,8 +517,8 @@
     "table_name": "visits",
     "column_name": "patient_id",
     "data_type": "integer",
-    "description": "Foreign key to patients.",
-    "table_description": "Records patient visits.",
+    "description": "Foreign key referencing the patient who made the visit.",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
     "fqn": "healthcare_schema.visits.patient_id"
   },
   {
@@ -220,8 +526,8 @@
     "table_name": "visits",
     "column_name": "total_cost",
     "data_type": "numeric(12,2)",
-    "description": "Total visit cost.",
-    "table_description": "Records patient visits.",
+    "description": "Total cost of the visit.",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
     "fqn": "healthcare_schema.visits.total_cost"
   },
   {
@@ -229,8 +535,8 @@
     "table_name": "visits",
     "column_name": "visit_id",
     "data_type": "integer",
-    "description": "Unique identifier for each visit.",
-    "table_description": "Records patient visits.",
+    "description": "Unique system-generated identifier for each visit.",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
     "fqn": "healthcare_schema.visits.visit_id"
   },
   {
@@ -238,8 +544,8 @@
     "table_name": "visits",
     "column_name": "visit_type",
     "data_type": "character varying(50)",
-    "description": "Visit type (Inpatient, Outpatient, Emergency).",
-    "table_description": "Records patient visits.",
+    "description": "Type of visit (Inpatient, Outpatient, Emergency, Follow-up).",
+    "table_description": "Records patient visits including admission, discharge, department, and cost information.",
     "fqn": "healthcare_schema.visits.visit_type"
   }
 ]

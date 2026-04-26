@@ -67,6 +67,8 @@ def extract_metadata(engine, schema_name: str) -> list[dict]:
         JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
         WHERE n.nspname = :schema_name
           AND c.relkind = 'r'
+          AND c.relname <> 'table_relationships'
+          AND c.relname NOT LIKE '%\\_business\\_rules' ESCAPE '\\'
         ORDER BY c.relname
     """)
     # Columns: comments + data type (format_type matches psql / CREATE TABLE spelling)
@@ -81,6 +83,8 @@ def extract_metadata(engine, schema_name: str) -> list[dict]:
         JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
         WHERE n.nspname = :schema_name
           AND c.relkind = 'r'
+          AND c.relname <> 'table_relationships'
+          AND c.relname NOT LIKE '%\\_business\\_rules' ESCAPE '\\'
           AND a.attnum > 0
           AND NOT a.attisdropped
         ORDER BY c.relname, a.attnum

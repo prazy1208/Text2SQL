@@ -195,5 +195,265 @@
       "service distribution"
     ],
     "content": "Healthcare Interaction Distribution Healthcare interaction distribution describes how patient interactions are spread across different services or providers. Analyzing interaction distribution helps healthcare organizations understand how care is delivered. healthcare interactions patient interactions service distribution"
+  },
+  {
+    "index": 15,
+    "rule_id": 16,
+    "concept_name": "Insurance Claim Approval Rate",
+    "description": "Analyzes claim_status from insurance_claims table comparing approved_amount to claim_amount to measure claim acceptance and denial patterns.",
+    "insight": "Enables Text2SQL to answer queries about claim success rates, identifies problematic claim types, and supports revenue cycle optimization.",
+    "keywords": [
+      "claim approval",
+      "claim denial rate",
+      "insurance acceptance"
+    ],
+    "content": "Insurance Claim Approval Rate Analyzes claim_status from insurance_claims table comparing approved_amount to claim_amount to measure claim acceptance and denial patterns. Enables Text2SQL to answer queries about claim success rates, identifies problematic claim types, and supports revenue cycle optimization. claim approval claim denial rate insurance acceptance"
+  },
+  {
+    "index": 16,
+    "rule_id": 17,
+    "concept_name": "Medication Cost Analysis",
+    "description": "Tracks unit_cost and manufacturer from medications table to compare pricing across brands and identify cost-effective treatment alternatives.",
+    "insight": "Supports formulary optimization queries, identifies high-cost medications, and enables pharmaceutical cost management strategies.",
+    "keywords": [
+      "medication costs",
+      "drug pricing",
+      "pharmaceutical expenses"
+    ],
+    "content": "Medication Cost Analysis Tracks unit_cost and manufacturer from medications table to compare pricing across brands and identify cost-effective treatment alternatives. Supports formulary optimization queries, identifies high-cost medications, and enables pharmaceutical cost management strategies. medication costs drug pricing pharmaceutical expenses"
+  },
+  {
+    "index": 17,
+    "rule_id": 18,
+    "concept_name": "Provider Specialization Workload",
+    "description": "Aggregates visits, procedures, and prescriptions by provider_id and specialty from providers table to measure specialist utilization and capacity.",
+    "insight": "Enables provider capacity planning, identifies overburdened specialists, and supports workforce allocation decisions.",
+    "keywords": [
+      "provider workload",
+      "specialist capacity",
+      "physician utilization"
+    ],
+    "content": "Provider Specialization Workload Aggregates visits, procedures, and prescriptions by provider_id and specialty from providers table to measure specialist utilization and capacity. Enables provider capacity planning, identifies overburdened specialists, and supports workforce allocation decisions. provider workload specialist capacity physician utilization"
+  },
+  {
+    "index": 18,
+    "rule_id": 19,
+    "concept_name": "Diagnosis Severity Distribution",
+    "description": "Analyzes severity_level patterns in diagnoses table by diagnosis_code to measure acuity mix and case complexity across departments.",
+    "insight": "Supports case mix analysis, resource planning for high-acuity patients, and quality of care risk adjustment.",
+    "keywords": [
+      "diagnosis severity",
+      "case complexity",
+      "patient acuity"
+    ],
+    "content": "Diagnosis Severity Distribution Analyzes severity_level patterns in diagnoses table by diagnosis_code to measure acuity mix and case complexity across departments. Supports case mix analysis, resource planning for high-acuity patients, and quality of care risk adjustment. diagnosis severity case complexity patient acuity"
+  },
+  {
+    "index": 19,
+    "rule_id": 20,
+    "concept_name": "Billing Payment Gap Analysis",
+    "description": "Compares total_amount against insurance_covered_amount and out_of_pocket_amount in billing table to identify payment collection opportunities.",
+    "insight": "Enables revenue cycle queries, identifies uncollected balances, and supports financial counseling and payment plan targeting.",
+    "keywords": [
+      "payment gaps",
+      "billing balance",
+      "collection opportunities"
+    ],
+    "content": "Billing Payment Gap Analysis Compares total_amount against insurance_covered_amount and out_of_pocket_amount in billing table to identify payment collection opportunities. Enables revenue cycle queries, identifies uncollected balances, and supports financial counseling and payment plan targeting. payment gaps billing balance collection opportunities"
+  },
+  {
+    "index": 20,
+    "rule_id": 21,
+    "concept_name": "Length of Stay Tracking",
+    "description": "Calculates visit duration by comparing admission_date and discharge_date from visits table to measure patient flow and bed utilization.",
+    "insight": "Supports operational efficiency queries, identifies prolonged stays, and enables discharge planning optimization.",
+    "keywords": [
+      "length of stay",
+      "visit duration",
+      "patient days"
+    ],
+    "content": "Length of Stay Tracking Calculates visit duration by comparing admission_date and discharge_date from visits table to measure patient flow and bed utilization. Supports operational efficiency queries, identifies prolonged stays, and enables discharge planning optimization. length of stay visit duration patient days"
+  },
+  {
+    "index": 21,
+    "rule_id": 22,
+    "concept_name": "Department Service Volume",
+    "description": "Aggregates visits and procedures by department_id from departments table to compare service line activity and departmental workload.",
+    "insight": "Enables departmental performance analysis, identifies capacity constraints, and supports resource allocation across units.",
+    "keywords": [
+      "department volume",
+      "service line activity",
+      "departmental workload"
+    ],
+    "content": "Department Service Volume Aggregates visits and procedures by department_id from departments table to compare service line activity and departmental workload. Enables departmental performance analysis, identifies capacity constraints, and supports resource allocation across units. department volume service line activity departmental workload"
+  },
+  {
+    "index": 22,
+    "rule_id": 23,
+    "concept_name": "Prescription Duration Patterns",
+    "description": "Calculates treatment length by comparing start_date and end_date in prescriptions table by medication_id to analyze therapy compliance windows.",
+    "insight": "Supports medication adherence queries, identifies chronic versus acute treatments, and enables refill prediction analysis.",
+    "keywords": [
+      "prescription duration",
+      "treatment length",
+      "medication timeline"
+    ],
+    "content": "Prescription Duration Patterns Calculates treatment length by comparing start_date and end_date in prescriptions table by medication_id to analyze therapy compliance windows. Supports medication adherence queries, identifies chronic versus acute treatments, and enables refill prediction analysis. prescription duration treatment length medication timeline"
+  },
+  {
+    "index": 23,
+    "rule_id": 24,
+    "concept_name": "Procedure Cost Benchmarking",
+    "description": "Compares cost values across procedure_name in procedures table by provider_id and department to identify pricing variations and efficiency.",
+    "insight": "Enables cost standardization queries, identifies outlier pricing, and supports value-based care negotiations.",
+    "keywords": [
+      "procedure costs",
+      "treatment pricing",
+      "cost variance"
+    ],
+    "content": "Procedure Cost Benchmarking Compares cost values across procedure_name in procedures table by provider_id and department to identify pricing variations and efficiency. Enables cost standardization queries, identifies outlier pricing, and supports value-based care negotiations. procedure costs treatment pricing cost variance"
+  },
+  {
+    "index": 24,
+    "rule_id": 25,
+    "concept_name": "Patient Insurance Coverage Mix",
+    "description": "Analyzes insurance_type distribution from patients table to measure payer mix and assess financial risk exposure.",
+    "insight": "Supports payer strategy queries, identifies underserved insurance segments, and guides contracting priorities.",
+    "keywords": [
+      "insurance mix",
+      "payer distribution",
+      "coverage types"
+    ],
+    "content": "Patient Insurance Coverage Mix Analyzes insurance_type distribution from patients table to measure payer mix and assess financial risk exposure. Supports payer strategy queries, identifies underserved insurance segments, and guides contracting priorities. insurance mix payer distribution coverage types"
+  },
+  {
+    "index": 25,
+    "rule_id": 26,
+    "concept_name": "Visit Type Utilization",
+    "description": "Tracks visit_type patterns from visits table to compare inpatient, outpatient, and emergency service usage trends.",
+    "insight": "Enables care setting analysis, identifies avoidable emergency visits, and supports care delivery model optimization.",
+    "keywords": [
+      "visit types",
+      "care settings",
+      "service utilization"
+    ],
+    "content": "Visit Type Utilization Tracks visit_type patterns from visits table to compare inpatient, outpatient, and emergency service usage trends. Enables care setting analysis, identifies avoidable emergency visits, and supports care delivery model optimization. visit types care settings service utilization"
+  },
+  {
+    "index": 26,
+    "rule_id": 27,
+    "concept_name": "Provider Experience Impact",
+    "description": "Correlates years_of_experience from providers table with patient outcomes, procedure volumes, and visit complexity metrics.",
+    "insight": "Supports quality analysis queries, identifies mentorship opportunities, and validates experience-based care assignments.",
+    "keywords": [
+      "provider experience",
+      "physician tenure",
+      "experience levels"
+    ],
+    "content": "Provider Experience Impact Correlates years_of_experience from providers table with patient outcomes, procedure volumes, and visit complexity metrics. Supports quality analysis queries, identifies mentorship opportunities, and validates experience-based care assignments. provider experience physician tenure experience levels"
+  },
+  {
+    "index": 27,
+    "rule_id": 28,
+    "concept_name": "Claim Processing Timeliness",
+    "description": "Calculates time between visit completion and claim_date in insurance_claims table to measure billing cycle efficiency.",
+    "insight": "Enables revenue cycle speed analysis, identifies claim submission delays, and supports cash flow optimization.",
+    "keywords": [
+      "claim timing",
+      "billing speed",
+      "claim submission"
+    ],
+    "content": "Claim Processing Timeliness Calculates time between visit completion and claim_date in insurance_claims table to measure billing cycle efficiency. Enables revenue cycle speed analysis, identifies claim submission delays, and supports cash flow optimization. claim timing billing speed claim submission"
+  },
+  {
+    "index": 28,
+    "rule_id": 29,
+    "concept_name": "Medication Prescribing Patterns",
+    "description": "Analyzes prescription frequency by medication_id and provider_id from prescriptions table to identify formulary adherence and prescribing variations.",
+    "insight": "Supports clinical variation queries, identifies off-formulary usage, and enables evidence-based prescribing initiatives.",
+    "keywords": [
+      "prescribing patterns",
+      "medication usage",
+      "formulary compliance"
+    ],
+    "content": "Medication Prescribing Patterns Analyzes prescription frequency by medication_id and provider_id from prescriptions table to identify formulary adherence and prescribing variations. Supports clinical variation queries, identifies off-formulary usage, and enables evidence-based prescribing initiatives. prescribing patterns medication usage formulary compliance"
+  },
+  {
+    "index": 29,
+    "rule_id": 30,
+    "concept_name": "Patient Age Demographics",
+    "description": "Calculates patient age distribution from date_of_birth in patients table to segment populations and predict service demand.",
+    "insight": "Enables age-based care planning, identifies pediatric versus geriatric service needs, and supports population health strategies.",
+    "keywords": [
+      "patient age",
+      "age distribution",
+      "demographic profile"
+    ],
+    "content": "Patient Age Demographics Calculates patient age distribution from date_of_birth in patients table to segment populations and predict service demand. Enables age-based care planning, identifies pediatric versus geriatric service needs, and supports population health strategies. patient age age distribution demographic profile"
+  },
+  {
+    "index": 30,
+    "rule_id": 31,
+    "concept_name": "Department Location Accessibility",
+    "description": "Maps department_name and location from departments table to analyze service availability and geographic access patterns.",
+    "insight": "Supports facility planning queries, identifies service gaps, and guides expansion or consolidation decisions.",
+    "keywords": [
+      "department location",
+      "service access",
+      "facility distribution"
+    ],
+    "content": "Department Location Accessibility Maps department_name and location from departments table to analyze service availability and geographic access patterns. Supports facility planning queries, identifies service gaps, and guides expansion or consolidation decisions. department location service access facility distribution"
+  },
+  {
+    "index": 31,
+    "rule_id": 32,
+    "concept_name": "Billing Date Performance",
+    "description": "Tracks billing_date patterns from billing table to measure billing cycle consistency and identify process delays.",
+    "insight": "Enables billing operations analysis, identifies bottlenecks in charge capture, and supports timely revenue recognition.",
+    "keywords": [
+      "billing timing",
+      "charge capture",
+      "billing cycle"
+    ],
+    "content": "Billing Date Performance Tracks billing_date patterns from billing table to measure billing cycle consistency and identify process delays. Enables billing operations analysis, identifies bottlenecks in charge capture, and supports timely revenue recognition. billing timing charge capture billing cycle"
+  },
+  {
+    "index": 32,
+    "rule_id": 33,
+    "concept_name": "Multi-Visit Patient Tracking",
+    "description": "Counts visit frequency by patient_id from visits table to identify high-utilization patients and potential care coordination needs.",
+    "insight": "Supports care management queries, identifies frequent flyers, and enables proactive intervention program targeting.",
+    "keywords": [
+      "frequent patients",
+      "visit frequency",
+      "high utilizers"
+    ],
+    "content": "Multi-Visit Patient Tracking Counts visit frequency by patient_id from visits table to identify high-utilization patients and potential care coordination needs. Supports care management queries, identifies frequent flyers, and enables proactive intervention program targeting. frequent patients visit frequency high utilizers"
+  },
+  {
+    "index": 33,
+    "rule_id": 34,
+    "concept_name": "Diagnosis Code Distribution",
+    "description": "Analyzes diagnosis_code prevalence from diagnoses table to measure disease burden and population health trends.",
+    "insight": "Enables epidemiological queries, identifies common conditions, and supports preventive care program development.",
+    "keywords": [
+      "common diagnoses",
+      "disease prevalence",
+      "diagnosis frequency"
+    ],
+    "content": "Diagnosis Code Distribution Analyzes diagnosis_code prevalence from diagnoses table to measure disease burden and population health trends. Enables epidemiological queries, identifies common conditions, and supports preventive care program development. common diagnoses disease prevalence diagnosis frequency"
+  },
+  {
+    "index": 34,
+    "rule_id": 35,
+    "concept_name": "Patient Geographic Distribution",
+    "description": "Aggregates patient counts by city and state from patients table to analyze service area coverage and market penetration.",
+    "insight": "Supports market analysis queries, identifies underserved regions, and guides community outreach and access improvement initiatives.",
+    "keywords": [
+      "patient geography",
+      "service area",
+      "regional patients"
+    ],
+    "content": "Patient Geographic Distribution Aggregates patient counts by city and state from patients table to analyze service area coverage and market penetration. Supports market analysis queries, identifies underserved regions, and guides community outreach and access improvement initiatives. patient geography service area regional patients"
   }
 ]
