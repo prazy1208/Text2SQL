@@ -1,6 +1,8 @@
 """Routes: POST /session, POST /query (full pipeline incl. Gen-SQL), GET /use-cases."""
 
 import logging
+import re
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -12,12 +14,20 @@ from backend.agents.intent_agent import run_intent
 from backend.agents.table_agent import run_table_agent
 from backend.api.db import (
     create_session,
+    get_latest_pending_intent,
+    get_latest_rejected_intent_rephrase,
+    get_recent_chat_messages,
+    get_session_memory,
+    insert_chat_message,
     insert_column_agent_output,
     insert_few_shot_agent_output,
     insert_gen_sql_agent_output,
     insert_intent_output,
+    insert_intent_review,
     insert_table_agent_output,
+    merge_session_memory,
     session_exists,
+    update_intent_review_status,
 )
 from backend.config import USE_CASE_TO_SCHEMA, USE_CASES
 from backend.services.relationship_retrieval import (
@@ -34,6 +44,8 @@ class QueryRequest(BaseModel):
     message: str = Field(..., min_length=1)
     use_case: str = Field(...)
     session_id: str | None = Field(None)
+    message_type: Literal["new_query", "intent_confirmation", "intent_correction"] = Field("new_query")
+    confirmation: Literal["yes", "no"] | None = Field(None)
 
 
 class QueryResponse(BaseModel):
@@ -45,6 +57,12 @@ class QueryResponse(BaseModel):
     selected_tables: list[str] = Field(default_factory=list)
     selected_columns: dict[str, list[str]] = Field(default_factory=dict)
     generated_sql: str = Field(default="", description="Synthesized SQL from Gen-SQL Agent")
+    resolved_question: str = ""
+    intent_confidence: int = 0
+    needs_confirmation: bool = False
+    clarification_question: str = ""
+    conversation_state: str = "completed"
+    pending_intent_id: int | None = None
     error: str | None = None
 
 
@@ -56,14 +74,114 @@ def _empty_response(session_id: str, error: str) -> QueryResponse:
     return QueryResponse(
         session_id=session_id,
         rephrased_question="",
+        resolved_question="",
         keywords=[],
         business_insights=[],
         few_shot_examples=[],
         selected_tables=[],
         selected_columns={},
         generated_sql="",
+        intent_confidence=0,
+        needs_confirmation=False,
+        clarification_question="",
+        conversation_state="error",
+        pending_intent_id=None,
         error=error,
     )
+
+
+INTENT_CONFIRM_THRESHOLD = 95
+
+_OPEN_INVITE_RE = re.compile(
+    r"(?is)\b("
+    r"do\s+you\s+have\b"
+    r"|what\s+(would|do)\s+you\b"
+    r"|please\s+(describe|tell\s+me|share|provide)\b"
+    r"|could\s+you\s+(please\s+)?(tell|describe|clarify)\b"
+    r"|what\s+kind\s+of\b"
+    r"|how\s+can\s+i\s+help\b"
+    r"|what\s+are\s+you\s+looking\s+for\b"
+    r"|tell\s+me\s+more\s+about\s+what\b"
+    r"|any\s+analytical\s+question\b"
+    r"|topic\s+you\s+would\s+like\s+to\s+explore\b"
+    r")\b"
+)
+
+
+def _is_open_analytical_invitation(text: str) -> bool:
+    t = (text or "").strip()
+    if not t:
+        return False
+    return bool(_OPEN_INVITE_RE.search(t))
+
+
+def _is_trivial_user_message(msg: str) -> bool:
+    m = (msg or "").strip().lower()
+    if not m:
+        return True
+    if len(m) <= 3 and m.isalpha():
+        return True
+    trivial = {
+        "hi",
+        "hello",
+        "hey",
+        "yo",
+        "sup",
+        "thanks",
+        "thank you",
+        "thankyou",
+        "ok",
+        "okay",
+        "k",
+        "bye",
+        "goodbye",
+    }
+    if m in trivial:
+        return True
+    if m.startswith("thank") and len(m) < 40:
+        return True
+    if m in {"good morning", "good afternoon", "good evening", "gm", "gn"}:
+        return True
+    return False
+
+
+def _greeting_assistant_reply(user_message: str) -> str:
+    """Short reply for trivial turns; no Yes/No — user should type their next question."""
+    m = (user_message or "").strip().lower()
+    if m.startswith("thank"):
+        return "You're welcome! Whenever you're ready, describe the analysis you want."
+    if m in {"bye", "goodbye"}:
+        return "Goodbye! Come back anytime you have an analytical question."
+    if m in {"hi", "hello", "hey", "yo", "sup", "gm", "gn"} or m in {
+        "good morning",
+        "good afternoon",
+        "good evening",
+    }:
+        return "Hello! What would you like to analyze?"
+    if m in {"ok", "okay", "k"}:
+        return "Great — tell me what you'd like to explore in the data."
+    return "Hi! When you're ready, describe what you'd like to analyze."
+
+
+def _effective_intent_confidence(
+    model_confidence: int,
+    user_message: str,
+    rephrased: str,
+    keywords: list[str],
+) -> int:
+    c = max(0, min(100, int(model_confidence)))
+    if _is_trivial_user_message(user_message):
+        return min(c, 55)
+    kw = keywords or []
+    core = (rephrased or "").strip()
+    if not kw and len(core) < 24:
+        return min(c, 60)
+    return c
+
+
+def _strip_internal_memory_keys(summary: dict) -> dict:
+    skip = {"pending_confirm_kind", "pending_intent_output_id"}
+    return {k: v for k, v in summary.items() if k not in skip}
 
 
 @router.get("/use-cases")
@@ -98,6 +216,190 @@ def post_query(body: QueryRequest) -> QueryResponse:
             return _empty_response("", str(e))
 
     logger.info("Query request: use_case=%s", use_case)
+    user_message = body.message.strip()
+    if not user_message:
+        return _empty_response(session_id, "message cannot be empty")
+
+    # Persist incoming user turn for chat history.
+    try:
+        insert_chat_message(
+            session_id=session_id,
+            role="user",
+            message_type=body.message_type,
+            content=user_message,
+        )
+    except Exception:
+        logger.exception("Failed to persist user chat message")
+
+    # Handle yes/no confirmation action before running a new intent.
+    if body.message_type == "intent_confirmation":
+        if body.confirmation not in {"yes", "no"}:
+            return _empty_response(session_id, "confirmation must be 'yes' or 'no' for intent_confirmation")
+        pending = get_latest_pending_intent(session_id)
+        if not pending:
+            return _empty_response(session_id, "No pending intent found for confirmation")
+        session_mem = get_session_memory(session_id)
+        confirm_kind = (session_mem or {}).get("pending_confirm_kind") or "intent_confirm"
+
+        if confirm_kind == "open_invite" and body.confirmation == "yes":
+            update_intent_review_status(pending["intent_output_id"], "rejected")
+            try:
+                merge_session_memory(
+                    session_id,
+                    {"pending_confirm_kind": None, "pending_intent_output_id": None},
+                )
+            except Exception:
+                logger.exception("Failed to clear session memory after open-invite yes")
+            follow = (
+                "Please type your analytical question in the message box "
+                "(for example: total sales by region last quarter)."
+            )
+            try:
+                insert_chat_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_type="intent_invite_accepted",
+                    content=follow,
+                )
+            except Exception:
+                logger.exception("Failed to persist assistant chat message")
+            rq = (pending["rephrased_question"] or "").strip()
+            return QueryResponse(
+                session_id=session_id,
+                rephrased_question=rq,
+                resolved_question=rq,
+                keywords=pending["keywords"] or [],
+                business_insights=pending["business_insights"] or [],
+                few_shot_examples=[],
+                selected_tables=[],
+                selected_columns={},
+                generated_sql="",
+                intent_confidence=int(pending["confidence_score"] or 0),
+                needs_confirmation=False,
+                clarification_question=follow,
+                conversation_state="waiting_analytical_query",
+                pending_intent_id=None,
+                error=None,
+            )
+
+        if confirm_kind == "open_invite" and body.confirmation == "no":
+            update_intent_review_status(pending["intent_output_id"], "rejected")
+            try:
+                merge_session_memory(
+                    session_id,
+                    {"pending_confirm_kind": None, "pending_intent_output_id": None},
+                )
+            except Exception:
+                logger.exception("Failed to clear session memory after open-invite no")
+            closing = "Ok, thank you!"
+            try:
+                insert_chat_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_type="intent_conversation_closed",
+                    content=closing,
+                )
+            except Exception:
+                logger.exception("Failed to persist assistant chat message")
+            rq = (pending["rephrased_question"] or "").strip()
+            return QueryResponse(
+                session_id=session_id,
+                rephrased_question=rq,
+                resolved_question=rq,
+                keywords=pending["keywords"] or [],
+                business_insights=pending["business_insights"] or [],
+                few_shot_examples=[],
+                selected_tables=[],
+                selected_columns={},
+                generated_sql="",
+                intent_confidence=int(pending["confidence_score"] or 0),
+                needs_confirmation=False,
+                clarification_question=closing,
+                conversation_state="conversation_ended",
+                pending_intent_id=None,
+                error=None,
+            )
+
+        if body.confirmation == "yes":
+            try:
+                merge_session_memory(
+                    session_id,
+                    {"pending_confirm_kind": None, "pending_intent_output_id": None},
+                )
+            except Exception:
+                logger.exception("Failed to clear session memory after intent confirm yes")
+            update_intent_review_status(pending["intent_output_id"], "confirmed")
+            try:
+                insert_chat_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_type="intent_confirmation_result",
+                    content="Thanks, I understood your intent. Proceeding to SQL generation.",
+                )
+            except Exception:
+                logger.exception("Failed to persist confirmation assistant chat message")
+            intent = {
+                "rephrased_question": pending["rephrased_question"],
+                "resolved_question": pending["rephrased_question"],
+                "keywords": pending["keywords"] or [],
+                "business_insights": pending["business_insights"] or [],
+                "confidence_score": pending["confidence_score"],
+                "clarification_question": "",
+            }
+            intent_output_id = pending["intent_output_id"]
+        else:
+            update_intent_review_status(pending["intent_output_id"], "rejected")
+            try:
+                merge_session_memory(
+                    session_id,
+                    {"pending_confirm_kind": None, "pending_intent_output_id": None},
+                )
+            except Exception:
+                logger.exception("Failed to clear session memory after intent reject")
+            try:
+                insert_chat_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_type="intent_rejected",
+                    content="Thanks, please provide a corrected question.",
+                )
+            except Exception:
+                logger.exception("Failed to persist rejection assistant chat message")
+            return QueryResponse(
+                session_id=session_id,
+                rephrased_question=pending["rephrased_question"],
+                resolved_question=pending["rephrased_question"],
+                keywords=pending["keywords"] or [],
+                business_insights=pending["business_insights"] or [],
+                few_shot_examples=[],
+                selected_tables=[],
+                selected_columns={},
+                generated_sql="",
+                intent_confidence=int(pending["confidence_score"] or 0),
+                needs_confirmation=False,
+                clarification_question="Please provide a corrected question.",
+                conversation_state="waiting_user_rephrase",
+                pending_intent_id=pending["intent_output_id"],
+                error=None,
+            )
+    else:
+        # Build conversation context and run intent.
+        try:
+            recent_messages = get_recent_chat_messages(session_id, limit=8)
+            session_summary = get_session_memory(session_id)
+        except Exception:
+            logger.exception("Failed to read chat context; continuing without it")
+            recent_messages = []
+            session_summary = {}
+        if body.message_type in ("new_query", "intent_correction"):
+            try:
+                merge_session_memory(
+                    session_id,
+                    {"pending_confirm_kind": None, "pending_intent_output_id": None},
+                )
+            except Exception:
+                logger.exception("Failed to reset pending confirmation flags in session memory")
+
     schema_name = USE_CASE_TO_SCHEMA[use_case]
     relationships: list[dict] = []
     try:
@@ -109,38 +411,198 @@ def post_query(body: QueryRequest) -> QueryResponse:
             e,
         )
 
-    try:
-        intent = run_intent(body.message.strip(), use_case)
-    except Exception as e:
-        logger.exception("Intent Agent failed")
-        return _empty_response(session_id, str(e))
+    if body.message_type != "intent_confirmation":
+        # Greeting / small talk only: respond in kind and wait for a real question (no Yes/No).
+        if body.message_type == "new_query" and _is_trivial_user_message(user_message):
+            rephrased = user_message.strip()
+            resolved_question = rephrased
+            keywords: list[str] = []
+            business_insights: list[str] = []
+            confidence_score = 50
+            try:
+                intent_output_id = insert_intent_output(
+                    session_id=session_id,
+                    use_case=use_case,
+                    user_input=user_message,
+                    rephrased_question=rephrased,
+                    keywords=keywords,
+                    business_insights=business_insights,
+                )
+                insert_intent_review(
+                    intent_output_id=intent_output_id,
+                    confidence_score=confidence_score,
+                    confirmation_required=False,
+                    confirmation_status="confirmed",
+                )
+            except Exception as e:
+                logger.exception("Failed to persist greeting intent output")
+                return QueryResponse(
+                    session_id=session_id,
+                    rephrased_question=rephrased,
+                    resolved_question=resolved_question,
+                    keywords=keywords,
+                    business_insights=business_insights,
+                    few_shot_examples=[],
+                    selected_tables=[],
+                    selected_columns={},
+                    generated_sql="",
+                    intent_confidence=confidence_score,
+                    needs_confirmation=False,
+                    clarification_question="",
+                    conversation_state="error",
+                    pending_intent_id=None,
+                    error=f"Save failed: {e}",
+                )
+            reply = _greeting_assistant_reply(user_message)
+            try:
+                insert_chat_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_type="greeting_ack",
+                    content=reply,
+                )
+            except Exception:
+                logger.exception("Failed to persist greeting assistant message")
+            return QueryResponse(
+                session_id=session_id,
+                rephrased_question=rephrased,
+                resolved_question=resolved_question,
+                keywords=keywords,
+                business_insights=business_insights,
+                few_shot_examples=[],
+                selected_tables=[],
+                selected_columns={},
+                generated_sql="",
+                intent_confidence=confidence_score,
+                needs_confirmation=False,
+                clarification_question=reply,
+                conversation_state="waiting_analytical_query",
+                pending_intent_id=None,
+                error=None,
+            )
 
+        pending_for_intent: str | None = None
+        if body.message_type == "intent_correction":
+            try:
+                pending_for_intent = get_latest_rejected_intent_rephrase(session_id)
+            except Exception:
+                logger.exception("Failed to read rejected intent for correction context")
+                pending_for_intent = None
+        summary_for_intent: dict = {}
+        if isinstance(session_summary, dict):
+            summary_for_intent = _strip_internal_memory_keys(session_summary)
+        try:
+            intent = run_intent(
+                user_message,
+                use_case,
+                recent_messages=recent_messages,
+                last_confirmed_intent=None,
+                pending_intent=pending_for_intent,
+                session_summary=summary_for_intent,
+            )
+        except Exception as e:
+            logger.exception("Intent Agent failed")
+            return _empty_response(session_id, str(e))
+
+        rephrased = intent.get("rephrased_question", "")
+        resolved_question = intent.get("resolved_question") or rephrased
+        keywords = intent.get("keywords") or []
+        business_insights = intent.get("business_insights") or []
+        _ics = intent.get("confidence_score")
+        model_confidence = 50 if _ics is None else max(0, min(100, int(_ics)))
+        confidence_score = _effective_intent_confidence(
+            model_confidence, user_message, rephrased, keywords
+        )
+        intent["confidence_score"] = confidence_score
+        clarification_question = (intent.get("clarification_question") or "").strip()
+        needs_confirmation = confidence_score < INTENT_CONFIRM_THRESHOLD
+
+        try:
+            intent_output_id = insert_intent_output(
+                session_id=session_id,
+                use_case=use_case,
+                user_input=user_message,
+                rephrased_question=rephrased,
+                keywords=keywords,
+                business_insights=business_insights,
+            )
+            insert_intent_review(
+                intent_output_id=intent_output_id,
+                confidence_score=confidence_score,
+                confirmation_required=needs_confirmation,
+                confirmation_status="pending" if needs_confirmation else "confirmed",
+            )
+        except Exception as e:
+            logger.exception("Failed to persist intent output")
+            return QueryResponse(
+                session_id=session_id,
+                rephrased_question=rephrased,
+                resolved_question=resolved_question,
+                keywords=keywords,
+                business_insights=business_insights,
+                few_shot_examples=[],
+                selected_tables=[],
+                selected_columns={},
+                generated_sql="",
+                intent_confidence=confidence_score,
+                needs_confirmation=needs_confirmation,
+                clarification_question=clarification_question,
+                conversation_state="error",
+                pending_intent_id=None,
+                error=f"Save failed: {e}",
+            )
+
+        if needs_confirmation:
+            anchor = (rephrased or resolved_question or user_message).strip() or "—"
+            prompt_text = (
+                f'Did I understand correctly? You want: "{anchor}". Please answer Yes or No.'
+            )
+            open_invite = _is_open_analytical_invitation(clarification_question)
+            confirm_kind = "open_invite" if open_invite else "intent_confirm"
+            try:
+                merge_session_memory(
+                    session_id,
+                    {
+                        "pending_confirm_kind": confirm_kind,
+                        "pending_intent_output_id": intent_output_id,
+                    },
+                )
+            except Exception:
+                logger.exception("Failed to persist pending confirmation kind in session memory")
+            try:
+                insert_chat_message(
+                    session_id=session_id,
+                    role="assistant",
+                    message_type="intent_confirmation_prompt",
+                    content=prompt_text,
+                )
+            except Exception:
+                logger.exception("Failed to persist assistant confirmation prompt")
+            return QueryResponse(
+                session_id=session_id,
+                rephrased_question=rephrased,
+                resolved_question=resolved_question,
+                keywords=keywords,
+                business_insights=business_insights,
+                few_shot_examples=[],
+                selected_tables=[],
+                selected_columns={},
+                generated_sql="",
+                intent_confidence=confidence_score,
+                needs_confirmation=True,
+                clarification_question=prompt_text,
+                conversation_state="waiting_intent_confirmation",
+                pending_intent_id=intent_output_id,
+                error=None,
+            )
+    # Common fields for downstream pipeline path
     rephrased = intent.get("rephrased_question", "")
+    resolved_question = intent.get("resolved_question") or rephrased
     keywords = intent.get("keywords") or []
     business_insights = intent.get("business_insights") or []
-
-    try:
-        intent_output_id = insert_intent_output(
-            session_id=session_id,
-            use_case=use_case,
-            user_input=body.message.strip(),
-            rephrased_question=rephrased,
-            keywords=keywords,
-            business_insights=business_insights,
-        )
-    except Exception as e:
-        logger.exception("Failed to persist intent output")
-        return QueryResponse(
-            session_id=session_id,
-            rephrased_question=rephrased,
-            keywords=keywords,
-            business_insights=business_insights,
-            few_shot_examples=[],
-            selected_tables=[],
-            selected_columns={},
-            generated_sql="",
-            error=f"Save failed: {e}",
-        )
+    _ics = intent.get("confidence_score")
+    confidence_score = 50 if _ics is None else max(0, min(100, int(_ics)))
+    clarification_question = (intent.get("clarification_question") or "").strip()
 
     few_shot_examples: list[dict] = []
     few_shot_error: str | None = None
@@ -288,11 +750,17 @@ def post_query(body: QueryRequest) -> QueryResponse:
     return QueryResponse(
         session_id=session_id,
         rephrased_question=rephrased,
+        resolved_question=resolved_question,
         keywords=keywords,
         business_insights=business_insights,
         few_shot_examples=few_shot_examples,
         selected_tables=selected_tables,
         selected_columns=selected_columns,
         generated_sql=generated_sql,
+        intent_confidence=confidence_score,
+        needs_confirmation=False,
+        clarification_question="",
+        conversation_state="completed",
+        pending_intent_id=None,
         error=err,
     )

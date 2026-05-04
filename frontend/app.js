@@ -1,23 +1,26 @@
 const SESSION_KEY = 'text2sql_session_id';
-const LAST_OUTPUT_KEY = 'text2sql_last_output';
+const CHAT_HISTORY_KEY = 'text2sql_chat_history';
 const API_BASE = '';
 
 const form = document.getElementById('query-form');
 const useCaseSelect = document.getElementById('use-case');
 const messageInput = document.getElementById('message');
 const submitBtn = document.getElementById('submit-btn');
-const outputSection = document.getElementById('output-section');
 const outputPlaceholder = document.getElementById('output-placeholder');
 const outputContent = document.getElementById('output-content');
 const outputError = document.getElementById('output-error');
-const outRephrased = document.getElementById('out-rephrased');
-const outKeywords = document.getElementById('out-keywords');
-const outInsights = document.getElementById('out-insights');
-const outFewShot = document.getElementById('out-few-shot');
-const outTables = document.getElementById('out-tables');
-const outColumns = document.getElementById('out-columns');
-const outGeneratedSql = document.getElementById('out-generated-sql');
+const chatScroll = document.getElementById('chat-scroll');
+const chatThread = document.getElementById('chat-thread');
+const composerStatus = document.getElementById('composer-status');
+const intentActions = document.getElementById('intent-actions');
+const intentActionsLabel = document.getElementById('intent-actions-label');
+const intentYesBtn = document.getElementById('intent-yes-btn');
+const intentNoBtn = document.getElementById('intent-no-btn');
 const sessionIdEl = document.getElementById('session-id');
+
+let pendingIntentState = null;
+
+const PROMPT_CORRECTED_QUESTION = 'Please provide a corrected question.';
 
 /**
  * API returns selected_columns as object mapping "schema.table" -> string[].
@@ -66,6 +69,29 @@ function clearStoredSessionId() {
   sessionIdEl.textContent = '—';
 }
 
+function getStoredChatHistory() {
+  try {
+    const raw = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (_e) {
+    return [];
+  }
+}
+
+function setStoredChatHistory(history) {
+  try {
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(history || []));
+  } catch (e) {
+    console.warn('setStoredChatHistory failed', e);
+  }
+}
+
+function clearStoredChatHistory() {
+  localStorage.removeItem(CHAT_HISTORY_KEY);
+}
+
 async function bootstrapFreshSession() {
   const res = await fetch(`${API_BASE}/session`, {
     method: 'POST',
@@ -80,126 +106,208 @@ async function bootstrapFreshSession() {
   return data.session_id;
 }
 
-/** Save last /query response + form context so a hard refresh can restore the panel. */
-function persistLastOutput(useCase, message, data) {
-  try {
-    const pack = {
-      session_id: data.session_id || '',
-      rephrased_question: data.rephrased_question || '',
-      keywords: data.keywords || [],
-      business_insights: data.business_insights || [],
-      few_shot_examples: data.few_shot_examples || [],
-      selected_tables: data.selected_tables || [],
-      selected_columns: data.selected_columns || {},
-      generated_sql: data.generated_sql || '',
-      error: data.error || null,
-      _use_case: useCase || '',
-      _message: message || '',
-    };
-    localStorage.setItem(LAST_OUTPUT_KEY, JSON.stringify(pack));
-  } catch (e) {
-    console.warn('persistLastOutput failed', e);
-  }
+function scrollChatToBottom() {
+  if (!chatScroll) return;
+  chatScroll.scrollTop = chatScroll.scrollHeight;
 }
 
-/** Restore output and form after load (e.g. hard refresh). */
-function restoreLastOutput() {
-  try {
-    const raw = localStorage.getItem(LAST_OUTPUT_KEY);
-    if (!raw) return;
-    const pack = JSON.parse(raw);
-    const useCase = pack._use_case;
-    const msg = pack._message;
-    delete pack._use_case;
-    delete pack._message;
-
-    if (useCase && [...useCaseSelect.options].some((o) => o.value === useCase)) {
-      useCaseSelect.value = useCase;
-    }
-    if (msg != null) messageInput.value = msg;
-
-    const hasContent =
-      (pack.rephrased_question && String(pack.rephrased_question).trim()) ||
-      (pack.keywords && pack.keywords.length) ||
-      (pack.business_insights && pack.business_insights.length) ||
-      (pack.few_shot_examples && pack.few_shot_examples.length) ||
-      (pack.selected_tables && pack.selected_tables.length) ||
-      Object.keys(normalizeSelectedColumns(pack.selected_columns)).length ||
-      (pack.generated_sql && String(pack.generated_sql).trim()) ||
-      (pack.error && String(pack.error).trim());
-    if (hasContent) {
-      showOutput(pack);
-    }
-  } catch (e) {
-    console.warn('restoreLastOutput failed', e);
-    localStorage.removeItem(LAST_OUTPUT_KEY);
-  }
-}
-
-function showOutput(data) {
-  outputError.classList.add('hidden');
-  outputError.textContent = '';
-  outputPlaceholder.classList.add('hidden');
-  outputContent.classList.remove('hidden');
-
-  outRephrased.textContent = data.rephrased_question || '—';
-  outKeywords.innerHTML = (data.keywords && data.keywords.length)
-    ? data.keywords.map(k => `<li>${escapeHtml(k)}</li>`).join('')
-    : '<li>—</li>';
-  outInsights.innerHTML = (data.business_insights && data.business_insights.length)
-    ? data.business_insights.map(b => `<li>${escapeHtml(b)}</li>`).join('')
-    : '<li>—</li>';
-
-  if (outFewShot) {
-    const fs = data.few_shot_examples;
-    if (fs && fs.length) {
-      outFewShot.innerHTML = fs.map((ex) => {
-        const id = ex.id != null ? ex.id : '—';
-        const qt = escapeHtml(String(ex.query_type || ''));
-        const qn = escapeHtml(String(ex.question_text || ''));
-        const sql = escapeHtml(String(ex.sql_query || ''));
-        return `<div class="out-few-shot-item"><div class="out-few-shot-head"><span class="out-few-shot-id">#${id}</span> <code>${qt}</code></div><p class="out-few-shot-q">${qn}</p><pre class="out-sql"><code>${sql}</code></pre></div>`;
-      }).join('');
+function setLoadingState(loading, text) {
+  submitBtn.disabled = loading;
+  const statusText = text || 'Processing...';
+  if (loading) {
+    outputError.classList.add('hidden');
+    outputError.textContent = '';
+    const hasThread = chatThread.children.length > 0;
+    if (hasThread) {
+      outputContent.classList.remove('hidden');
+      outputPlaceholder.classList.add('hidden');
+      if (composerStatus) {
+        composerStatus.textContent = statusText;
+        composerStatus.classList.remove('hidden');
+      }
     } else {
-      outFewShot.innerHTML = '<p class="out-text-muted">—</p>';
-    }
-  }
-
-  outTables.innerHTML = (data.selected_tables && data.selected_tables.length)
-    ? data.selected_tables.map(t => `<li><code>${escapeHtml(t)}</code></li>`).join('')
-    : '<li>—</li>';
-
-  const cols = normalizeSelectedColumns(data.selected_columns);
-  const colKeys = Object.keys(cols);
-  if (outColumns) {
-    if (!colKeys.length) {
-      const hint =
-        (data.selected_tables && data.selected_tables.length)
-          ? 'No columns in this response.'
-          : '—';
-      outColumns.innerHTML = `<p class="out-text-muted">${escapeHtml(hint)}</p>`;
-    } else {
-      colKeys.sort();
-      outColumns.innerHTML = colKeys.map((tableFqn) => {
-        const list = cols[tableFqn];
-        const items = list.map((c) => `<li><code>${escapeHtml(String(c))}</code></li>`).join('');
-        return `<div class="out-column-group"><h4 class="out-column-table"><code>${escapeHtml(tableFqn)}</code></h4><ul class="out-list out-list-mono">${items}</ul></div>`;
-      }).join('');
+      outputPlaceholder.classList.remove('hidden');
+      outputPlaceholder.textContent = statusText;
+      outputContent.classList.add('hidden');
+      if (composerStatus) {
+        composerStatus.classList.add('hidden');
+        composerStatus.textContent = '';
+      }
     }
   } else {
-    console.error('text2sql UI: missing #out-columns in index.html — hard refresh (Ctrl+Shift+R) or clear cache.');
+    if (composerStatus) {
+      composerStatus.classList.add('hidden');
+      composerStatus.textContent = '';
+    }
+    if (!chatThread.children.length) {
+      outputPlaceholder.classList.remove('hidden');
+      outputPlaceholder.textContent = 'Submit a question to start the conversation.';
+      outputContent.classList.add('hidden');
+    }
+  }
+}
+
+function showChatArea() {
+  outputPlaceholder.classList.add('hidden');
+  outputContent.classList.remove('hidden');
+}
+
+function renderColumns(columnsObj) {
+  const cols = normalizeSelectedColumns(columnsObj);
+  const keys = Object.keys(cols).sort();
+  if (!keys.length) return '<p class="out-text-muted">—</p>';
+  return keys.map((tableFqn) => {
+    const items = cols[tableFqn].map((c) => `<li><code>${escapeHtml(String(c))}</code></li>`).join('');
+    return `<div class="out-column-group"><h4 class="out-column-table"><code>${escapeHtml(tableFqn)}</code></h4><ul class="out-list out-list-mono">${items}</ul></div>`;
+  }).join('');
+}
+
+function buildAssistantDetails(data) {
+  if (!data || typeof data !== 'object') return '';
+  const parts = [];
+  const state = data.conversation_state;
+  // Confirmation / rephrase: the main bubble text is enough — no duplicate rephrase or metadata blocks.
+  if (state === 'waiting_intent_confirmation' || state === 'waiting_user_rephrase') {
+    return '';
   }
 
-  if (outGeneratedSql) {
-    const sql = (data.generated_sql && String(data.generated_sql).trim()) || '';
-    outGeneratedSql.innerHTML = `<code>${sql ? escapeHtml(sql) : '—'}</code>`;
+  if (typeof data.intent_confidence === 'number' && Number.isFinite(data.intent_confidence)) {
+    parts.push(`<h4>Intent confidence</h4><p class="out-text">${escapeHtml(String(data.intent_confidence))}%</p>`);
+  }
+
+  if (data.rephrased_question) {
+    parts.push(`<h4>Rephrased question</h4><p class="out-text">${escapeHtml(data.rephrased_question)}</p>`);
+  }
+
+  if (data.keywords && data.keywords.length) {
+    parts.push(`<h4>Keywords</h4><ul class="out-list">${data.keywords.map((k) => `<li>${escapeHtml(k)}</li>`).join('')}</ul>`);
+  }
+
+  if (data.business_insights && data.business_insights.length) {
+    parts.push(`<h4>Business insights</h4><ul class="out-list">${data.business_insights.map((b) => `<li>${escapeHtml(b)}</li>`).join('')}</ul>`);
+  }
+
+  if (data.selected_tables && data.selected_tables.length) {
+    parts.push(`<h4>Selected tables</h4><ul class="out-list out-list-mono">${data.selected_tables.map((t) => `<li><code>${escapeHtml(t)}</code></li>`).join('')}</ul>`);
+  }
+
+  if (data.selected_columns && Object.keys(normalizeSelectedColumns(data.selected_columns)).length) {
+    parts.push(`<h4>Selected columns</h4><div class="out-columns">${renderColumns(data.selected_columns)}</div>`);
+  }
+
+  if (data.generated_sql && String(data.generated_sql).trim()) {
+    parts.push(`<h4>Generated SQL</h4><pre class="out-sql"><code>${escapeHtml(String(data.generated_sql).trim())}</code></pre>`);
+  }
+
+  if (parts.length === 0) return '';
+  return `<div class="chat-details">${parts.join('')}</div>`;
+}
+
+function dockIntentActionsDefault() {
+  intentActions.classList.add('hidden');
+  intentActions.setAttribute('hidden', '');
+  intentActionsLabel.classList.remove('sr-only');
+  intentActionsLabel.textContent = 'Is this understanding correct?';
+  outputContent.append(chatThread, intentActions);
+}
+
+function appendChatBubble(role, text, data = null, options = {}) {
+  showChatArea();
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`;
+
+  const title = role === 'user' ? 'You' : 'Assistant';
+  let html = `
+    <p class="chat-bubble-meta">${title}</p>
+    <p class="chat-bubble-text">${escapeHtml(text || '')}</p>
+  `;
+
+  if (role === 'assistant' && data) {
+    html += buildAssistantDetails(data);
+  }
+
+  bubble.innerHTML = html;
+
+  if (options.intentInline && role === 'assistant') {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-item chat-item--intent-prompt';
+    wrap.appendChild(bubble);
+    intentActionsLabel.classList.add('sr-only');
+    intentActionsLabel.textContent = 'Confirm with Yes or No';
+    wrap.appendChild(intentActions);
+    intentActions.classList.remove('hidden');
+    intentActions.removeAttribute('hidden');
+    chatThread.appendChild(wrap);
+  } else {
+    chatThread.appendChild(bubble);
+  }
+  scrollChatToBottom();
+}
+
+function persistCurrentChat() {
+  const history = [];
+  chatThread.querySelectorAll('.chat-bubble').forEach((node) => {
+    const isUser = node.classList.contains('chat-bubble-user');
+    const textNode = node.querySelector('.chat-bubble-text');
+    history.push({
+      role: isUser ? 'user' : 'assistant',
+      text: textNode ? textNode.textContent : '',
+      html: node.innerHTML,
+    });
+  });
+  setStoredChatHistory(history);
+}
+
+function restoreChat() {
+  const history = getStoredChatHistory();
+  if (!history.length) return;
+  showChatArea();
+  history.forEach((item) => {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${item.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`;
+    bubble.innerHTML = item.html || '';
+    chatThread.appendChild(bubble);
+  });
+  scrollChatToBottom();
+}
+
+function showError(errorText) {
+  outputError.textContent = errorText || '';
+  outputError.classList.toggle('hidden', !errorText);
+}
+
+function hideIntentActions() {
+  dockIntentActionsDefault();
+}
+
+async function callQuery(payload) {
+  let res = await fetch(`${API_BASE}/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let data = await res.json();
+
+  const invalidSession =
+    !res.ok &&
+    data?.detail &&
+    String(data.detail).toLowerCase().includes('invalid or unknown session_id');
+  if (invalidSession) {
+    await bootstrapFreshSession();
+    const retryPayload = {
+      ...payload,
+      session_id: getStoredSessionId(),
+    };
+    res = await fetch(`${API_BASE}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(retryPayload),
+    });
+    data = await res.json();
   }
 
   if (data.session_id) setStoredSessionId(data.session_id);
-  if (data.error) {
-    outputError.textContent = data.error;
-    outputError.classList.remove('hidden');
-  }
+  return { res, data };
 }
 
 function escapeHtml(s) {
@@ -214,101 +322,163 @@ form.addEventListener('submit', async (e) => {
   const message = messageInput.value?.trim();
   if (!useCase || !message) return;
 
-  submitBtn.disabled = true;
-  outputPlaceholder.classList.remove('hidden');
-  outputPlaceholder.textContent = 'Processing… (first request may take 1–2 min to load the model)';
-  outputContent.classList.add('hidden');
-  outputError.classList.add('hidden');
+  showError('');
+  hideIntentActions();
+  appendChatBubble('user', message);
+  setLoadingState(true, 'Processing... (first request may take 1-2 min to load the model)');
 
   try {
     const body = {
       message,
       use_case: useCase,
       session_id: getStoredSessionId(),
+      message_type: pendingIntentState ? 'intent_correction' : 'new_query',
     };
-    let res = await fetch(`${API_BASE}/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    let data = await res.json();
-
-    const invalidSession =
-      !res.ok &&
-      data?.detail &&
-      String(data.detail).toLowerCase().includes('invalid or unknown session_id');
-    if (invalidSession) {
-      await bootstrapFreshSession();
-      const retryBody = {
-        ...body,
-        session_id: getStoredSessionId(),
-      };
-      res = await fetch(`${API_BASE}/query`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(retryBody),
-      });
-      data = await res.json();
-    }
+    const { res, data } = await callQuery(body);
 
     if (!res.ok) {
       const detail = data.detail != null ? data.detail : res.statusText;
       const errText = typeof detail === 'string' ? detail : JSON.stringify(detail);
-      const errPayload = {
-        rephrased_question: '',
-        keywords: [],
-        business_insights: [],
-        few_shot_examples: [],
-        selected_tables: [],
-        selected_columns: {},
-        generated_sql: '',
-        error: errText,
-      };
-      showOutput(errPayload);
-      persistLastOutput(useCase, message, errPayload);
+      showError(errText);
+      appendChatBubble('assistant', `Error: ${errText}`);
+      persistCurrentChat();
       return;
     }
 
-    showOutput(data);
-    persistLastOutput(useCase, message, data);
+    if (data.conversation_state === 'waiting_intent_confirmation') {
+      pendingIntentState = {
+        useCase,
+        pendingIntentId: data.pending_intent_id || null,
+      };
+      const prompt = data.clarification_question || `Did I understand correctly: ${data.resolved_question || data.rephrased_question}?`;
+      appendChatBubble('assistant', prompt, data, { intentInline: true });
+    } else if (data.conversation_state === 'waiting_user_rephrase') {
+      pendingIntentState = {
+        useCase,
+        pendingIntentId: data.pending_intent_id || null,
+      };
+      appendChatBubble('assistant', PROMPT_CORRECTED_QUESTION, { conversation_state: 'waiting_user_rephrase' });
+      hideIntentActions();
+    } else if (data.conversation_state === 'waiting_analytical_query') {
+      pendingIntentState = null;
+      hideIntentActions();
+      appendChatBubble(
+        'assistant',
+        data.clarification_question || 'Please type your analytical question.',
+        data
+      );
+    } else if (data.conversation_state === 'conversation_ended') {
+      pendingIntentState = null;
+      hideIntentActions();
+      appendChatBubble(
+        'assistant',
+        data.clarification_question || 'Ok, thank you!',
+        data
+      );
+    } else {
+      pendingIntentState = null;
+      hideIntentActions();
+      appendChatBubble('assistant', 'Here is what I found.', data);
+      if (data.error) showError(data.error);
+    }
+    persistCurrentChat();
+    messageInput.value = '';
   } catch (err) {
-    const errPayload = {
-      rephrased_question: '',
-      keywords: [],
-      business_insights: [],
-      few_shot_examples: [],
-      selected_tables: [],
-      selected_columns: {},
-      generated_sql: '',
-      error: err.message || 'Request failed',
-    };
-    showOutput(errPayload);
-    persistLastOutput(useCase, message, errPayload);
+    const errText = err?.message || 'Request failed';
+    showError(errText);
+    appendChatBubble('assistant', `Error: ${errText}`);
+    persistCurrentChat();
   } finally {
-    submitBtn.disabled = false;
-    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, selected columns, and generated SQL.';
+    setLoadingState(false);
   }
 });
+
+async function submitIntentConfirmation(answer) {
+  if (!pendingIntentState) return;
+  hideIntentActions();
+  appendChatBubble('user', answer === 'yes' ? 'Yes' : 'No');
+  setLoadingState(true, 'Applying confirmation...');
+  try {
+    const payload = {
+      message: answer,
+      use_case: pendingIntentState.useCase,
+      session_id: getStoredSessionId(),
+      message_type: 'intent_confirmation',
+      confirmation: answer,
+    };
+    const { res, data } = await callQuery(payload);
+    if (!res.ok) {
+      const detail = data.detail != null ? data.detail : res.statusText;
+      const errText = typeof detail === 'string' ? detail : JSON.stringify(detail);
+      showError(errText);
+      appendChatBubble('assistant', `Error: ${errText}`);
+      persistCurrentChat();
+      return;
+    }
+
+    if (data.conversation_state === 'waiting_user_rephrase') {
+      pendingIntentState = {
+        useCase: pendingIntentState.useCase,
+        pendingIntentId: data.pending_intent_id || null,
+      };
+      appendChatBubble('assistant', PROMPT_CORRECTED_QUESTION, { conversation_state: 'waiting_user_rephrase' });
+    } else if (data.conversation_state === 'waiting_analytical_query') {
+      pendingIntentState = null;
+      appendChatBubble(
+        'assistant',
+        data.clarification_question || 'Please type your analytical question.',
+        data
+      );
+    } else if (data.conversation_state === 'conversation_ended') {
+      pendingIntentState = null;
+      appendChatBubble(
+        'assistant',
+        data.clarification_question || 'Ok, thank you!',
+        data
+      );
+    } else {
+      pendingIntentState = null;
+      const done = data.conversation_state === 'completed';
+      appendChatBubble(
+        'assistant',
+        done ? 'Here is what I found.' : 'Thanks — proceeding with SQL generation.',
+        data
+      );
+      if (data.error) showError(data.error);
+    }
+    persistCurrentChat();
+  } catch (err) {
+    const errText = err?.message || 'Request failed';
+    showError(errText);
+    appendChatBubble('assistant', `Error: ${errText}`);
+    persistCurrentChat();
+  } finally {
+    setLoadingState(false);
+    hideIntentActions();
+  }
+}
+
+intentYesBtn.addEventListener('click', () => submitIntentConfirmation('yes'));
+intentNoBtn.addEventListener('click', () => submitIntentConfirmation('no'));
 
 async function init() {
   submitBtn.disabled = true;
   await loadUseCases();
-  localStorage.removeItem(LAST_OUTPUT_KEY);
   clearStoredSessionId();
-  outputError.classList.add('hidden');
-  outputError.textContent = '';
+  showError('');
+  hideIntentActions();
   outputPlaceholder.classList.remove('hidden');
   outputPlaceholder.textContent = 'Starting a fresh session...';
   outputContent.classList.add('hidden');
 
   try {
     await bootstrapFreshSession();
-    outputPlaceholder.textContent = 'Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, selected columns, and generated SQL.';
+    restoreChat();
+    outputPlaceholder.textContent = 'Submit a question to start the conversation.';
     submitBtn.disabled = false;
   } catch (e) {
     outputPlaceholder.textContent = 'Could not create a session. Refresh to retry.';
-    outputError.textContent = e.message || 'Failed to initialize session';
-    outputError.classList.remove('hidden');
+    showError(e.message || 'Failed to initialize session');
   }
 }
 init();

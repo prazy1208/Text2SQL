@@ -67,6 +67,52 @@ CREATE TABLE IF NOT EXISTS app_schema.column_agent_output (
 
 COMMENT ON TABLE app_schema.column_agent_output IS 'Column Agent: selected_columns (per table) for one table_agent_output row';
 
+-- ---------------------------------------------------------------------------
+-- Chat persistence (for chat-style UX + intent confirmation flow)
+-- ---------------------------------------------------------------------------
+
+-- One row per displayed chat message (user/assistant/system), per session.
+CREATE TABLE IF NOT EXISTS app_schema.chat_messages (
+    id            BIGSERIAL PRIMARY KEY,
+    session_id    UUID NOT NULL REFERENCES app_schema.sessions(session_id) ON DELETE CASCADE,
+    role          VARCHAR(16) NOT NULL,  -- 'user' | 'assistant' | 'system'
+    message_type  VARCHAR(32) NOT NULL DEFAULT 'message', -- 'new_query' | 'intent_confirmation' | 'intent_correction' | etc.
+    content       TEXT NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id_created_at
+    ON app_schema.chat_messages(session_id, created_at);
+
+COMMENT ON TABLE app_schema.chat_messages IS 'Session chat transcript (user/assistant/system messages)';
+
+-- Records intent confidence + confirmation status for a given intent output.
+CREATE TABLE IF NOT EXISTS app_schema.intent_review (
+    id                     BIGSERIAL PRIMARY KEY,
+    intent_output_id       INT NOT NULL REFERENCES app_schema.intent_agent_output(id) ON DELETE CASCADE,
+    confidence_score       INT NOT NULL, -- 0..100
+    confirmation_required  BOOLEAN NOT NULL DEFAULT FALSE,
+    confirmation_status    VARCHAR(16) NOT NULL DEFAULT 'pending', -- 'pending' | 'confirmed' | 'rejected' | 'superseded'
+    reviewed_at            TIMESTAMP WITH TIME ZONE,
+    created_at             TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (intent_output_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_intent_review_status
+    ON app_schema.intent_review(confirmation_status);
+
+COMMENT ON TABLE app_schema.intent_review IS 'Intent confidence + user confirmation status for one intent_agent_output row';
+
+-- Stores rolling summary for long conversations to keep prompts token-safe.
+CREATE TABLE IF NOT EXISTS app_schema.session_memory (
+    session_id                  UUID PRIMARY KEY REFERENCES app_schema.sessions(session_id) ON DELETE CASCADE,
+    summary_json                JSONB NOT NULL DEFAULT '{}'::jsonb,
+    last_summarized_message_id  BIGINT,
+    updated_at                  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE app_schema.session_memory IS 'Per-session structured summary for context-window + long chat memory';
+
 -- Gen-SQL agent output: at most one row per intent_agent_output row
 CREATE TABLE IF NOT EXISTS app_schema.gen_sql_agent_output (
     id                         SERIAL PRIMARY KEY,

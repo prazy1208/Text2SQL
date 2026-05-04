@@ -4,72 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <title>Text2SQL — Intent through generated SQL</title>
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <title>Text2SQL — Chat</title>
+  <link rel="stylesheet" href="styles.css?v=11" />
 </head>
 <body>
-  <div class="layout">
-    <header class="header">
-      <h1>Text2SQL</h1>
-      <p class="tagline">Natural language to intent, schema selection, and generated SQL</p>
+  <div class="app layout">
+    <header class="header header--compact">
+      <div class="header-brand">
+        <h1>Text2SQL</h1>
+        <p class="tagline">Natural language to intent, schema selection, and generated SQL</p>
+      </div>
+      <div class="header-session" aria-live="polite">
+        <span class="header-session-label">Session</span>
+        <code id="session-id" class="header-session-id">—</code>
+      </div>
     </header>
-    <main class="main">
-      <section class="card form-card">
-        <h2>Ask a question</h2>
-        <form id="query-form" class="form">
-          <div class="field">
-            <label for="use-case">Use case</label>
-            <select id="use-case" required><option value="">Select domain…</option></select>
-          </div>
-          <div class="field">
-            <label for="message">Question</label>
-            <textarea id="message" rows="4" placeholder="e.g. How many patients were admitted last month?" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary" id="submit-btn">Submit</button>
-        </form>
-      </section>
-      <section class="card output-card" id="output-section">
-        <h2>Query output</h2>
-        <div id="output-placeholder" class="output-placeholder">Submit a question to see rephrased intent, keywords, business insights, few-shot patterns, selected tables, selected columns, and generated SQL.</div>
+
+    <main class="main main--chatbot">
+      <div id="chat-scroll" class="chat-scroll">
+        <div id="output-placeholder" class="output-placeholder">Submit a question to start the conversation.</div>
         <div id="output-content" class="output-content hidden">
-          <div class="output-block">
-            <h3>Rephrased question</h3>
-            <p id="out-rephrased" class="out-text"></p>
-          </div>
-          <div class="output-block">
-            <h3>Keywords</h3>
-            <ul id="out-keywords" class="out-list"></ul>
-          </div>
-          <div class="output-block">
-            <h3>Business insights</h3>
-            <ul id="out-insights" class="out-list"></ul>
-          </div>
-          <div class="output-block">
-            <h3>Few-shot patterns</h3>
-            <p class="output-hint">Selected by id (LLM sees question + type only); SQL shown for Gen-SQL.</p>
-            <div id="out-few-shot" class="out-few-shot"></div>
-          </div>
-          <div class="output-block">
-            <h3>Selected tables</h3>
-            <p class="output-hint">Schema-qualified names chosen for SQL generation.</p>
-            <ul id="out-tables" class="out-list out-list-mono"></ul>
-          </div>
-          <div class="output-block">
-            <h3>Selected columns</h3>
-            <p class="output-hint">Per table, from the Column Agent (metadata only).</p>
-            <div id="out-columns" class="out-columns"></div>
-          </div>
-          <div class="output-block">
-            <h3>Generated SQL</h3>
-            <p class="output-hint">From the Gen-SQL agent (PostgreSQL / Supabase-style). Validation messages may appear in the error area below.</p>
-            <pre id="out-generated-sql" class="out-sql"><code>—</code></pre>
+          <div id="chat-thread" class="chat-thread"></div>
+          <div id="intent-actions" class="intent-actions hidden">
+            <p id="intent-actions-label" class="intent-actions-label">Is this understanding correct?</p>
+            <div class="intent-actions-buttons">
+              <button type="button" id="intent-yes-btn" class="btn btn-secondary">Yes</button>
+              <button type="button" id="intent-no-btn" class="btn btn-secondary btn-secondary-muted">No</button>
+            </div>
           </div>
         </div>
-        <div id="output-error" class="output-error hidden"></div>
-      </section>
+      </div>
+
+      <div id="output-error" class="output-error output-error--composer hidden"></div>
+
+      <form id="query-form" class="composer" autocomplete="off">
+        <div class="composer-row">
+          <label class="sr-only" for="use-case">Use case</label>
+          <select id="use-case" class="composer-use-case" required aria-label="Use case">
+            <option value="">Domain…</option>
+          </select>
+          <label class="sr-only" for="message">Question</label>
+          <textarea
+            id="message"
+            class="composer-message"
+            rows="1"
+            placeholder="Ask a question…"
+            required
+            aria-label="Your question"
+          ></textarea>
+          <button type="submit" class="btn btn-primary composer-send" id="submit-btn">Send</button>
+        </div>
+        <p id="composer-status" class="composer-status hidden" role="status" aria-live="polite"></p>
+      </form>
     </main>
-    <footer class="footer"><span>Session: <code id="session-id">—</code></span></footer>
   </div>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
