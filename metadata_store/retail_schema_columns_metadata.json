@@ -1,11 +1,38 @@
 [
   {
     "schema_name": "retail_schema",
+    "table_name": "categories",
+    "column_name": "category_id",
+    "data_type": "integer",
+    "description": "Unique category identifier",
+    "table_description": "Product category hierarchy",
+    "fqn": "retail_schema.categories.category_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "categories",
+    "column_name": "category_name",
+    "data_type": "character varying(100)",
+    "description": "Category name",
+    "table_description": "Product category hierarchy",
+    "fqn": "retail_schema.categories.category_name"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "categories",
+    "column_name": "parent_category_id",
+    "data_type": "integer",
+    "description": "Parent category for hierarchical grouping",
+    "table_description": "Product category hierarchy",
+    "fqn": "retail_schema.categories.parent_category_id"
+  },
+  {
+    "schema_name": "retail_schema",
     "table_name": "customers",
     "column_name": "city",
     "data_type": "character varying(100)",
-    "description": "City of residence.",
-    "table_description": "Stores customer information.",
+    "description": "City where the customer resides.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "fqn": "retail_schema.customers.city"
   },
   {
@@ -13,8 +40,8 @@
     "table_name": "customers",
     "column_name": "customer_id",
     "data_type": "integer",
-    "description": "Unique identifier for each customer.",
-    "table_description": "Stores customer information.",
+    "description": "Unique system-generated identifier for each customer.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "fqn": "retail_schema.customers.customer_id"
   },
   {
@@ -22,8 +49,8 @@
     "table_name": "customers",
     "column_name": "email",
     "data_type": "character varying(150)",
-    "description": "Customer email.",
-    "table_description": "Stores customer information.",
+    "description": "Email address of the customer.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "fqn": "retail_schema.customers.email"
   },
   {
@@ -31,8 +58,8 @@
     "table_name": "customers",
     "column_name": "first_name",
     "data_type": "character varying(100)",
-    "description": "Customer first name.",
-    "table_description": "Stores customer information.",
+    "description": "First name of the customer.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "fqn": "retail_schema.customers.first_name"
   },
   {
@@ -40,8 +67,8 @@
     "table_name": "customers",
     "column_name": "last_name",
     "data_type": "character varying(100)",
-    "description": "Customer last name.",
-    "table_description": "Stores customer information.",
+    "description": "Last name of the customer.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "fqn": "retail_schema.customers.last_name"
   },
   {
@@ -49,8 +76,8 @@
     "table_name": "customers",
     "column_name": "signup_date",
     "data_type": "date",
-    "description": "Signup date.",
-    "table_description": "Stores customer information.",
+    "description": "Date when the customer signed up.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "fqn": "retail_schema.customers.signup_date"
   },
   {
@@ -58,17 +85,62 @@
     "table_name": "customers",
     "column_name": "state",
     "data_type": "character varying(100)",
-    "description": "State of residence.",
-    "table_description": "Stores customer information.",
+    "description": "State abbreviation where the customer resides.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "fqn": "retail_schema.customers.state"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "inventory",
+    "column_name": "inventory_id",
+    "data_type": "integer",
+    "description": "Unique inventory record",
+    "table_description": "Inventory levels per product and store",
+    "fqn": "retail_schema.inventory.inventory_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "inventory",
+    "column_name": "last_updated",
+    "data_type": "timestamp without time zone",
+    "description": "Last update timestamp",
+    "table_description": "Inventory levels per product and store",
+    "fqn": "retail_schema.inventory.last_updated"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "inventory",
+    "column_name": "product_id",
+    "data_type": "integer",
+    "description": "Product being tracked",
+    "table_description": "Inventory levels per product and store",
+    "fqn": "retail_schema.inventory.product_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "inventory",
+    "column_name": "stock_quantity",
+    "data_type": "integer",
+    "description": "Available stock quantity",
+    "table_description": "Inventory levels per product and store",
+    "fqn": "retail_schema.inventory.stock_quantity"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "inventory",
+    "column_name": "store_id",
+    "data_type": "integer",
+    "description": "Store holding inventory",
+    "table_description": "Inventory levels per product and store",
+    "fqn": "retail_schema.inventory.store_id"
   },
   {
     "schema_name": "retail_schema",
     "table_name": "orders",
     "column_name": "customer_id",
     "data_type": "integer",
-    "description": "Foreign key to customers.",
-    "table_description": "Records customer orders.",
+    "description": "Foreign key referencing the customer who placed the order.",
+    "table_description": "Records customer orders linking customers to products with quantities and amounts.",
     "fqn": "retail_schema.orders.customer_id"
   },
   {
@@ -76,8 +148,8 @@
     "table_name": "orders",
     "column_name": "order_date",
     "data_type": "date",
-    "description": "Order date.",
-    "table_description": "Records customer orders.",
+    "description": "Date when the order was placed.",
+    "table_description": "Records customer orders linking customers to products with quantities and amounts.",
     "fqn": "retail_schema.orders.order_date"
   },
   {
@@ -85,8 +157,8 @@
     "table_name": "orders",
     "column_name": "order_id",
     "data_type": "integer",
-    "description": "Unique identifier for each order.",
-    "table_description": "Records customer orders.",
+    "description": "Unique system-generated identifier for each order.",
+    "table_description": "Records customer orders linking customers to products with quantities and amounts.",
     "fqn": "retail_schema.orders.order_id"
   },
   {
@@ -94,8 +166,8 @@
     "table_name": "orders",
     "column_name": "product_id",
     "data_type": "integer",
-    "description": "Foreign key to products.",
-    "table_description": "Records customer orders.",
+    "description": "Foreign key referencing the ordered product.",
+    "table_description": "Records customer orders linking customers to products with quantities and amounts.",
     "fqn": "retail_schema.orders.product_id"
   },
   {
@@ -103,8 +175,8 @@
     "table_name": "orders",
     "column_name": "quantity",
     "data_type": "integer",
-    "description": "Quantity ordered.",
-    "table_description": "Records customer orders.",
+    "description": "Number of units ordered.",
+    "table_description": "Records customer orders linking customers to products with quantities and amounts.",
     "fqn": "retail_schema.orders.quantity"
   },
   {
@@ -112,8 +184,8 @@
     "table_name": "orders",
     "column_name": "total_amount",
     "data_type": "numeric(12,2)",
-    "description": "Total order amount.",
-    "table_description": "Records customer orders.",
+    "description": "Total amount for the order.",
+    "table_description": "Records customer orders linking customers to products with quantities and amounts.",
     "fqn": "retail_schema.orders.total_amount"
   },
   {
@@ -121,8 +193,8 @@
     "table_name": "products",
     "column_name": "brand",
     "data_type": "character varying(100)",
-    "description": "Product brand.",
-    "table_description": "Stores product catalog.",
+    "description": "Brand name of the product.",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
     "fqn": "retail_schema.products.brand"
   },
   {
@@ -130,17 +202,26 @@
     "table_name": "products",
     "column_name": "category",
     "data_type": "character varying(100)",
-    "description": "Product category.",
-    "table_description": "Stores product catalog.",
+    "description": "Legacy text category (kept for backward compatibility).",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
     "fqn": "retail_schema.products.category"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "products",
+    "column_name": "category_id",
+    "data_type": "integer",
+    "description": "Foreign key to categories hierarchy.",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
+    "fqn": "retail_schema.products.category_id"
   },
   {
     "schema_name": "retail_schema",
     "table_name": "products",
     "column_name": "launch_date",
     "data_type": "date",
-    "description": "Launch date.",
-    "table_description": "Stores product catalog.",
+    "description": "Date when the product was launched.",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
     "fqn": "retail_schema.products.launch_date"
   },
   {
@@ -148,8 +229,8 @@
     "table_name": "products",
     "column_name": "price",
     "data_type": "numeric(10,2)",
-    "description": "Product price.",
-    "table_description": "Stores product catalog.",
+    "description": "Unit price of the product.",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
     "fqn": "retail_schema.products.price"
   },
   {
@@ -157,8 +238,8 @@
     "table_name": "products",
     "column_name": "product_id",
     "data_type": "integer",
-    "description": "Unique identifier for each product.",
-    "table_description": "Stores product catalog.",
+    "description": "Unique system-generated identifier for each product.",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
     "fqn": "retail_schema.products.product_id"
   },
   {
@@ -166,62 +247,251 @@
     "table_name": "products",
     "column_name": "product_name",
     "data_type": "character varying(150)",
-    "description": "Product name.",
-    "table_description": "Stores product catalog.",
+    "description": "Name of the product.",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
     "fqn": "retail_schema.products.product_name"
   },
   {
     "schema_name": "retail_schema",
-    "table_name": "retail_business_rules",
-    "column_name": "concept_name",
-    "data_type": "character varying(150)",
-    "description": "",
-    "table_description": "",
-    "fqn": "retail_schema.retail_business_rules.concept_name"
+    "table_name": "promotions",
+    "column_name": "discount_percentage",
+    "data_type": "numeric(5,2)",
+    "description": "Discount percentage applied",
+    "table_description": "Marketing promotions and discounts",
+    "fqn": "retail_schema.promotions.discount_percentage"
   },
   {
     "schema_name": "retail_schema",
-    "table_name": "retail_business_rules",
-    "column_name": "created_at",
-    "data_type": "timestamp without time zone",
-    "description": "",
-    "table_description": "",
-    "fqn": "retail_schema.retail_business_rules.created_at"
+    "table_name": "promotions",
+    "column_name": "end_date",
+    "data_type": "date",
+    "description": "Promotion end date",
+    "table_description": "Marketing promotions and discounts",
+    "fqn": "retail_schema.promotions.end_date"
   },
   {
     "schema_name": "retail_schema",
-    "table_name": "retail_business_rules",
-    "column_name": "description",
-    "data_type": "text",
-    "description": "",
-    "table_description": "",
-    "fqn": "retail_schema.retail_business_rules.description"
-  },
-  {
-    "schema_name": "retail_schema",
-    "table_name": "retail_business_rules",
-    "column_name": "insight",
-    "data_type": "text",
-    "description": "",
-    "table_description": "",
-    "fqn": "retail_schema.retail_business_rules.insight"
-  },
-  {
-    "schema_name": "retail_schema",
-    "table_name": "retail_business_rules",
-    "column_name": "keywords",
-    "data_type": "text[]",
-    "description": "",
-    "table_description": "",
-    "fqn": "retail_schema.retail_business_rules.keywords"
-  },
-  {
-    "schema_name": "retail_schema",
-    "table_name": "retail_business_rules",
-    "column_name": "rule_id",
+    "table_name": "promotions",
+    "column_name": "promotion_id",
     "data_type": "integer",
-    "description": "",
-    "table_description": "",
-    "fqn": "retail_schema.retail_business_rules.rule_id"
+    "description": "Unique promotion identifier",
+    "table_description": "Marketing promotions and discounts",
+    "fqn": "retail_schema.promotions.promotion_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "promotions",
+    "column_name": "promotion_name",
+    "data_type": "character varying(100)",
+    "description": "Promotion campaign name",
+    "table_description": "Marketing promotions and discounts",
+    "fqn": "retail_schema.promotions.promotion_name"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "promotions",
+    "column_name": "start_date",
+    "data_type": "date",
+    "description": "Promotion start date",
+    "table_description": "Marketing promotions and discounts",
+    "fqn": "retail_schema.promotions.start_date"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "reviews",
+    "column_name": "customer_id",
+    "data_type": "integer",
+    "description": "Customer writing review",
+    "table_description": "Customer reviews and ratings for products",
+    "fqn": "retail_schema.reviews.customer_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "reviews",
+    "column_name": "product_id",
+    "data_type": "integer",
+    "description": "Reviewed product",
+    "table_description": "Customer reviews and ratings for products",
+    "fqn": "retail_schema.reviews.product_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "reviews",
+    "column_name": "rating",
+    "data_type": "integer",
+    "description": "Rating score (1-5)",
+    "table_description": "Customer reviews and ratings for products",
+    "fqn": "retail_schema.reviews.rating"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "reviews",
+    "column_name": "review_date",
+    "data_type": "date",
+    "description": "Date of review",
+    "table_description": "Customer reviews and ratings for products",
+    "fqn": "retail_schema.reviews.review_date"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "reviews",
+    "column_name": "review_id",
+    "data_type": "integer",
+    "description": "Unique review identifier",
+    "table_description": "Customer reviews and ratings for products",
+    "fqn": "retail_schema.reviews.review_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "reviews",
+    "column_name": "review_text",
+    "data_type": "text",
+    "description": "Written feedback",
+    "table_description": "Customer reviews and ratings for products",
+    "fqn": "retail_schema.reviews.review_text"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "shipments",
+    "column_name": "delivery_date",
+    "data_type": "date",
+    "description": "Date delivered",
+    "table_description": "Tracks shipment and delivery of orders",
+    "fqn": "retail_schema.shipments.delivery_date"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "shipments",
+    "column_name": "order_id",
+    "data_type": "integer",
+    "description": "Order being shipped",
+    "table_description": "Tracks shipment and delivery of orders",
+    "fqn": "retail_schema.shipments.order_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "shipments",
+    "column_name": "shipment_date",
+    "data_type": "date",
+    "description": "Date shipped",
+    "table_description": "Tracks shipment and delivery of orders",
+    "fqn": "retail_schema.shipments.shipment_date"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "shipments",
+    "column_name": "shipment_id",
+    "data_type": "integer",
+    "description": "Unique shipment identifier",
+    "table_description": "Tracks shipment and delivery of orders",
+    "fqn": "retail_schema.shipments.shipment_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "shipments",
+    "column_name": "shipment_status",
+    "data_type": "character varying(50)",
+    "description": "Delivery status",
+    "table_description": "Tracks shipment and delivery of orders",
+    "fqn": "retail_schema.shipments.shipment_status"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "stores",
+    "column_name": "city",
+    "data_type": "character varying(50)",
+    "description": "Store city",
+    "table_description": "Retail store locations",
+    "fqn": "retail_schema.stores.city"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "stores",
+    "column_name": "state",
+    "data_type": "character varying(50)",
+    "description": "Store state",
+    "table_description": "Retail store locations",
+    "fqn": "retail_schema.stores.state"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "stores",
+    "column_name": "store_id",
+    "data_type": "integer",
+    "description": "Unique store identifier",
+    "table_description": "Retail store locations",
+    "fqn": "retail_schema.stores.store_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "stores",
+    "column_name": "store_name",
+    "data_type": "character varying(100)",
+    "description": "Store name",
+    "table_description": "Retail store locations",
+    "fqn": "retail_schema.stores.store_name"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "stores",
+    "column_name": "store_type",
+    "data_type": "character varying(50)",
+    "description": "Type (online/physical)",
+    "table_description": "Retail store locations",
+    "fqn": "retail_schema.stores.store_type"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "suppliers",
+    "column_name": "city",
+    "data_type": "character varying(50)",
+    "description": "Supplier city",
+    "table_description": "Suppliers providing products",
+    "fqn": "retail_schema.suppliers.city"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "suppliers",
+    "column_name": "contact_email",
+    "data_type": "character varying(100)",
+    "description": "Supplier contact email",
+    "table_description": "Suppliers providing products",
+    "fqn": "retail_schema.suppliers.contact_email"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "suppliers",
+    "column_name": "phone",
+    "data_type": "character varying(20)",
+    "description": "Supplier phone number",
+    "table_description": "Suppliers providing products",
+    "fqn": "retail_schema.suppliers.phone"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "suppliers",
+    "column_name": "state",
+    "data_type": "character varying(50)",
+    "description": "Supplier state",
+    "table_description": "Suppliers providing products",
+    "fqn": "retail_schema.suppliers.state"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "suppliers",
+    "column_name": "supplier_id",
+    "data_type": "integer",
+    "description": "Unique supplier identifier",
+    "table_description": "Suppliers providing products",
+    "fqn": "retail_schema.suppliers.supplier_id"
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "suppliers",
+    "column_name": "supplier_name",
+    "data_type": "character varying(100)",
+    "description": "Supplier name",
+    "table_description": "Suppliers providing products",
+    "fqn": "retail_schema.suppliers.supplier_name"
   }
 ]

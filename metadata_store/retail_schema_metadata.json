@@ -1,79 +1,133 @@
 [
   {
     "schema_name": "retail_schema",
+    "table_name": "categories",
+    "table_description": "Product category hierarchy",
+    "columns": [
+      {
+        "name": "category_id",
+        "description": "Unique category identifier",
+        "data_type": "integer"
+      },
+      {
+        "name": "category_name",
+        "description": "Category name",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "parent_category_id",
+        "description": "Parent category for hierarchical grouping",
+        "data_type": "integer"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
     "table_name": "customers",
-    "table_description": "Stores customer information.",
+    "table_description": "Stores customer information including contact details and signup date.",
     "columns": [
       {
         "name": "customer_id",
-        "description": "Unique identifier for each customer.",
+        "description": "Unique system-generated identifier for each customer.",
         "data_type": "integer"
       },
       {
         "name": "first_name",
-        "description": "Customer first name.",
+        "description": "First name of the customer.",
         "data_type": "character varying(100)"
       },
       {
         "name": "last_name",
-        "description": "Customer last name.",
+        "description": "Last name of the customer.",
         "data_type": "character varying(100)"
       },
       {
         "name": "email",
-        "description": "Customer email.",
+        "description": "Email address of the customer.",
         "data_type": "character varying(150)"
       },
       {
         "name": "city",
-        "description": "City of residence.",
+        "description": "City where the customer resides.",
         "data_type": "character varying(100)"
       },
       {
         "name": "state",
-        "description": "State of residence.",
+        "description": "State abbreviation where the customer resides.",
         "data_type": "character varying(100)"
       },
       {
         "name": "signup_date",
-        "description": "Signup date.",
+        "description": "Date when the customer signed up.",
         "data_type": "date"
       }
     ]
   },
   {
     "schema_name": "retail_schema",
-    "table_name": "orders",
-    "table_description": "Records customer orders.",
+    "table_name": "inventory",
+    "table_description": "Inventory levels per product and store",
     "columns": [
       {
-        "name": "order_id",
-        "description": "Unique identifier for each order.",
-        "data_type": "integer"
-      },
-      {
-        "name": "customer_id",
-        "description": "Foreign key to customers.",
+        "name": "inventory_id",
+        "description": "Unique inventory record",
         "data_type": "integer"
       },
       {
         "name": "product_id",
-        "description": "Foreign key to products.",
+        "description": "Product being tracked",
+        "data_type": "integer"
+      },
+      {
+        "name": "store_id",
+        "description": "Store holding inventory",
+        "data_type": "integer"
+      },
+      {
+        "name": "stock_quantity",
+        "description": "Available stock quantity",
+        "data_type": "integer"
+      },
+      {
+        "name": "last_updated",
+        "description": "Last update timestamp",
+        "data_type": "timestamp without time zone"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "orders",
+    "table_description": "Records customer orders linking customers to products with quantities and amounts.",
+    "columns": [
+      {
+        "name": "order_id",
+        "description": "Unique system-generated identifier for each order.",
+        "data_type": "integer"
+      },
+      {
+        "name": "customer_id",
+        "description": "Foreign key referencing the customer who placed the order.",
+        "data_type": "integer"
+      },
+      {
+        "name": "product_id",
+        "description": "Foreign key referencing the ordered product.",
         "data_type": "integer"
       },
       {
         "name": "order_date",
-        "description": "Order date.",
+        "description": "Date when the order was placed.",
         "data_type": "date"
       },
       {
         "name": "quantity",
-        "description": "Quantity ordered.",
+        "description": "Number of units ordered.",
         "data_type": "integer"
       },
       {
         "name": "total_amount",
-        "description": "Total order amount.",
+        "description": "Total amount for the order.",
         "data_type": "numeric(12,2)"
       }
     ]
@@ -81,74 +135,212 @@
   {
     "schema_name": "retail_schema",
     "table_name": "products",
-    "table_description": "Stores product catalog.",
+    "table_description": "Stores product catalog information including category, brand, and pricing.",
     "columns": [
       {
         "name": "product_id",
-        "description": "Unique identifier for each product.",
+        "description": "Unique system-generated identifier for each product.",
         "data_type": "integer"
       },
       {
         "name": "product_name",
-        "description": "Product name.",
+        "description": "Name of the product.",
         "data_type": "character varying(150)"
       },
       {
         "name": "category",
-        "description": "Product category.",
+        "description": "Legacy text category (kept for backward compatibility).",
         "data_type": "character varying(100)"
       },
       {
         "name": "brand",
-        "description": "Product brand.",
+        "description": "Brand name of the product.",
         "data_type": "character varying(100)"
       },
       {
         "name": "price",
-        "description": "Product price.",
+        "description": "Unit price of the product.",
         "data_type": "numeric(10,2)"
       },
       {
         "name": "launch_date",
-        "description": "Launch date.",
+        "description": "Date when the product was launched.",
+        "data_type": "date"
+      },
+      {
+        "name": "category_id",
+        "description": "Foreign key to categories hierarchy.",
+        "data_type": "integer"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "promotions",
+    "table_description": "Marketing promotions and discounts",
+    "columns": [
+      {
+        "name": "promotion_id",
+        "description": "Unique promotion identifier",
+        "data_type": "integer"
+      },
+      {
+        "name": "promotion_name",
+        "description": "Promotion campaign name",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "discount_percentage",
+        "description": "Discount percentage applied",
+        "data_type": "numeric(5,2)"
+      },
+      {
+        "name": "start_date",
+        "description": "Promotion start date",
+        "data_type": "date"
+      },
+      {
+        "name": "end_date",
+        "description": "Promotion end date",
         "data_type": "date"
       }
     ]
   },
   {
     "schema_name": "retail_schema",
-    "table_name": "retail_business_rules",
-    "table_description": "",
+    "table_name": "reviews",
+    "table_description": "Customer reviews and ratings for products",
     "columns": [
       {
-        "name": "rule_id",
-        "description": "",
+        "name": "review_id",
+        "description": "Unique review identifier",
         "data_type": "integer"
       },
       {
-        "name": "concept_name",
-        "description": "",
-        "data_type": "character varying(150)"
+        "name": "product_id",
+        "description": "Reviewed product",
+        "data_type": "integer"
       },
       {
-        "name": "description",
-        "description": "",
+        "name": "customer_id",
+        "description": "Customer writing review",
+        "data_type": "integer"
+      },
+      {
+        "name": "rating",
+        "description": "Rating score (1-5)",
+        "data_type": "integer"
+      },
+      {
+        "name": "review_text",
+        "description": "Written feedback",
         "data_type": "text"
       },
       {
-        "name": "insight",
-        "description": "",
-        "data_type": "text"
+        "name": "review_date",
+        "description": "Date of review",
+        "data_type": "date"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "shipments",
+    "table_description": "Tracks shipment and delivery of orders",
+    "columns": [
+      {
+        "name": "shipment_id",
+        "description": "Unique shipment identifier",
+        "data_type": "integer"
       },
       {
-        "name": "keywords",
-        "description": "",
-        "data_type": "text[]"
+        "name": "order_id",
+        "description": "Order being shipped",
+        "data_type": "integer"
       },
       {
-        "name": "created_at",
-        "description": "",
-        "data_type": "timestamp without time zone"
+        "name": "shipment_date",
+        "description": "Date shipped",
+        "data_type": "date"
+      },
+      {
+        "name": "delivery_date",
+        "description": "Date delivered",
+        "data_type": "date"
+      },
+      {
+        "name": "shipment_status",
+        "description": "Delivery status",
+        "data_type": "character varying(50)"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "stores",
+    "table_description": "Retail store locations",
+    "columns": [
+      {
+        "name": "store_id",
+        "description": "Unique store identifier",
+        "data_type": "integer"
+      },
+      {
+        "name": "store_name",
+        "description": "Store name",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "city",
+        "description": "Store city",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "state",
+        "description": "Store state",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "store_type",
+        "description": "Type (online/physical)",
+        "data_type": "character varying(50)"
+      }
+    ]
+  },
+  {
+    "schema_name": "retail_schema",
+    "table_name": "suppliers",
+    "table_description": "Suppliers providing products",
+    "columns": [
+      {
+        "name": "supplier_id",
+        "description": "Unique supplier identifier",
+        "data_type": "integer"
+      },
+      {
+        "name": "supplier_name",
+        "description": "Supplier name",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "contact_email",
+        "description": "Supplier contact email",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "phone",
+        "description": "Supplier phone number",
+        "data_type": "character varying(20)"
+      },
+      {
+        "name": "city",
+        "description": "Supplier city",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "state",
+        "description": "Supplier state",
+        "data_type": "character varying(50)"
       }
     ]
   }

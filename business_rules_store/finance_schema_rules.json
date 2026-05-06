@@ -219,5 +219,265 @@
       "financial analytics"
     ],
     "content": "Operational Financial Insights Operational financial insights focus on understanding the behavior and structure of financial operations within a system. These insights help organizations make informed decisions about financial management and operational efficiency. financial insights operational finance financial analytics"
+  },
+  {
+    "index": 17,
+    "rule_id": 18,
+    "concept_name": "Credit Utilization Analysis",
+    "description": "Calculates credit card utilization by comparing current_balance against credit_limit from credit_cards table to identify usage patterns.",
+    "insight": "Enables Text2SQL to answer queries about customer credit health, overspending risks, and credit availability across different card types.",
+    "keywords": [
+      "credit utilization",
+      "credit limit usage",
+      "card balance ratio"
+    ],
+    "content": "Credit Utilization Analysis Calculates credit card utilization by comparing current_balance against credit_limit from credit_cards table to identify usage patterns. Enables Text2SQL to answer queries about customer credit health, overspending risks, and credit availability across different card types. credit utilization credit limit usage card balance ratio"
+  },
+  {
+    "index": 18,
+    "rule_id": 19,
+    "concept_name": "Loan Repayment Tracking",
+    "description": "Monitors loan payment progress by joining loans and payments tables to track payment_amount against loan_amount over time.",
+    "insight": "Supports queries about outstanding loan balances, payment completion rates, and delinquency identification for risk assessment.",
+    "keywords": [
+      "loan payments",
+      "repayment status",
+      "outstanding balance"
+    ],
+    "content": "Loan Repayment Tracking Monitors loan payment progress by joining loans and payments tables to track payment_amount against loan_amount over time. Supports queries about outstanding loan balances, payment completion rates, and delinquency identification for risk assessment. loan payments repayment status outstanding balance"
+  },
+  {
+    "index": 19,
+    "rule_id": 20,
+    "concept_name": "Fraud Detection Metrics",
+    "description": "Analyzes fraud_alerts by alert_type, alert_status, and linked transaction_id to measure fraud incident rates and resolution efficiency.",
+    "insight": "Enables Text2SQL to identify fraud patterns, response times, and high-risk transaction types for security monitoring.",
+    "keywords": [
+      "fraud alerts",
+      "suspicious transactions",
+      "fraud detection rate"
+    ],
+    "content": "Fraud Detection Metrics Analyzes fraud_alerts by alert_type, alert_status, and linked transaction_id to measure fraud incident rates and resolution efficiency. Enables Text2SQL to identify fraud patterns, response times, and high-risk transaction types for security monitoring. fraud alerts suspicious transactions fraud detection rate"
+  },
+  {
+    "index": 20,
+    "rule_id": 21,
+    "concept_name": "Investment Portfolio Performance",
+    "description": "Tracks total_value trends in investment_accounts by account_type and customer_id to measure portfolio growth and allocation.",
+    "insight": "Supports queries about investment returns, portfolio diversification, and customer wealth accumulation patterns.",
+    "keywords": [
+      "investment performance",
+      "portfolio value",
+      "investment growth"
+    ],
+    "content": "Investment Portfolio Performance Tracks total_value trends in investment_accounts by account_type and customer_id to measure portfolio growth and allocation. Supports queries about investment returns, portfolio diversification, and customer wealth accumulation patterns. investment performance portfolio value investment growth"
+  },
+  {
+    "index": 21,
+    "rule_id": 22,
+    "concept_name": "Branch Performance Comparison",
+    "description": "Aggregates account and transaction metrics by branch_id from branches table to compare city and state level banking activity.",
+    "insight": "Enables geographic performance analysis, identifying high-performing branches and regional market opportunities.",
+    "keywords": [
+      "branch performance",
+      "regional banking",
+      "branch comparison"
+    ],
+    "content": "Branch Performance Comparison Aggregates account and transaction metrics by branch_id from branches table to compare city and state level banking activity. Enables geographic performance analysis, identifying high-performing branches and regional market opportunities. branch performance regional banking branch comparison"
+  },
+  {
+    "index": 22,
+    "rule_id": 23,
+    "concept_name": "Account Balance Volatility",
+    "description": "Analyzes balance fluctuations in account_balances_history by tracking recorded_at timestamps to identify stability patterns.",
+    "insight": "Helps detect unusual account activity, cash flow issues, and accounts requiring attention or financial advisory services.",
+    "keywords": [
+      "balance changes",
+      "account volatility",
+      "balance history"
+    ],
+    "content": "Account Balance Volatility Analyzes balance fluctuations in account_balances_history by tracking recorded_at timestamps to identify stability patterns. Helps detect unusual account activity, cash flow issues, and accounts requiring attention or financial advisory services. balance changes account volatility balance history"
+  },
+  {
+    "index": 23,
+    "rule_id": 24,
+    "concept_name": "Customer Relationship Tenure",
+    "description": "Calculates customer lifetime by comparing created_at in customers table and opening_date in accounts to measure relationship duration.",
+    "insight": "Supports customer segmentation queries, loyalty analysis, and retention strategy effectiveness measurement.",
+    "keywords": [
+      "customer tenure",
+      "relationship duration",
+      "customer age"
+    ],
+    "content": "Customer Relationship Tenure Calculates customer lifetime by comparing created_at in customers table and opening_date in accounts to measure relationship duration. Supports customer segmentation queries, loyalty analysis, and retention strategy effectiveness measurement. customer tenure relationship duration customer age"
+  },
+  {
+    "index": 24,
+    "rule_id": 25,
+    "concept_name": "Multi-Product Customer Profiling",
+    "description": "Identifies customers with multiple products by joining accounts, credit_cards, loans, and investment_accounts on customer_id.",
+    "insight": "Enables cross-selling analysis, product penetration metrics, and identification of high-value multi-product customers.",
+    "keywords": [
+      "product holdings",
+      "cross-product ownership",
+      "customer products"
+    ],
+    "content": "Multi-Product Customer Profiling Identifies customers with multiple products by joining accounts, credit_cards, loans, and investment_accounts on customer_id. Enables cross-selling analysis, product penetration metrics, and identification of high-value multi-product customers. product holdings cross-product ownership customer products"
+  },
+  {
+    "index": 25,
+    "rule_id": 26,
+    "concept_name": "Loan Interest Revenue Potential",
+    "description": "Calculates expected interest revenue by multiplying loan_amount by interest_rate and loan duration from loans table.",
+    "insight": "Supports revenue forecasting, loan portfolio profitability analysis, and pricing strategy optimization queries.",
+    "keywords": [
+      "loan interest",
+      "interest revenue",
+      "loan profitability"
+    ],
+    "content": "Loan Interest Revenue Potential Calculates expected interest revenue by multiplying loan_amount by interest_rate and loan duration from loans table. Supports revenue forecasting, loan portfolio profitability analysis, and pricing strategy optimization queries. loan interest interest revenue loan profitability"
+  },
+  {
+    "index": 26,
+    "rule_id": 27,
+    "concept_name": "Payment Method Preferences",
+    "description": "Analyzes payment_type distribution from payments table to identify preferred payment channels and methods by customer segments.",
+    "insight": "Enables Text2SQL to answer queries about payment behavior, channel optimization, and customer convenience patterns.",
+    "keywords": [
+      "payment methods",
+      "payment channels",
+      "payment preferences"
+    ],
+    "content": "Payment Method Preferences Analyzes payment_type distribution from payments table to identify preferred payment channels and methods by customer segments. Enables Text2SQL to answer queries about payment behavior, channel optimization, and customer convenience patterns. payment methods payment channels payment preferences"
+  },
+  {
+    "index": 27,
+    "rule_id": 28,
+    "concept_name": "Credit Card Expiry Management",
+    "description": "Tracks expiry_date in credit_cards table to identify cards nearing expiration and renewal timing patterns.",
+    "insight": "Supports proactive customer communication queries, renewal campaign targeting, and card lifecycle management.",
+    "keywords": [
+      "card expiry",
+      "card renewal",
+      "expiring cards"
+    ],
+    "content": "Credit Card Expiry Management Tracks expiry_date in credit_cards table to identify cards nearing expiration and renewal timing patterns. Supports proactive customer communication queries, renewal campaign targeting, and card lifecycle management. card expiry card renewal expiring cards"
+  },
+  {
+    "index": 28,
+    "rule_id": 29,
+    "concept_name": "Geographic Customer Distribution",
+    "description": "Aggregates customer counts by city and state from customers table to analyze market penetration and demographic spread.",
+    "insight": "Enables market analysis queries, branch expansion planning, and regional marketing strategy optimization.",
+    "keywords": [
+      "customer geography",
+      "market distribution",
+      "regional customers"
+    ],
+    "content": "Geographic Customer Distribution Aggregates customer counts by city and state from customers table to analyze market penetration and demographic spread. Enables market analysis queries, branch expansion planning, and regional marketing strategy optimization. customer geography market distribution regional customers"
+  },
+  {
+    "index": 29,
+    "rule_id": 30,
+    "concept_name": "Account Type Diversification",
+    "description": "Analyzes account_type distribution across accounts and investment_accounts tables to measure product mix and preferences.",
+    "insight": "Supports product portfolio queries, identifies gaps in account type offerings, and guides product development priorities.",
+    "keywords": [
+      "account types",
+      "product mix",
+      "account distribution"
+    ],
+    "content": "Account Type Diversification Analyzes account_type distribution across accounts and investment_accounts tables to measure product mix and preferences. Supports product portfolio queries, identifies gaps in account type offerings, and guides product development priorities. account types product mix account distribution"
+  },
+  {
+    "index": 30,
+    "rule_id": 31,
+    "concept_name": "Loan Maturity Schedule",
+    "description": "Tracks loan_end_date from loans table to forecast upcoming loan completions and refinancing opportunities.",
+    "insight": "Enables cash flow forecasting, renewal opportunity identification, and loan book maturity analysis queries.",
+    "keywords": [
+      "loan maturity",
+      "loan end dates",
+      "maturing loans"
+    ],
+    "content": "Loan Maturity Schedule Tracks loan_end_date from loans table to forecast upcoming loan completions and refinancing opportunities. Enables cash flow forecasting, renewal opportunity identification, and loan book maturity analysis queries. loan maturity loan end dates maturing loans"
+  },
+  {
+    "index": 31,
+    "rule_id": 32,
+    "concept_name": "Transaction-to-Fraud Correlation",
+    "description": "Links transaction_id between transactions and fraud_alerts tables to calculate fraud rate by transaction_type and amount ranges.",
+    "insight": "Supports risk profiling queries, identifies vulnerable transaction categories, and improves fraud prevention targeting.",
+    "keywords": [
+      "fraud by transaction type",
+      "transaction fraud rate",
+      "risky transactions"
+    ],
+    "content": "Transaction-to-Fraud Correlation Links transaction_id between transactions and fraud_alerts tables to calculate fraud rate by transaction_type and amount ranges. Supports risk profiling queries, identifies vulnerable transaction categories, and improves fraud prevention targeting. fraud by transaction type transaction fraud rate risky transactions"
+  },
+  {
+    "index": 32,
+    "rule_id": 33,
+    "concept_name": "Customer Contact Completeness",
+    "description": "Evaluates email and phone field population in customers table to measure contact information quality and completeness.",
+    "insight": "Enables data quality queries, identifies communication gaps, and supports customer outreach effectiveness analysis.",
+    "keywords": [
+      "contact information",
+      "customer reachability",
+      "data completeness"
+    ],
+    "content": "Customer Contact Completeness Evaluates email and phone field population in customers table to measure contact information quality and completeness. Enables data quality queries, identifies communication gaps, and supports customer outreach effectiveness analysis. contact information customer reachability data completeness"
+  },
+  {
+    "index": 33,
+    "rule_id": 34,
+    "concept_name": "Branch Account Concentration",
+    "description": "Calculates account concentration by branch_id from accounts table to identify branch capacity and workload distribution.",
+    "insight": "Supports operational efficiency queries, staffing optimization, and identifies underutilized or overburdened branches.",
+    "keywords": [
+      "accounts per branch",
+      "branch concentration",
+      "branch workload"
+    ],
+    "content": "Branch Account Concentration Calculates account concentration by branch_id from accounts table to identify branch capacity and workload distribution. Supports operational efficiency queries, staffing optimization, and identifies underutilized or overburdened branches. accounts per branch branch concentration branch workload"
+  },
+  {
+    "index": 34,
+    "rule_id": 35,
+    "concept_name": "Payment Timeliness Analysis",
+    "description": "Compares payment_date from payments table against loan payment schedules to measure on-time payment rates and delays.",
+    "insight": "Enables delinquency tracking, credit risk assessment, and customer payment behavior pattern identification.",
+    "keywords": [
+      "payment punctuality",
+      "late payments",
+      "payment timeliness"
+    ],
+    "content": "Payment Timeliness Analysis Compares payment_date from payments table against loan payment schedules to measure on-time payment rates and delays. Enables delinquency tracking, credit risk assessment, and customer payment behavior pattern identification. payment punctuality late payments payment timeliness"
+  },
+  {
+    "index": 35,
+    "rule_id": 36,
+    "concept_name": "Credit Card Issuance Trends",
+    "description": "Analyzes issue_date patterns in credit_cards table by card_type to identify seasonal issuance trends and growth patterns.",
+    "insight": "Supports acquisition campaign analysis, identifies successful card launch periods, and guides promotional timing.",
+    "keywords": [
+      "card issuance",
+      "new cards",
+      "card acquisition"
+    ],
+    "content": "Credit Card Issuance Trends Analyzes issue_date patterns in credit_cards table by card_type to identify seasonal issuance trends and growth patterns. Supports acquisition campaign analysis, identifies successful card launch periods, and guides promotional timing. card issuance new cards card acquisition"
+  },
+  {
+    "index": 36,
+    "rule_id": 37,
+    "concept_name": "Customer Transaction Recency",
+    "description": "Identifies time since last transaction by customer_id using transaction_date from transactions table to detect dormant accounts.",
+    "insight": "Enables customer engagement queries, churn prediction, and reactivation campaign targeting for inactive customers.",
+    "keywords": [
+      "transaction recency",
+      "last transaction",
+      "dormant accounts"
+    ],
+    "content": "Customer Transaction Recency Identifies time since last transaction by customer_id using transaction_date from transactions table to detect dormant accounts. Enables customer engagement queries, churn prediction, and reactivation campaign targeting for inactive customers. transaction recency last transaction dormant accounts"
   }
 ]

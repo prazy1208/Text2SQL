@@ -1,74 +1,254 @@
 [
   {
     "schema_name": "finance_schema",
-    "table_name": "accounts",
-    "table_description": "Stores bank account information.",
+    "table_name": "account_balances_history",
+    "table_description": "Historical record of account balances",
     "columns": [
       {
-        "name": "account_id",
-        "description": "Unique identifier for each account.",
+        "name": "record_id",
+        "description": "Unique record identifier",
         "data_type": "integer"
       },
       {
-        "name": "customer_name",
-        "description": "Customer name.",
-        "data_type": "character varying(150)"
+        "name": "account_id",
+        "description": "Account being tracked",
+        "data_type": "integer"
       },
       {
-        "name": "account_type",
-        "description": "Account type (savings, checking).",
-        "data_type": "character varying(50)"
+        "name": "balance",
+        "description": "Balance at given timestamp",
+        "data_type": "numeric(12,2)"
       },
       {
-        "name": "branch_city",
-        "description": "Branch city.",
-        "data_type": "character varying(100)"
-      },
-      {
-        "name": "opening_date",
-        "description": "Account opening date.",
-        "data_type": "date"
-      },
-      {
-        "name": "current_balance",
-        "description": "Current balance.",
-        "data_type": "numeric(14,2)"
+        "name": "recorded_at",
+        "description": "Timestamp of recorded balance",
+        "data_type": "timestamp without time zone"
       }
     ]
   },
   {
     "schema_name": "finance_schema",
-    "table_name": "finance_business_rules",
-    "table_description": "",
+    "table_name": "accounts",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
     "columns": [
       {
-        "name": "rule_id",
-        "description": "",
+        "name": "account_id",
+        "description": "Unique system-generated identifier assigned to each bank account.",
         "data_type": "integer"
       },
       {
-        "name": "concept_name",
-        "description": "",
+        "name": "customer_name",
+        "description": "Legacy customer name text (kept for backward compatibility).",
         "data_type": "character varying(150)"
       },
       {
-        "name": "description",
-        "description": "",
-        "data_type": "text"
+        "name": "account_type",
+        "description": "Type of bank account such as savings or checking.",
+        "data_type": "character varying(50)"
       },
       {
-        "name": "insight",
-        "description": "",
-        "data_type": "text"
+        "name": "branch_city",
+        "description": "Legacy branch city text (kept for backward compatibility).",
+        "data_type": "character varying(100)"
       },
       {
-        "name": "keywords",
-        "description": "",
-        "data_type": "text[]"
+        "name": "opening_date",
+        "description": "Date when the bank account was opened.",
+        "data_type": "date"
+      },
+      {
+        "name": "current_balance",
+        "description": "Current available balance in the account.",
+        "data_type": "numeric(14,2)"
+      },
+      {
+        "name": "customer_id",
+        "description": "Foreign key to finance customers master.",
+        "data_type": "integer"
+      },
+      {
+        "name": "branch_id",
+        "description": "Foreign key to branch master.",
+        "data_type": "integer"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "branches",
+    "table_description": "Bank branch information",
+    "columns": [
+      {
+        "name": "branch_id",
+        "description": "Unique identifier for branch",
+        "data_type": "integer"
+      },
+      {
+        "name": "branch_name",
+        "description": "Name of the branch",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "city",
+        "description": "City where branch is located",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "state",
+        "description": "State where branch is located",
+        "data_type": "character varying(50)"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "table_description": "Credit card accounts issued to customers",
+    "columns": [
+      {
+        "name": "card_id",
+        "description": "Unique credit card identifier",
+        "data_type": "integer"
+      },
+      {
+        "name": "customer_id",
+        "description": "Customer owning the card",
+        "data_type": "integer"
+      },
+      {
+        "name": "card_type",
+        "description": "Type of card (e.g., Visa, Mastercard)",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "credit_limit",
+        "description": "Maximum allowed spending limit",
+        "data_type": "numeric(12,2)"
+      },
+      {
+        "name": "current_balance",
+        "description": "Outstanding balance on the card",
+        "data_type": "numeric(12,2)"
+      },
+      {
+        "name": "issue_date",
+        "description": "Date when card was issued",
+        "data_type": "date"
+      },
+      {
+        "name": "expiry_date",
+        "description": "Card expiration date",
+        "data_type": "date"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
+    "table_description": "Customer master data storing personal and contact details",
+    "columns": [
+      {
+        "name": "customer_id",
+        "description": "Unique identifier for each customer",
+        "data_type": "integer"
+      },
+      {
+        "name": "first_name",
+        "description": "Customer first name",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "last_name",
+        "description": "Customer last name",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "email",
+        "description": "Customer email address",
+        "data_type": "character varying(100)"
+      },
+      {
+        "name": "phone",
+        "description": "Customer phone number",
+        "data_type": "character varying(20)"
+      },
+      {
+        "name": "city",
+        "description": "City where customer resides",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "state",
+        "description": "State where customer resides",
+        "data_type": "character varying(50)"
       },
       {
         "name": "created_at",
-        "description": "",
+        "description": "Timestamp when customer profile was created",
+        "data_type": "timestamp without time zone"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "fraud_alerts",
+    "table_description": "Flags suspicious or fraudulent transactions",
+    "columns": [
+      {
+        "name": "alert_id",
+        "description": "Unique alert identifier",
+        "data_type": "integer"
+      },
+      {
+        "name": "transaction_id",
+        "description": "Transaction flagged for fraud",
+        "data_type": "integer"
+      },
+      {
+        "name": "alert_type",
+        "description": "Type of fraud detected",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "alert_status",
+        "description": "Status of investigation",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "created_at",
+        "description": "Timestamp when alert was generated",
+        "data_type": "timestamp without time zone"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "investment_accounts",
+    "table_description": "Investment portfolios held by customers",
+    "columns": [
+      {
+        "name": "investment_account_id",
+        "description": "Unique investment account identifier",
+        "data_type": "integer"
+      },
+      {
+        "name": "customer_id",
+        "description": "Customer owning investment account",
+        "data_type": "integer"
+      },
+      {
+        "name": "account_type",
+        "description": "Type of investment (stocks, mutual funds)",
+        "data_type": "character varying(50)"
+      },
+      {
+        "name": "total_value",
+        "description": "Total portfolio value",
+        "data_type": "numeric(14,2)"
+      },
+      {
+        "name": "created_at",
+        "description": "Account creation timestamp",
         "data_type": "timestamp without time zone"
       }
     ]
@@ -76,78 +256,115 @@
   {
     "schema_name": "finance_schema",
     "table_name": "loans",
-    "table_description": "Stores loan information.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "columns": [
       {
         "name": "loan_id",
-        "description": "Unique identifier for each loan.",
+        "description": "Unique system-generated identifier for each loan record.",
         "data_type": "integer"
       },
       {
         "name": "account_id",
-        "description": "Foreign key to accounts.",
+        "description": "Foreign key referencing the account associated with the loan.",
         "data_type": "integer"
       },
       {
         "name": "loan_type",
-        "description": "Loan type (home, auto, personal).",
+        "description": "Category of loan such as home loan, auto loan, or personal loan.",
         "data_type": "character varying(100)"
       },
       {
         "name": "loan_amount",
-        "description": "Loan principal amount.",
+        "description": "Total principal amount borrowed under the loan agreement.",
         "data_type": "numeric(14,2)"
       },
       {
         "name": "interest_rate",
-        "description": "Annual interest rate.",
+        "description": "Annual interest rate applied to the loan expressed as a percentage.",
         "data_type": "numeric(5,2)"
       },
       {
         "name": "loan_start_date",
-        "description": "Loan start date.",
+        "description": "Date when the loan repayment period began.",
         "data_type": "date"
       },
       {
         "name": "loan_end_date",
-        "description": "Loan end date.",
+        "description": "Date when the loan is scheduled to be fully repaid.",
         "data_type": "date"
       }
     ]
   },
   {
     "schema_name": "finance_schema",
-    "table_name": "transactions",
-    "table_description": "Records financial transactions.",
+    "table_name": "payments",
+    "table_description": "Payments made towards loans or accounts",
     "columns": [
       {
-        "name": "transaction_id",
-        "description": "Unique identifier for each transaction.",
+        "name": "payment_id",
+        "description": "Unique payment identifier",
         "data_type": "integer"
       },
       {
         "name": "account_id",
-        "description": "Foreign key to accounts.",
+        "description": "Account from which payment was made",
+        "data_type": "integer"
+      },
+      {
+        "name": "loan_id",
+        "description": "Loan associated with payment (if applicable)",
+        "data_type": "integer"
+      },
+      {
+        "name": "payment_amount",
+        "description": "Amount paid",
+        "data_type": "numeric(12,2)"
+      },
+      {
+        "name": "payment_date",
+        "description": "Date of payment",
+        "data_type": "date"
+      },
+      {
+        "name": "payment_type",
+        "description": "Type of payment (EMI, credit card, etc.)",
+        "data_type": "character varying(50)"
+      }
+    ]
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "transactions",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
+    "columns": [
+      {
+        "name": "transaction_id",
+        "description": "Unique system-generated identifier for each transaction.",
+        "data_type": "integer"
+      },
+      {
+        "name": "account_id",
+        "description": "Foreign key referencing the account on which the transaction occurred.",
         "data_type": "integer"
       },
       {
         "name": "transaction_date",
-        "description": "Transaction date.",
+        "description": "Date when the transaction was executed.",
         "data_type": "date"
       },
       {
         "name": "transaction_type",
-        "description": "Transaction type (debit, credit).",
+        "description": "Type of transaction such as debit or credit.",
         "data_type": "character varying(50)"
       },
       {
         "name": "amount",
-        "description": "Transaction amount.",
+        "description": "Monetary value of the transaction.",
         "data_type": "numeric(14,2)"
       },
       {
         "name": "description",
-        "description": "Transaction description.",
+        "description": "Short textual explanation describing the purpose of the transaction.",
         "data_type": "character varying(255)"
       }
     ]

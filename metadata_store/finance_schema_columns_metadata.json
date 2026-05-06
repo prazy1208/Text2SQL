@@ -1,11 +1,47 @@
 [
   {
     "schema_name": "finance_schema",
+    "table_name": "account_balances_history",
+    "column_name": "account_id",
+    "data_type": "integer",
+    "description": "Account being tracked",
+    "table_description": "Historical record of account balances",
+    "fqn": "finance_schema.account_balances_history.account_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "account_balances_history",
+    "column_name": "balance",
+    "data_type": "numeric(12,2)",
+    "description": "Balance at given timestamp",
+    "table_description": "Historical record of account balances",
+    "fqn": "finance_schema.account_balances_history.balance"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "account_balances_history",
+    "column_name": "record_id",
+    "data_type": "integer",
+    "description": "Unique record identifier",
+    "table_description": "Historical record of account balances",
+    "fqn": "finance_schema.account_balances_history.record_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "account_balances_history",
+    "column_name": "recorded_at",
+    "data_type": "timestamp without time zone",
+    "description": "Timestamp of recorded balance",
+    "table_description": "Historical record of account balances",
+    "fqn": "finance_schema.account_balances_history.recorded_at"
+  },
+  {
+    "schema_name": "finance_schema",
     "table_name": "accounts",
     "column_name": "account_id",
     "data_type": "integer",
-    "description": "Unique identifier for each account.",
-    "table_description": "Stores bank account information.",
+    "description": "Unique system-generated identifier assigned to each bank account.",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
     "fqn": "finance_schema.accounts.account_id"
   },
   {
@@ -13,8 +49,8 @@
     "table_name": "accounts",
     "column_name": "account_type",
     "data_type": "character varying(50)",
-    "description": "Account type (savings, checking).",
-    "table_description": "Stores bank account information.",
+    "description": "Type of bank account such as savings or checking.",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
     "fqn": "finance_schema.accounts.account_type"
   },
   {
@@ -22,26 +58,44 @@
     "table_name": "accounts",
     "column_name": "branch_city",
     "data_type": "character varying(100)",
-    "description": "Branch city.",
-    "table_description": "Stores bank account information.",
+    "description": "Legacy branch city text (kept for backward compatibility).",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
     "fqn": "finance_schema.accounts.branch_city"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "branch_id",
+    "data_type": "integer",
+    "description": "Foreign key to branch master.",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "fqn": "finance_schema.accounts.branch_id"
   },
   {
     "schema_name": "finance_schema",
     "table_name": "accounts",
     "column_name": "current_balance",
     "data_type": "numeric(14,2)",
-    "description": "Current balance.",
-    "table_description": "Stores bank account information.",
+    "description": "Current available balance in the account.",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
     "fqn": "finance_schema.accounts.current_balance"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "accounts",
+    "column_name": "customer_id",
+    "data_type": "integer",
+    "description": "Foreign key to finance customers master.",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
+    "fqn": "finance_schema.accounts.customer_id"
   },
   {
     "schema_name": "finance_schema",
     "table_name": "accounts",
     "column_name": "customer_name",
     "data_type": "character varying(150)",
-    "description": "Customer name.",
-    "table_description": "Stores bank account information.",
+    "description": "Legacy customer name text (kept for backward compatibility).",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
     "fqn": "finance_schema.accounts.customer_name"
   },
   {
@@ -49,71 +103,278 @@
     "table_name": "accounts",
     "column_name": "opening_date",
     "data_type": "date",
-    "description": "Account opening date.",
-    "table_description": "Stores bank account information.",
+    "description": "Date when the bank account was opened.",
+    "table_description": "Stores customer bank account information including account type, branch location, and current balance.",
     "fqn": "finance_schema.accounts.opening_date"
   },
   {
     "schema_name": "finance_schema",
-    "table_name": "finance_business_rules",
-    "column_name": "concept_name",
-    "data_type": "character varying(150)",
-    "description": "",
-    "table_description": "",
-    "fqn": "finance_schema.finance_business_rules.concept_name"
+    "table_name": "branches",
+    "column_name": "branch_id",
+    "data_type": "integer",
+    "description": "Unique identifier for branch",
+    "table_description": "Bank branch information",
+    "fqn": "finance_schema.branches.branch_id"
   },
   {
     "schema_name": "finance_schema",
-    "table_name": "finance_business_rules",
+    "table_name": "branches",
+    "column_name": "branch_name",
+    "data_type": "character varying(100)",
+    "description": "Name of the branch",
+    "table_description": "Bank branch information",
+    "fqn": "finance_schema.branches.branch_name"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "branches",
+    "column_name": "city",
+    "data_type": "character varying(50)",
+    "description": "City where branch is located",
+    "table_description": "Bank branch information",
+    "fqn": "finance_schema.branches.city"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "branches",
+    "column_name": "state",
+    "data_type": "character varying(50)",
+    "description": "State where branch is located",
+    "table_description": "Bank branch information",
+    "fqn": "finance_schema.branches.state"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "column_name": "card_id",
+    "data_type": "integer",
+    "description": "Unique credit card identifier",
+    "table_description": "Credit card accounts issued to customers",
+    "fqn": "finance_schema.credit_cards.card_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "column_name": "card_type",
+    "data_type": "character varying(50)",
+    "description": "Type of card (e.g., Visa, Mastercard)",
+    "table_description": "Credit card accounts issued to customers",
+    "fqn": "finance_schema.credit_cards.card_type"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "column_name": "credit_limit",
+    "data_type": "numeric(12,2)",
+    "description": "Maximum allowed spending limit",
+    "table_description": "Credit card accounts issued to customers",
+    "fqn": "finance_schema.credit_cards.credit_limit"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "column_name": "current_balance",
+    "data_type": "numeric(12,2)",
+    "description": "Outstanding balance on the card",
+    "table_description": "Credit card accounts issued to customers",
+    "fqn": "finance_schema.credit_cards.current_balance"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "column_name": "customer_id",
+    "data_type": "integer",
+    "description": "Customer owning the card",
+    "table_description": "Credit card accounts issued to customers",
+    "fqn": "finance_schema.credit_cards.customer_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "column_name": "expiry_date",
+    "data_type": "date",
+    "description": "Card expiration date",
+    "table_description": "Credit card accounts issued to customers",
+    "fqn": "finance_schema.credit_cards.expiry_date"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "credit_cards",
+    "column_name": "issue_date",
+    "data_type": "date",
+    "description": "Date when card was issued",
+    "table_description": "Credit card accounts issued to customers",
+    "fqn": "finance_schema.credit_cards.issue_date"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
+    "column_name": "city",
+    "data_type": "character varying(50)",
+    "description": "City where customer resides",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.city"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
     "column_name": "created_at",
     "data_type": "timestamp without time zone",
-    "description": "",
-    "table_description": "",
-    "fqn": "finance_schema.finance_business_rules.created_at"
+    "description": "Timestamp when customer profile was created",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.created_at"
   },
   {
     "schema_name": "finance_schema",
-    "table_name": "finance_business_rules",
-    "column_name": "description",
-    "data_type": "text",
-    "description": "",
-    "table_description": "",
-    "fqn": "finance_schema.finance_business_rules.description"
-  },
-  {
-    "schema_name": "finance_schema",
-    "table_name": "finance_business_rules",
-    "column_name": "insight",
-    "data_type": "text",
-    "description": "",
-    "table_description": "",
-    "fqn": "finance_schema.finance_business_rules.insight"
-  },
-  {
-    "schema_name": "finance_schema",
-    "table_name": "finance_business_rules",
-    "column_name": "keywords",
-    "data_type": "text[]",
-    "description": "",
-    "table_description": "",
-    "fqn": "finance_schema.finance_business_rules.keywords"
-  },
-  {
-    "schema_name": "finance_schema",
-    "table_name": "finance_business_rules",
-    "column_name": "rule_id",
+    "table_name": "customers",
+    "column_name": "customer_id",
     "data_type": "integer",
-    "description": "",
-    "table_description": "",
-    "fqn": "finance_schema.finance_business_rules.rule_id"
+    "description": "Unique identifier for each customer",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.customer_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
+    "column_name": "email",
+    "data_type": "character varying(100)",
+    "description": "Customer email address",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.email"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
+    "column_name": "first_name",
+    "data_type": "character varying(50)",
+    "description": "Customer first name",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.first_name"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
+    "column_name": "last_name",
+    "data_type": "character varying(50)",
+    "description": "Customer last name",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.last_name"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
+    "column_name": "phone",
+    "data_type": "character varying(20)",
+    "description": "Customer phone number",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.phone"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "customers",
+    "column_name": "state",
+    "data_type": "character varying(50)",
+    "description": "State where customer resides",
+    "table_description": "Customer master data storing personal and contact details",
+    "fqn": "finance_schema.customers.state"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "fraud_alerts",
+    "column_name": "alert_id",
+    "data_type": "integer",
+    "description": "Unique alert identifier",
+    "table_description": "Flags suspicious or fraudulent transactions",
+    "fqn": "finance_schema.fraud_alerts.alert_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "fraud_alerts",
+    "column_name": "alert_status",
+    "data_type": "character varying(50)",
+    "description": "Status of investigation",
+    "table_description": "Flags suspicious or fraudulent transactions",
+    "fqn": "finance_schema.fraud_alerts.alert_status"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "fraud_alerts",
+    "column_name": "alert_type",
+    "data_type": "character varying(50)",
+    "description": "Type of fraud detected",
+    "table_description": "Flags suspicious or fraudulent transactions",
+    "fqn": "finance_schema.fraud_alerts.alert_type"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "fraud_alerts",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "description": "Timestamp when alert was generated",
+    "table_description": "Flags suspicious or fraudulent transactions",
+    "fqn": "finance_schema.fraud_alerts.created_at"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "fraud_alerts",
+    "column_name": "transaction_id",
+    "data_type": "integer",
+    "description": "Transaction flagged for fraud",
+    "table_description": "Flags suspicious or fraudulent transactions",
+    "fqn": "finance_schema.fraud_alerts.transaction_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "investment_accounts",
+    "column_name": "account_type",
+    "data_type": "character varying(50)",
+    "description": "Type of investment (stocks, mutual funds)",
+    "table_description": "Investment portfolios held by customers",
+    "fqn": "finance_schema.investment_accounts.account_type"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "investment_accounts",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "description": "Account creation timestamp",
+    "table_description": "Investment portfolios held by customers",
+    "fqn": "finance_schema.investment_accounts.created_at"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "investment_accounts",
+    "column_name": "customer_id",
+    "data_type": "integer",
+    "description": "Customer owning investment account",
+    "table_description": "Investment portfolios held by customers",
+    "fqn": "finance_schema.investment_accounts.customer_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "investment_accounts",
+    "column_name": "investment_account_id",
+    "data_type": "integer",
+    "description": "Unique investment account identifier",
+    "table_description": "Investment portfolios held by customers",
+    "fqn": "finance_schema.investment_accounts.investment_account_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "investment_accounts",
+    "column_name": "total_value",
+    "data_type": "numeric(14,2)",
+    "description": "Total portfolio value",
+    "table_description": "Investment portfolios held by customers",
+    "fqn": "finance_schema.investment_accounts.total_value"
   },
   {
     "schema_name": "finance_schema",
     "table_name": "loans",
     "column_name": "account_id",
     "data_type": "integer",
-    "description": "Foreign key to accounts.",
-    "table_description": "Stores loan information.",
+    "description": "Foreign key referencing the account associated with the loan.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "fqn": "finance_schema.loans.account_id"
   },
   {
@@ -121,8 +382,8 @@
     "table_name": "loans",
     "column_name": "interest_rate",
     "data_type": "numeric(5,2)",
-    "description": "Annual interest rate.",
-    "table_description": "Stores loan information.",
+    "description": "Annual interest rate applied to the loan expressed as a percentage.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "fqn": "finance_schema.loans.interest_rate"
   },
   {
@@ -130,8 +391,8 @@
     "table_name": "loans",
     "column_name": "loan_amount",
     "data_type": "numeric(14,2)",
-    "description": "Loan principal amount.",
-    "table_description": "Stores loan information.",
+    "description": "Total principal amount borrowed under the loan agreement.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "fqn": "finance_schema.loans.loan_amount"
   },
   {
@@ -139,8 +400,8 @@
     "table_name": "loans",
     "column_name": "loan_end_date",
     "data_type": "date",
-    "description": "Loan end date.",
-    "table_description": "Stores loan information.",
+    "description": "Date when the loan is scheduled to be fully repaid.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "fqn": "finance_schema.loans.loan_end_date"
   },
   {
@@ -148,8 +409,8 @@
     "table_name": "loans",
     "column_name": "loan_id",
     "data_type": "integer",
-    "description": "Unique identifier for each loan.",
-    "table_description": "Stores loan information.",
+    "description": "Unique system-generated identifier for each loan record.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "fqn": "finance_schema.loans.loan_id"
   },
   {
@@ -157,8 +418,8 @@
     "table_name": "loans",
     "column_name": "loan_start_date",
     "data_type": "date",
-    "description": "Loan start date.",
-    "table_description": "Stores loan information.",
+    "description": "Date when the loan repayment period began.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "fqn": "finance_schema.loans.loan_start_date"
   },
   {
@@ -166,17 +427,71 @@
     "table_name": "loans",
     "column_name": "loan_type",
     "data_type": "character varying(100)",
-    "description": "Loan type (home, auto, personal).",
-    "table_description": "Stores loan information.",
+    "description": "Category of loan such as home loan, auto loan, or personal loan.",
+    "table_description": "Stores loan account information associated with customer accounts.",
     "fqn": "finance_schema.loans.loan_type"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "payments",
+    "column_name": "account_id",
+    "data_type": "integer",
+    "description": "Account from which payment was made",
+    "table_description": "Payments made towards loans or accounts",
+    "fqn": "finance_schema.payments.account_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "payments",
+    "column_name": "loan_id",
+    "data_type": "integer",
+    "description": "Loan associated with payment (if applicable)",
+    "table_description": "Payments made towards loans or accounts",
+    "fqn": "finance_schema.payments.loan_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "payments",
+    "column_name": "payment_amount",
+    "data_type": "numeric(12,2)",
+    "description": "Amount paid",
+    "table_description": "Payments made towards loans or accounts",
+    "fqn": "finance_schema.payments.payment_amount"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "payments",
+    "column_name": "payment_date",
+    "data_type": "date",
+    "description": "Date of payment",
+    "table_description": "Payments made towards loans or accounts",
+    "fqn": "finance_schema.payments.payment_date"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "payments",
+    "column_name": "payment_id",
+    "data_type": "integer",
+    "description": "Unique payment identifier",
+    "table_description": "Payments made towards loans or accounts",
+    "fqn": "finance_schema.payments.payment_id"
+  },
+  {
+    "schema_name": "finance_schema",
+    "table_name": "payments",
+    "column_name": "payment_type",
+    "data_type": "character varying(50)",
+    "description": "Type of payment (EMI, credit card, etc.)",
+    "table_description": "Payments made towards loans or accounts",
+    "fqn": "finance_schema.payments.payment_type"
   },
   {
     "schema_name": "finance_schema",
     "table_name": "transactions",
     "column_name": "account_id",
     "data_type": "integer",
-    "description": "Foreign key to accounts.",
-    "table_description": "Records financial transactions.",
+    "description": "Foreign key referencing the account on which the transaction occurred.",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
     "fqn": "finance_schema.transactions.account_id"
   },
   {
@@ -184,8 +499,8 @@
     "table_name": "transactions",
     "column_name": "amount",
     "data_type": "numeric(14,2)",
-    "description": "Transaction amount.",
-    "table_description": "Records financial transactions.",
+    "description": "Monetary value of the transaction.",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
     "fqn": "finance_schema.transactions.amount"
   },
   {
@@ -193,8 +508,8 @@
     "table_name": "transactions",
     "column_name": "description",
     "data_type": "character varying(255)",
-    "description": "Transaction description.",
-    "table_description": "Records financial transactions.",
+    "description": "Short textual explanation describing the purpose of the transaction.",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
     "fqn": "finance_schema.transactions.description"
   },
   {
@@ -202,8 +517,8 @@
     "table_name": "transactions",
     "column_name": "transaction_date",
     "data_type": "date",
-    "description": "Transaction date.",
-    "table_description": "Records financial transactions.",
+    "description": "Date when the transaction was executed.",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
     "fqn": "finance_schema.transactions.transaction_date"
   },
   {
@@ -211,8 +526,8 @@
     "table_name": "transactions",
     "column_name": "transaction_id",
     "data_type": "integer",
-    "description": "Unique identifier for each transaction.",
-    "table_description": "Records financial transactions.",
+    "description": "Unique system-generated identifier for each transaction.",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
     "fqn": "finance_schema.transactions.transaction_id"
   },
   {
@@ -220,8 +535,8 @@
     "table_name": "transactions",
     "column_name": "transaction_type",
     "data_type": "character varying(50)",
-    "description": "Transaction type (debit, credit).",
-    "table_description": "Records financial transactions.",
+    "description": "Type of transaction such as debit or credit.",
+    "table_description": "Records financial transactions performed on customer accounts including debits and credits.",
     "fqn": "finance_schema.transactions.transaction_type"
   }
 ]
