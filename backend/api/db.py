@@ -11,13 +11,37 @@ from sqlalchemy import text
 from backend.config import APP_SCHEMA, get_engine
 
 
-def create_session() -> str:
-    """Insert a new session and return its session_id (UUID string)."""
+def create_session(client_id: str | None = None, use_case: str | None = None) -> str:
+    """Insert a new session and return its session_id (UUID string).
+
+    Optional client_id scopes sessions for anonymous multi-chat listing (GET /sessions).
+    use_case may be set at creation time or later via update_session_use_case.
+    """
     engine = get_engine()
+    cid = None
+    if client_id:
+        try:
+            cid = uuid.UUID(str(client_id).strip())
+        except (ValueError, TypeError):
+            cid = None
+    uc = (use_case or "").strip() or None
+    if uc and len(uc) > 64:
+        uc = uc[:64]
+
     with engine.connect() as conn:
-        row = conn.execute(
-            text(f"INSERT INTO {APP_SCHEMA}.sessions DEFAULT VALUES RETURNING session_id")
-        ).fetchone()
+        if cid is not None or uc is not None:
+            row = conn.execute(
+                text(f"""
+                    INSERT INTO {APP_SCHEMA}.sessions (client_id, use_case)
+                    VALUES (:client_id, :use_case)
+                    RETURNING session_id
+                """),
+                {"client_id": cid, "use_case": uc},
+            ).fetchone()
+        else:
+            row = conn.execute(
+                text(f"INSERT INTO {APP_SCHEMA}.sessions DEFAULT VALUES RETURNING session_id")
+            ).fetchone()
         conn.commit()
     if not row:
         raise RuntimeError("Failed to create session")
@@ -39,10 +63,58 @@ def session_exists(session_id: str) -> bool:
     return row is not None
 
 
+def set_session_title_if_unset(session_id: str, title: str) -> None:
+    """Set sessions.title only when currently null or blank (immutable after first assign)."""
+    t = (title or "").strip()
+    if not t:
+        return
+    if len(t) > 200:
+        t = t[:199] + "…"
+    try:
+        sid = uuid.UUID(session_id)
+    except (ValueError, TypeError):
+        return
+    engine = get_engine()
+    with engine.connect() as conn:
+        conn.execute(
+            text(f"""
+                UPDATE {APP_SCHEMA}.sessions
+                SET title = :title, updated_at = CURRENT_TIMESTAMP
+                WHERE session_id = :sid
+                  AND (title IS NULL OR trim(title) = '')
+            """),
+            {"sid": sid, "title": t},
+        )
+        conn.commit()
+
+
+def update_session_use_case(session_id: str, use_case: str) -> None:
+    """Persist last domain for the session (VARCHAR(64))."""
+    uc = (use_case or "").strip()
+    if not uc or len(uc) > 64:
+        return
+    try:
+        sid = uuid.UUID(session_id)
+    except (ValueError, TypeError):
+        return
+    engine = get_engine()
+    with engine.connect() as conn:
+        conn.execute(
+            text(f"""
+                UPDATE {APP_SCHEMA}.sessions
+                SET use_case = :use_case, updated_at = CURRENT_TIMESTAMP
+                WHERE session_id = :sid
+            """),
+            {"sid": sid, "use_case": uc},
+        )
+        conn.commit()
+
+
 def insert_chat_message(session_id: str, role: str, content: str, message_type: str = "message") -> int:
     """Insert one chat message row; return new id."""
     engine = get_engine()
-    with engine.connect() as conn:
+    sid = uuid.UUID(session_id)
+    with engine.begin() as conn:
         result = conn.execute(
             text(f"""
                 INSERT INTO {APP_SCHEMA}.chat_messages (session_id, role, message_type, content)
@@ -50,14 +122,21 @@ def insert_chat_message(session_id: str, role: str, content: str, message_type: 
                 RETURNING id
             """),
             {
-                "session_id": uuid.UUID(session_id),
+                "session_id": sid,
                 "role": (role or "user").strip().lower(),
                 "message_type": (message_type or "message").strip().lower(),
                 "content": content or "",
             },
         )
         row = result.fetchone()
-        conn.commit()
+        conn.execute(
+            text(f"""
+                UPDATE {APP_SCHEMA}.sessions
+                SET updated_at = CURRENT_TIMESTAMP
+                WHERE session_id = :sid
+            """),
+            {"sid": sid},
+        )
     if not row:
         raise RuntimeError("INSERT chat_messages did not return id")
     return int(row[0])
@@ -88,6 +167,247 @@ def get_recent_chat_messages(session_id: str, limit: int = 6) -> list[dict]:
             }
         )
     return out
+
+
+def list_sessions_for_client(client_id: str, limit: int = 100) -> list[dict]:
+    """Return sessions for this browser client, newest activity first.
+
+    Only ``client_id = :cid`` (strict). Rows with NULL ``client_id`` do **not** appear
+    until you backfill them for this browser — see ``docs/BACKFILL_SESSIONS.md``.
+
+    Only sessions with at least one ``chat_messages`` row are listed.
+    """
+    try:
+        cid = uuid.UUID(str(client_id).strip())
+    except (ValueError, TypeError):
+        return []
+    engine = get_engine()
+    lim = max(1, min(500, int(limit)))
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text(f"""
+                SELECT s.session_id, s.title, s.use_case, s.created_at, s.updated_at
+                FROM {APP_SCHEMA}.sessions s
+                WHERE s.client_id = :cid
+                  AND EXISTS (
+                      SELECT 1 FROM {APP_SCHEMA}.chat_messages m
+                      WHERE m.session_id = s.session_id
+                  )
+                ORDER BY s.updated_at DESC
+                LIMIT :lim
+            """),
+            {"cid": cid, "lim": lim},
+        ).fetchall()
+    out = []
+    for r in rows:
+        out.append(
+            {
+                "session_id": str(r.session_id),
+                "title": r.title if r.title is not None else None,
+                "use_case": r.use_case if r.use_case is not None else None,
+                "created_at": str(r.created_at) if r.created_at else None,
+                "updated_at": str(r.updated_at) if r.updated_at else None,
+            }
+        )
+    return out
+
+
+def delete_session_if_owned(session_id: str, client_id: str) -> bool:
+    """Delete a session row only when ``sessions.client_id`` equals ``client_id``.
+
+    Returns True if a row was deleted. Unscoped sessions (``client_id`` NULL) are not
+    deletable through this path. Cascades remove related app_schema rows.
+    """
+    try:
+        sid = uuid.UUID(session_id)
+        cid = uuid.UUID(str(client_id).strip())
+    except (ValueError, TypeError):
+        return False
+    engine = get_engine()
+    with engine.begin() as conn:
+        row = conn.execute(
+            text(f"""
+                DELETE FROM {APP_SCHEMA}.sessions
+                WHERE session_id = :sid AND client_id = :cid
+                RETURNING session_id
+            """),
+            {"sid": sid, "cid": cid},
+        ).fetchone()
+    return row is not None
+
+
+def get_session_row(session_id: str) -> dict | None:
+    """Return session_id, title, use_case, client_id, created_at, updated_at or None."""
+    try:
+        sid = uuid.UUID(session_id)
+    except (ValueError, TypeError):
+        return None
+    engine = get_engine()
+    with engine.connect() as conn:
+        r = conn.execute(
+            text(f"""
+                SELECT session_id, title, use_case, client_id, created_at, updated_at
+                FROM {APP_SCHEMA}.sessions
+                WHERE session_id = :sid
+            """),
+            {"sid": sid},
+        ).fetchone()
+    if not r:
+        return None
+    return {
+        "session_id": str(r.session_id),
+        "title": r.title if r.title is not None else None,
+        "use_case": r.use_case if r.use_case is not None else None,
+        "client_id": str(r.client_id) if r.client_id is not None else None,
+        "created_at": str(r.created_at) if r.created_at else None,
+        "updated_at": str(r.updated_at) if r.updated_at else None,
+    }
+
+
+def get_session_pipeline_turns(session_id: str) -> list[dict]:
+    """One row per intent_agent_output, joined to downstream agent tables (for UI replay)."""
+    try:
+        sid = uuid.UUID(session_id)
+    except (ValueError, TypeError):
+        return []
+    engine = get_engine()
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text(f"""
+                SELECT
+                    i.id AS intent_output_id,
+                    i.user_input,
+                    i.rephrased_question,
+                    i.keywords,
+                    i.business_insights,
+                    COALESCE(r.confidence_score, 0) AS intent_confidence,
+                    COALESCE(t.selected_tables, CAST(ARRAY[] AS text[])) AS selected_tables,
+                    COALESCE(c.selected_columns, CAST('{{}}' AS jsonb)) AS selected_columns,
+                    COALESCE(f.few_shot_examples, CAST('[]' AS jsonb)) AS few_shot_examples,
+                    COALESCE(g.generated_sql, '') AS generated_sql,
+                    COALESCE(g.validation_passed, false) AS validation_passed,
+                    COALESCE(g.validation_error_message, '') AS validation_error_message,
+                    COALESCE(g.validation_error_codes, '') AS validation_error_codes
+                FROM {APP_SCHEMA}.intent_agent_output i
+                LEFT JOIN {APP_SCHEMA}.intent_review r ON r.intent_output_id = i.id
+                LEFT JOIN {APP_SCHEMA}.table_agent_output t ON t.intent_output_id = i.id
+                LEFT JOIN {APP_SCHEMA}.column_agent_output c ON c.table_agent_output_id = t.id
+                LEFT JOIN {APP_SCHEMA}.few_shot_agent_output f ON f.intent_output_id = i.id
+                LEFT JOIN {APP_SCHEMA}.gen_sql_agent_output g ON g.intent_output_id = i.id
+                WHERE i.session_id = :sid
+                ORDER BY i.id ASC
+            """),
+            {"sid": sid},
+        ).fetchall()
+
+    def _kw(row) -> list[str]:
+        v = row.keywords
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(x) for x in v if x is not None]
+        return []
+
+    def _insights(row) -> list[str]:
+        v = row.business_insights
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(x) for x in v if x is not None]
+        return []
+
+    def _tables(row) -> list[str]:
+        v = row.selected_tables
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(x) for x in v if x is not None]
+        return []
+
+    def _cols(row) -> dict:
+        v = row.selected_columns
+        if v is None:
+            return {}
+        if isinstance(v, dict):
+            return v
+        if isinstance(v, str):
+            try:
+                return json.loads(v) if v.strip() else {}
+            except json.JSONDecodeError:
+                return {}
+        return {}
+
+    def _fewshot(row) -> list:
+        v = row.few_shot_examples
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                return json.loads(v) if v.strip() else []
+            except json.JSONDecodeError:
+                return []
+        return []
+
+    out: list[dict] = []
+    for row in rows:
+        vm = (row.validation_error_message or "").strip()
+        vc = (row.validation_error_codes or "").strip()
+        err = None
+        if not bool(row.validation_passed) and (vm or vc):
+            err = vm
+            if vc:
+                err = f"{err} ({vc})".strip() if err else vc
+
+        rq = (row.rephrased_question or "").strip()
+        out.append(
+            {
+                "intent_output_id": int(row.intent_output_id),
+                "user_input": row.user_input or "",
+                "rephrased_question": rq,
+                "resolved_question": rq,
+                "keywords": _kw(row),
+                "business_insights": _insights(row),
+                "intent_confidence": int(row.intent_confidence or 0),
+                "selected_tables": _tables(row),
+                "selected_columns": _cols(row),
+                "few_shot_examples": _fewshot(row),
+                "generated_sql": (row.generated_sql or "").strip(),
+                "conversation_state": "completed",
+                "error": err,
+            }
+        )
+    return out
+
+
+def get_all_chat_messages_ordered(session_id: str) -> list[dict]:
+    """Full transcript for a session, oldest first (UI hydration)."""
+    try:
+        sid = uuid.UUID(session_id)
+    except (ValueError, TypeError):
+        return []
+    engine = get_engine()
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text(f"""
+                SELECT id, role, content, message_type, created_at
+                FROM {APP_SCHEMA}.chat_messages
+                WHERE session_id = :session_id
+                ORDER BY id ASC
+            """),
+            {"session_id": sid},
+        ).fetchall()
+    return [
+        {
+            "id": int(r.id),
+            "role": (r.role or "").strip().lower(),
+            "content": r.content or "",
+            "message_type": (r.message_type or "").strip().lower(),
+            "created_at": str(r.created_at) if r.created_at else None,
+        }
+        for r in rows
+    ]
 
 
 def upsert_session_memory(session_id: str, summary_json: dict, last_summarized_message_id: int | None = None) -> None:

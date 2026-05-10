@@ -8,8 +8,19 @@ CREATE SCHEMA IF NOT EXISTS app_schema;
 CREATE TABLE IF NOT EXISTS app_schema.sessions (
     session_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    title          TEXT,
+    client_id      UUID,
+    use_case       VARCHAR(64)
 );
+
+-- Idempotent upgrades for databases created before title/client_id/use_case existed
+ALTER TABLE app_schema.sessions ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE app_schema.sessions ADD COLUMN IF NOT EXISTS client_id UUID;
+ALTER TABLE app_schema.sessions ADD COLUMN IF NOT EXISTS use_case VARCHAR(64);
+
+CREATE INDEX IF NOT EXISTS idx_sessions_client_id_updated_at
+    ON app_schema.sessions (client_id, updated_at DESC);
 
 -- Intent agent output: one row per user request; each Intent output in separate columns
 CREATE TABLE IF NOT EXISTS app_schema.intent_agent_output (

@@ -9,6 +9,8 @@ Text2SQL project/
 ├── .env
 ├── docs/
 │   ├── PROJECT_STRUCTURE.md      # this file
+│   ├── CHAT_UI_AND_SESSIONS.md   # multi-chat UI, GET /sessions, client_id, localStorage
+│   ├── MULTI_CHAT_SIDEBAR_PLAN.md # pointer: multi-chat feature status + link to CHAT_UI doc
 │   ├── STAGE1_FINALIZED_PLAN.md
 │   ├── TABLE_AGENT_5A_PLAN.md    # Table Agent implementation plan (5a)
 │   ├── COLUMN_AGENT_5B_PLAN.md   # Column Agent implementation plan (5b)
@@ -26,8 +28,8 @@ Text2SQL project/
 ├── metadata_store/               # table/column metadata JSON (per schema)
 ├── business_rules_store/         # business-rules metadata JSON (per schema)
 ├── backend/                      # API and pipeline
-├── scripts/                      # create_app_schema.sql, domain FK DDL, extract_and_load_relationships.py, few_shot DDL, migrations
-└── frontend/                     # Stage 1 UI: intent, selected_tables, selected_columns; index.html, styles.css, app.js; served at / by FastAPI
+├── scripts/                      # create_app_schema.sql, backfill_session_metadata.sql, run_*.py, domain FK DDL, migrations
+└── frontend/                     # Chat UI: sidebar (multi-session), thread, composer; index.html, styles.css, app.js; served at / by FastAPI
 ```
 
 ## Backend
@@ -57,10 +59,10 @@ backend/
 └── api/                          # FastAPI app and routes
     ├── __init__.py
     ├── main.py                   # App entry point; mounts routers (uvicorn backend.api.main:app)
-    ├── db.py                     # Session, intent_agent_output, table_agent_output, column_agent_output
+    ├── db.py                     # sessions (title, client_id, use_case), chat_messages, intent/table/column outputs, session_memory
     └── routes/                   # One module per agent/flow
         ├── __init__.py
-        ├── query.py              # GET /use-cases, POST /session, POST /query (full pipeline incl. Gen-SQL + validation)
+        ├── query.py              # GET /use-cases, GET /sessions, GET /sessions/{id}/messages, POST /session, POST /query (full pipeline incl. Gen-SQL + validation)
         └── ...
 ```
 
@@ -74,6 +76,9 @@ backend/
 
 ## Reference
 
+- Chat UI, session APIs, `localStorage` keys: `docs/CHAT_UI_AND_SESSIONS.md`
+- Multi-chat feature pointer: `docs/MULTI_CHAT_SIDEBAR_PLAN.md`
+- Backfill session title / client_id: `docs/BACKFILL_SESSIONS.md`
 - Supabase (hosted DB) from scratch: `docs/SUPABASE_SETUP.md`
 - Stage 1 scope and order: `docs/STAGE1_FINALIZED_PLAN.md`
 - Table Agent (5a) — metadata shortlist, LLM selection, DB, API, UI: `docs/TABLE_AGENT_5A_PLAN.md`
