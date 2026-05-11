@@ -2,6 +2,7 @@
 
 import logging
 import re
+import time
 import uuid
 from typing import Any, Literal
 
@@ -394,6 +395,34 @@ def delete_session(
 
 @router.post("/query", response_model=QueryResponse)
 def post_query(body: QueryRequest) -> QueryResponse:
+    """Full POST /query wall time (intent → agents → Gen-SQL), all branches."""
+    t0 = time.perf_counter()
+    outcome: QueryResponse | None = None
+    try:
+        outcome = _post_query_core(body)
+        return outcome
+    finally:
+        elapsed_s = time.perf_counter() - t0
+        elapsed_ms = elapsed_s * 1000.0
+        if outcome is not None:
+            logger.info(
+                "POST /query pipeline duration %.0f ms (%.2f s) session_id=%s message_type=%s conversation_state=%s",
+                elapsed_ms,
+                elapsed_s,
+                outcome.session_id,
+                body.message_type,
+                outcome.conversation_state,
+            )
+        else:
+            logger.info(
+                "POST /query duration %.0f ms (%.2f s) message_type=%s (handler exited without QueryResponse — e.g. HTTPException)",
+                elapsed_ms,
+                elapsed_s,
+                body.message_type,
+            )
+
+
+def _post_query_core(body: QueryRequest) -> QueryResponse:
     use_case = body.use_case.strip().lower()
     if use_case not in USE_CASES:
         raise HTTPException(status_code=400, detail=f"use_case must be one of: {USE_CASES}")

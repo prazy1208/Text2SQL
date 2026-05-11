@@ -38,6 +38,8 @@ let pendingIntentState = null;
 
 const PROMPT_CORRECTED_QUESTION = 'Please provide a corrected question.';
 
+const COPY_SQL_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+
 function removeLegacyKeys() {
   try {
     localStorage.removeItem(LEGACY_CHAT_HISTORY_KEY);
@@ -120,26 +122,6 @@ function sidebarLabelForSession(s) {
   const raw = String(s.session_id || '').replace(/-/g, '');
   const tail = raw.slice(-6) || raw.slice(0, 6) || '…';
   return `New chat (${tail})`;
-}
-
-/**
- * API returns selected_columns as object mapping "schema.table" -> string[].
- * Guard against null, arrays, or bad values (cached HTML / older clients).
- */
-function normalizeSelectedColumns(raw) {
-  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
-    return {};
-  }
-  const out = {};
-  for (const [tableFqn, v] of Object.entries(raw)) {
-    if (!tableFqn || !String(tableFqn).trim()) continue;
-    if (!Array.isArray(v)) continue;
-    const names = v.map((x) => String(x).trim()).filter(Boolean);
-    if (names.length) {
-      out[String(tableFqn).trim()] = names;
-    }
-  }
-  return out;
 }
 
 /** Clear domain dropdown to the placeholder (new chat or no active session). */
@@ -476,6 +458,52 @@ function scrollChatToBottom() {
   chatScroll.scrollTop = chatScroll.scrollHeight;
 }
 
+/** Delegated clicks: copy SQL from `.out-sql-wrap` code blocks (dynamic bubbles). */
+function bindSqlCopyDelegation() {
+  if (!chatThread || chatThread.dataset.sqlCopyBound === '1') return;
+  chatThread.dataset.sqlCopyBound = '1';
+  chatThread.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.copy-sql-btn');
+    if (!btn || !chatThread.contains(btn)) return;
+    e.preventDefault();
+    const wrap = btn.closest('.out-sql-wrap');
+    const codeEl = wrap && wrap.querySelector('.out-sql code');
+    const text = codeEl ? codeEl.textContent : '';
+    if (!text || !String(text).trim()) return;
+
+    const revert = () => {
+      btn.classList.remove('copy-sql-btn--done');
+      btn.setAttribute('aria-label', 'Copy SQL');
+      btn.title = 'Copy SQL';
+      window.clearTimeout(btn._copyResetTid);
+      btn._copyResetTid = undefined;
+    };
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      btn.classList.add('copy-sql-btn--done');
+      btn.setAttribute('aria-label', 'Copied');
+      btn.title = 'Copied';
+      window.clearTimeout(btn._copyResetTid);
+      btn._copyResetTid = window.setTimeout(revert, 1600);
+    } catch (_err) {
+      revert();
+    }
+  });
+}
+
 function setLoadingState(loading, text) {
   submitBtn.disabled = loading;
   newChatBtn.disabled = loading;
@@ -518,56 +546,25 @@ function showChatArea() {
   outputContent.classList.remove('hidden');
 }
 
-function renderColumns(columnsObj) {
-  const cols = normalizeSelectedColumns(columnsObj);
-  const keys = Object.keys(cols).sort();
-  if (!keys.length) return '<p class="out-text-muted">—</p>';
-  return keys
-    .map((tableFqn) => {
-      const items = cols[tableFqn].map((c) => `<li><code>${escapeHtml(String(c))}</code></li>`).join('');
-      return `<div class="out-column-group"><h4 class="out-column-table"><code>${escapeHtml(tableFqn)}</code></h4><ul class="out-list out-list-mono">${items}</ul></div>`;
-    })
-    .join('');
-}
-
 function buildAssistantDetails(data) {
   if (!data || typeof data !== 'object') return '';
+  const state = data.conversation_state || '';
+  if (state !== 'completed') return '';
+
   const parts = [];
-  const state = data.conversation_state;
-  if (state === 'waiting_intent_confirmation' || state === 'waiting_user_rephrase') {
-    return '';
+  const interpreted = (data.resolved_question || data.rephrased_question || '').trim();
+  if (interpreted) {
+    parts.push(`<h4>User query</h4><p class="out-text">${escapeHtml(interpreted)}</p>`);
   }
 
-  if (typeof data.intent_confidence === 'number' && Number.isFinite(data.intent_confidence)) {
-    parts.push(`<h4>Intent confidence</h4><p class="out-text">${escapeHtml(String(data.intent_confidence))}%</p>`);
-  }
-
-  if (data.rephrased_question) {
-    parts.push(`<h4>Rephrased question</h4><p class="out-text">${escapeHtml(data.rephrased_question)}</p>`);
-  }
-
-  if (data.keywords && data.keywords.length) {
-    parts.push(`<h4>Keywords</h4><ul class="out-list">${data.keywords.map((k) => `<li>${escapeHtml(k)}</li>`).join('')}</ul>`);
-  }
-
-  if (data.business_insights && data.business_insights.length) {
-    parts.push(
-      `<h4>Business insights</h4><ul class="out-list">${data.business_insights.map((b) => `<li>${escapeHtml(b)}</li>`).join('')}</ul>`
-    );
-  }
-
-  if (data.selected_tables && data.selected_tables.length) {
-    parts.push(
-      `<h4>Selected tables</h4><ul class="out-list out-list-mono">${data.selected_tables.map((t) => `<li><code>${escapeHtml(t)}</code></li>`).join('')}</ul>`
-    );
-  }
-
-  if (data.selected_columns && Object.keys(normalizeSelectedColumns(data.selected_columns)).length) {
-    parts.push(`<h4>Selected columns</h4><div class="out-columns">${renderColumns(data.selected_columns)}</div>`);
-  }
-
-  if (data.generated_sql && String(data.generated_sql).trim()) {
-    parts.push(`<h4>Generated SQL</h4><pre class="out-sql"><code>${escapeHtml(String(data.generated_sql).trim())}</code></pre>`);
+  const sql = (data.generated_sql && String(data.generated_sql).trim()) || '';
+  if (sql) {
+    parts.push(`<div class="out-sql-wrap">
+<pre class="out-sql"><code>${escapeHtml(sql)}</code></pre>
+<button type="button" class="copy-sql-btn" aria-label="Copy SQL" title="Copy SQL">${COPY_SQL_ICON}</button>
+</div>`);
+  } else if (data.error != null && String(data.error).trim()) {
+    parts.push(`<p class="out-text out-error">${escapeHtml(String(data.error).trim())}</p>`);
   }
 
   if (parts.length === 0) return '';
@@ -867,6 +864,7 @@ if (newChatBtn) {
 }
 
 async function init() {
+  bindSqlCopyDelegation();
   submitBtn.disabled = true;
   newChatBtn.disabled = true;
   removeLegacyKeys();

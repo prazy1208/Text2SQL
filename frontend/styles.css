@@ -568,6 +568,12 @@ body {
   color: var(--text);
 }
 
+.out-error {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #b91c1c;
+}
+
 .out-list {
   margin: 0;
   padding-left: 1.25rem;
@@ -671,6 +677,55 @@ body {
 .out-few-shot-q {
   margin: 0 0 0.5rem;
   font-size: 0.9rem;
+}
+
+.out-sql-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0;
+  align-self: stretch;
+}
+
+.out-sql-wrap .out-sql {
+  flex: 1;
+  min-width: 0;
+}
+
+.copy-sql-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-top: 0.4rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.copy-sql-btn:hover {
+  background: var(--blue-50);
+  color: var(--blue-700);
+  border-color: var(--blue-200);
+}
+
+.copy-sql-btn:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 2px;
+}
+
+.copy-sql-btn--done {
+  color: #15803d;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
 }
 
 .out-sql {
