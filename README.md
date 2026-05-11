@@ -65,8 +65,35 @@ The system is built as an **LLM-powered, agent-driven pipeline** that decomposes
 - Uses **synthetic or publicly available datasets only**
 - No real or sensitive data is included in this project
 
+## Documentation
+
+| Document | Contents |
+|----------|----------|
+| [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Repository layout, backend conventions, how routes are organized |
+| [docs/CHAT_UI_AND_SESSIONS.md](docs/CHAT_UI_AND_SESSIONS.md) | Multi-chat sidebar, session/chat REST API, Postgres fields, browser `localStorage` keys |
+| [docs/MULTI_CHAT_SIDEBAR_PLAN.md](docs/MULTI_CHAT_SIDEBAR_PLAN.md) | Short status pointer for the multi-chat implementation |
+| [docs/BACKFILL_SESSIONS.md](docs/BACKFILL_SESSIONS.md) | SQL backfill for `sessions.title` and optional `client_id` |
+| [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) | Hosted Postgres (Supabase) connection and schema |
+| [docs/STAGE1_FINALIZED_PLAN.md](docs/STAGE1_FINALIZED_PLAN.md) | Stage 1 app schema and Intent pipeline scope |
+
+## Repository layout (summary)
+
+- **`backend/`** — FastAPI entrypoint [`backend/api/main.py`](backend/api/main.py), agents under `backend/agents/`, shared services under `backend/services/`, HTTP routes under `backend/api/routes/` (including [`query.py`](backend/api/routes/query.py): `/query`, `/session`, `/sessions`, session messages).
+- **`frontend/`** — Static chat UI (`index.html`, `app.js`, `styles.css`) served at `/`.
+- **`scripts/`** — Database DDL such as [`scripts/create_app_schema.sql`](scripts/create_app_schema.sql).
+- **`docs/`** — Setup guides and architecture notes.
+
+## Running locally
+
+From the project root (requires `.env` with `DATABASE_URL` and an LLM API key):
+
+```bash
+uvicorn backend.api.main:app --reload
+```
+
+Then open `http://127.0.0.1:8000/` for the chat UI. Apply `scripts/create_app_schema.sql` (or your full setup script) so `app_schema.sessions` and `chat_messages` exist.
+
 ## 🚀 Future Scope
-- Add an interactive **chat-based interface** for user-friendly querying  
 - Introduce **caching mechanisms** to optimize repeated query performance  
-- Implement **conversational memory** to retain context across interactions  
-- Enable **back-and-forth conversational querying**, allowing users to refine and iterate on previous queries naturally  
+- Extend **conversational memory** and structured persistence for richer reload fidelity  
+- Refine **back-and-forth querying** (e.g. intent flows across session switches)  

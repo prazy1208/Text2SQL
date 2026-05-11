@@ -2,9 +2,11 @@
 
 import logging
 import re
-from typing import Literal
+import time
+import uuid
+from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Query, Response
 from pydantic import BaseModel, Field
 
 from backend.agents.column_agent import run_column_agent
@@ -14,10 +16,14 @@ from backend.agents.intent_agent import run_intent
 from backend.agents.table_agent import run_table_agent
 from backend.api.db import (
     create_session,
+    delete_session_if_owned,
+    get_all_chat_messages_ordered,
     get_latest_pending_intent,
     get_latest_rejected_intent_rephrase,
     get_recent_chat_messages,
     get_session_memory,
+    get_session_pipeline_turns,
+    get_session_row,
     insert_chat_message,
     insert_column_agent_output,
     insert_few_shot_agent_output,
@@ -26,8 +32,11 @@ from backend.api.db import (
     insert_intent_review,
     insert_table_agent_output,
     merge_session_memory,
+    list_sessions_for_client,
     session_exists,
+    set_session_title_if_unset,
     update_intent_review_status,
+    update_session_use_case,
 )
 from backend.config import USE_CASE_TO_SCHEMA, USE_CASES
 from backend.services.relationship_retrieval import (
@@ -46,6 +55,10 @@ class QueryRequest(BaseModel):
     session_id: str | None = Field(None)
     message_type: Literal["new_query", "intent_confirmation", "intent_correction"] = Field("new_query")
     confirmation: Literal["yes", "no"] | None = Field(None)
+    client_id: str | None = Field(
+        None,
+        description="Optional UUID for anonymous chat lists; applied when a new session is created",
+    )
 
 
 class QueryResponse(BaseModel):
@@ -68,6 +81,91 @@ class QueryResponse(BaseModel):
 
 class SessionResponse(BaseModel):
     session_id: str
+
+
+class SessionListItem(BaseModel):
+    session_id: str
+    title: str | None = None
+    use_case: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class ChatMessageItem(BaseModel):
+    id: int
+    role: str
+    content: str
+    message_type: str
+    created_at: str | None = None
+
+
+class PipelineTurnItem(BaseModel):
+    """Structured pipeline snapshot for one intent_agent_output row (UI replay)."""
+
+    model_config = {"extra": "ignore"}
+
+    intent_output_id: int
+    user_input: str
+    rephrased_question: str = ""
+    resolved_question: str = ""
+    keywords: list[str] = Field(default_factory=list)
+    business_insights: list[str] = Field(default_factory=list)
+    intent_confidence: int = 0
+    selected_tables: list[str] = Field(default_factory=list)
+    selected_columns: dict[str, Any] = Field(default_factory=dict)
+    few_shot_examples: list[Any] = Field(default_factory=list)
+    generated_sql: str = ""
+    conversation_state: str = "completed"
+    error: str | None = None
+
+
+def _normalize_optional_uuid(value: str | None, *, field: str) -> str | None:
+    if value is None or not str(value).strip():
+        return None
+    try:
+        return str(uuid.UUID(str(value).strip()))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"{field} must be a valid UUID") from e
+
+
+def derive_session_title(user_text: str, max_chars: int = 60) -> str:
+    """Short label from the first user question (single assign in DB; never overwritten there)."""
+    s = " ".join((user_text or "").split())
+    if not s:
+        return "New chat"
+    if len(s) <= max_chars:
+        return s
+    return s[: max_chars - 1].rstrip() + "…"
+
+
+_MAX_PIPELINE_COMPLETION_CHAT_CHARS = 200_000
+
+
+def _persist_pipeline_completion_assistant(
+    session_id: str,
+    generated_sql: str,
+    err: str | None,
+) -> None:
+    """Persist the main assistant turn so GET /sessions/.../messages can reload the thread."""
+    parts = ["Here is what I found."]
+    e = (err or "").strip()
+    if e:
+        parts.extend(["", e])
+    gs = (generated_sql or "").strip()
+    if gs:
+        parts.extend(["", "Generated SQL:", gs])
+    content = "\n".join(parts)
+    if len(content) > _MAX_PIPELINE_COMPLETION_CHAT_CHARS:
+        content = content[: _MAX_PIPELINE_COMPLETION_CHAT_CHARS - 40] + "\n… (truncated for storage)"
+    try:
+        insert_chat_message(
+            session_id=session_id,
+            role="assistant",
+            message_type="pipeline_completed",
+            content=content,
+        )
+    except Exception:
+        logger.exception("Failed to persist pipeline completion assistant message")
 
 
 def _empty_response(session_id: str, error: str) -> QueryResponse:
@@ -190,16 +288,141 @@ def get_use_cases() -> list[str]:
 
 
 @router.post("/session", response_model=SessionResponse)
-def create_fresh_session() -> SessionResponse:
+def create_fresh_session(
+    client_id: str | None = Query(
+        default=None,
+        description="Optional UUID; scopes session for GET /sessions",
+    ),
+    x_client_id: str | None = Header(default=None, alias="X-Client-Id"),
+) -> SessionResponse:
+    raw = (x_client_id or client_id or "").strip() or None
+    cid = _normalize_optional_uuid(raw, field="client_id") if raw else None
     try:
-        return SessionResponse(session_id=create_session())
+        return SessionResponse(session_id=create_session(client_id=cid))
     except Exception as e:
         logger.exception("Failed to create session")
         raise HTTPException(status_code=500, detail=f"Failed to create session: {e}") from e
 
 
+@router.get("/sessions", response_model=list[SessionListItem])
+def list_sessions(
+    client_id: str = Query(..., min_length=1, description="UUID previously sent when creating sessions"),
+    limit: int = Query(100, ge=1, le=500),
+) -> list[SessionListItem]:
+    cid = _normalize_optional_uuid(client_id, field="client_id")
+    if not cid:
+        raise HTTPException(status_code=400, detail="client_id is required")
+    rows = list_sessions_for_client(cid, limit=limit)
+    return [SessionListItem(**r) for r in rows]
+
+
+def _assert_session_client_access(
+    session_id: str,
+    client_id: str | None,
+    x_client_id: str | None,
+) -> None:
+    if not session_exists(session_id):
+        raise HTTPException(status_code=404, detail="Unknown session_id")
+    row = get_session_row(session_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Unknown session_id")
+    scoped = row.get("client_id")
+    if scoped:
+        raw = (x_client_id or client_id or "").strip()
+        effective = _normalize_optional_uuid(raw, field="client_id") if raw else None
+        if effective != scoped:
+            raise HTTPException(
+                status_code=403,
+                detail="client_id does not match this session",
+            )
+
+
+@router.get("/sessions/{session_id}/messages", response_model=list[ChatMessageItem])
+def list_session_messages(
+    session_id: str,
+    client_id: str | None = Query(
+        default=None,
+        description="Must match session.client_id when the session is scoped",
+    ),
+    x_client_id: str | None = Header(default=None, alias="X-Client-Id"),
+) -> list[ChatMessageItem]:
+    _assert_session_client_access(session_id, client_id, x_client_id)
+    msgs = get_all_chat_messages_ordered(session_id)
+    return [ChatMessageItem(**m) for m in msgs]
+
+
+@router.get("/sessions/{session_id}/pipeline-turns", response_model=list[PipelineTurnItem])
+def list_session_pipeline_turns(
+    session_id: str,
+    client_id: str | None = Query(
+        default=None,
+        description="Must match session.client_id when the session is scoped",
+    ),
+    x_client_id: str | None = Header(default=None, alias="X-Client-Id"),
+) -> list[PipelineTurnItem]:
+    """Structured rows from intent/table/column/few-shot/gen-sql tables for rich replay."""
+    _assert_session_client_access(session_id, client_id, x_client_id)
+    rows = get_session_pipeline_turns(session_id)
+    return [PipelineTurnItem(**r) for r in rows]
+
+
+@router.delete("/sessions/{session_id}", status_code=204)
+def delete_session(
+    session_id: str,
+    client_id: str | None = Query(
+        default=None,
+        description="Must match session.client_id (same as listing)",
+    ),
+    x_client_id: str | None = Header(default=None, alias="X-Client-Id"),
+) -> Response:
+    """Remove a session and all related app data (FK cascade). Scoped to owning client_id."""
+    if not session_exists(session_id):
+        raise HTTPException(status_code=404, detail="Unknown session_id")
+    raw = (x_client_id or client_id or "").strip()
+    if not raw:
+        raise HTTPException(
+            status_code=400,
+            detail="client_id query param or X-Client-Id header is required to delete a session",
+        )
+    cid = _normalize_optional_uuid(raw, field="client_id")
+    if not delete_session_if_owned(session_id, cid):
+        raise HTTPException(
+            status_code=403,
+            detail="Cannot delete this session (wrong client or session has no client_id)",
+        )
+    return Response(status_code=204)
+
+
 @router.post("/query", response_model=QueryResponse)
 def post_query(body: QueryRequest) -> QueryResponse:
+    """Full POST /query wall time (intent → agents → Gen-SQL), all branches."""
+    t0 = time.perf_counter()
+    outcome: QueryResponse | None = None
+    try:
+        outcome = _post_query_core(body)
+        return outcome
+    finally:
+        elapsed_s = time.perf_counter() - t0
+        elapsed_ms = elapsed_s * 1000.0
+        if outcome is not None:
+            logger.info(
+                "POST /query pipeline duration %.0f ms (%.2f s) session_id=%s message_type=%s conversation_state=%s",
+                elapsed_ms,
+                elapsed_s,
+                outcome.session_id,
+                body.message_type,
+                outcome.conversation_state,
+            )
+        else:
+            logger.info(
+                "POST /query duration %.0f ms (%.2f s) message_type=%s (handler exited without QueryResponse — e.g. HTTPException)",
+                elapsed_ms,
+                elapsed_s,
+                body.message_type,
+            )
+
+
+def _post_query_core(body: QueryRequest) -> QueryResponse:
     use_case = body.use_case.strip().lower()
     if use_case not in USE_CASES:
         raise HTTPException(status_code=400, detail=f"use_case must be one of: {USE_CASES}")
@@ -210,7 +433,9 @@ def post_query(body: QueryRequest) -> QueryResponse:
         session_id = body.session_id
     else:
         try:
-            session_id = create_session()
+            raw_cid = (body.client_id or "").strip() or None
+            cid = _normalize_optional_uuid(raw_cid, field="client_id") if raw_cid else None
+            session_id = create_session(client_id=cid)
         except Exception as e:
             logger.exception("Failed to create session")
             return _empty_response("", str(e))
@@ -230,6 +455,13 @@ def post_query(body: QueryRequest) -> QueryResponse:
         )
     except Exception:
         logger.exception("Failed to persist user chat message")
+
+    try:
+        update_session_use_case(session_id, use_case)
+        if body.message_type in ("new_query", "intent_correction"):
+            set_session_title_if_unset(session_id, derive_session_title(user_message))
+    except Exception:
+        logger.exception("Failed to update session title/use_case")
 
     # Handle yes/no confirmation action before running a new intent.
     if body.message_type == "intent_confirmation":
@@ -746,6 +978,8 @@ def post_query(body: QueryRequest) -> QueryResponse:
         logger.exception("Failed to persist gen-sql agent output")
         persist_gen = f"Gen-SQL save failed: {e}"
         err = f"{err}; {persist_gen}" if err else persist_gen
+
+    _persist_pipeline_completion_assistant(session_id, generated_sql, err)
 
     return QueryResponse(
         session_id=session_id,

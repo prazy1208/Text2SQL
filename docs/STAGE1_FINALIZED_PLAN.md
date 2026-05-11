@@ -36,7 +36,7 @@ Per `Text2SQL_PostgreSQL_Setup_Guide.md`, rules are in **domain schemas**, not a
 
 | Table                  | Purpose |
 |------------------------|---------|
-| **sessions**           | session_id (UUID), created_at [, updated_at]. |
+| **sessions**           | session_id (UUID), created_at, updated_at; optional **title** (first-question label), **client_id** (anonymous chat list scope), **use_case** (last domain). See `scripts/create_app_schema.sql` and `docs/CHAT_UI_AND_SESSIONS.md`. |
 | **intent_agent_output**| One row per user request; every Intent output in **separate columns** (see below). |
 
 **Table `app_schema.intent_agent_output` — columns:**

@@ -84,13 +84,16 @@ If the DB URL is wrong, you will see errors on first request that touches the DB
 
 ---
 
-## 7. Browser session after switching databases
+## 7. Browser storage after switching databases
 
-Session IDs are stored in Postgres (`app_schema.sessions`) **and** in the browser (`localStorage`, key `text2sql_session_id`).
+Chat **transcripts and session rows** live in Postgres (`app_schema.sessions`, `app_schema.chat_messages`). The UI only stores:
 
-If you **point the app to a new database** (new Supabase project or reset DB), old session IDs are invalid.
+- `text2sql_client_id` — anonymous scope for listing “your” sessions (`GET /sessions`)
+- `text2sql_active_session` — last opened session id (reload convenience)
 
-**Fix:** Clear site data for this origin, or remove `text2sql_session_id` in DevTools → Application → Local Storage, then submit a query again so a new session is created.
+If you **point the app to a new database** (new Supabase project or reset DB), old session UUIDs are invalid.
+
+**Fix:** Clear site data for this origin (or remove those keys under DevTools → Application → Local Storage), then reload. The app will create or pick sessions via the API.
 
 ---
 
@@ -109,7 +112,7 @@ Use the exact string from the dashboard when possible.
 |--------|----------------|
 | SSL / connection errors | `sslmode=require` on the URL (or use `get_engine()` as above). |
 | Authentication failed | Wrong password in URI; reset in Supabase and update `.env`. |
-| `Invalid or unknown session_id` | Stale browser session; clear `text2sql_session_id` (see §7). |
+| `Invalid or unknown session_id` | Stale session id vs current DB; clear site storage or pick another chat (see §7). |
 | Table does not exist | Run `complete_setup.sql` (or migrations) on this Supabase project. |
 
 For a full local Postgres walkthrough (pgAdmin, etc.), see **`Text2SQL_PostgreSQL_Setup_Guide.md`**.
