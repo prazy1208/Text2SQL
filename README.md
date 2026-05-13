@@ -1,3 +1,12 @@
+---
+title: Text2SQL
+emoji: 🔐
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # 🔐 Privacy-Preserving Natural Language Querying via Schema-Driven Agent Pipelines
 
 ## 📌 Overview
