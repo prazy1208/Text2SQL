@@ -1011,24 +1011,10 @@ async function init() {
   try {
     let sessions = [];
     try { sessions = await fetchSessionsList(); } catch (e) { console.warn('Could not list sessions', e); }
-
-    const remembered = getRememberedSessionId();
-    let pick = null;
-    if (remembered && sessions.some((s) => s.session_id === remembered)) pick = remembered;
-    else if (sessions.length) pick = sessions[0].session_id;
-
     renderChatList(sessions);
-
-    if (!pick) {
-      setActiveSessionId(null);
-      resetDomainSelect();
-      showWelcome();
-      submitBtn.disabled = false;
-      newChatBtn.disabled = false;
-      return;
-    }
-
-    await loadChatSession(pick);
+    setActiveSessionId(null);
+    resetDomainSelect();
+    showWelcome();
     submitBtn.disabled = false;
     newChatBtn.disabled = false;
   } catch (e) {
