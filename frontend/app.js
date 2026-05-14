@@ -558,7 +558,7 @@ function renderReloadedThread(msgs, turns) {
     if (role === 'assistant' && mt === 'pipeline_completed') {
       const t = consumeNextRichTurn();
       if (t) {
-        appendChatBubble('assistant', 'Here is what I found.', turnToAssistantData(t), defer);
+        appendChatBubble('assistant', 'SQL generated successfully.', turnToAssistantData(t), defer);
       } else {
         appendPlainBubble(role, m.content || '', defer);
       }
@@ -572,7 +572,7 @@ function renderReloadedThread(msgs, turns) {
     if (id == null || consumedTurnIds.has(id) || !turnHasPipelineArtifacts(t)) continue;
     consumedTurnIds.add(id);
     appendChatBubble('user', t.user_input || '', null, defer);
-    appendChatBubble('assistant', 'Here is what I found.', turnToAssistantData(t), defer);
+    appendChatBubble('assistant', 'SQL generated successfully.', turnToAssistantData(t), defer);
   }
   scrollChatToBottom();
 }
@@ -687,13 +687,31 @@ function bindSqlCopyDelegation() {
   });
 }
 
+function showTypingIndicator() {
+  removeTypingIndicator();
+  const typing = document.createElement('div');
+  typing.className = 'chat-bubble chat-bubble-assistant typing-indicator';
+  typing.id = 'typing-indicator';
+  typing.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
+  chatThread.appendChild(typing);
+  scrollChatToBottom();
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
 function setLoadingState(loading, text, showPipeline = false) {
   submitBtn.disabled = loading;
   newChatBtn.disabled = loading;
   if (loading) {
     outputError.classList.add('hidden');
     outputError.textContent = '';
-    if (showPipeline) showPipelineProgress();
+    if (showPipeline) {
+      showPipelineProgress();
+      showTypingIndicator();
+    }
     const hasThread = chatThread.children.length > 0;
     if (hasThread) {
       outputContent.classList.remove('hidden');
@@ -705,6 +723,7 @@ function setLoadingState(loading, text, showPipeline = false) {
     }
   } else {
     hidePipelineProgress();
+    removeTypingIndicator();
     if (composerStatus) { composerStatus.classList.add('hidden'); composerStatus.textContent = ''; }
     if (!chatThread.children.length) {
       showContextualSuggestions();
@@ -725,18 +744,12 @@ function buildAssistantDetails(data) {
   const parts = [];
   const interpreted = (data.resolved_question || data.rephrased_question || '').trim();
   if (interpreted) {
-    parts.push(`<h4>Interpreted Query</h4><p class="out-text">${escapeHtml(interpreted)}</p>`);
-  }
-
-  const tables = Array.isArray(data.selected_tables) ? data.selected_tables : [];
-  if (tables.length) {
-    const pills = tables.map(t => `<span class="table-pill">${escapeHtml(t)}</span>`).join('');
-    parts.push(`<h4>Selected Tables</h4><div class="table-pills">${pills}</div>`);
+    parts.push(`<div class="detail-interpreted"><span class="detail-label">Interpreted as:</span> <span class="detail-value">${escapeHtml(interpreted)}</span></div>`);
   }
 
   const sql = (data.generated_sql && String(data.generated_sql).trim()) || '';
   if (sql) {
-    parts.push(`<h4>Generated SQL</h4><div class="out-sql-wrap">
+    parts.push(`<div class="out-sql-wrap">
 <pre class="out-sql"><code>${highlightSQL(sql)}</code></pre>
 <button type="button" class="copy-sql-btn" aria-label="Copy SQL" title="Copy SQL">${COPY_SQL_ICON}</button>
 </div>`);
@@ -830,12 +843,16 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const useCase = useCaseSelect.value?.trim();
   const message = messageInput.value?.trim();
-  if (!useCase || !message) return;
+  if (!useCase) {
+    showError('Please select a domain first (Healthcare, Retail, or Finance)');
+    return;
+  }
+  if (!message) return;
 
   showError('');
   hideIntentActions();
   appendChatBubble('user', message);
-  setLoadingState(true, 'Processing...', true);
+  setLoadingState(true, 'Running multi-agent pipeline...', true);
 
   try {
     const body = {
@@ -875,7 +892,7 @@ form.addEventListener('submit', async (e) => {
     } else {
       pendingIntentState = null;
       hideIntentActions();
-      appendChatBubble('assistant', 'Here is what I found.', data);
+      appendChatBubble('assistant', 'SQL generated successfully.', data);
       if (data.error) showError(data.error);
     }
     await refreshSidebar();
@@ -896,7 +913,7 @@ async function submitIntentConfirmation(answer) {
   if (!pendingIntentState) return;
   hideIntentActions();
   appendChatBubble('user', answer === 'yes' ? 'Yes' : 'No');
-  setLoadingState(true, 'Applying confirmation...', true);
+  setLoadingState(true, 'Confirming intent and generating SQL...', true);
   try {
     const payload = {
       message: answer,
@@ -927,7 +944,7 @@ async function submitIntentConfirmation(answer) {
     } else {
       pendingIntentState = null;
       const done = data.conversation_state === 'completed';
-      appendChatBubble('assistant', done ? 'Here is what I found.' : 'Thanks — proceeding with SQL generation.', data);
+      appendChatBubble('assistant', done ? 'SQL generated successfully.' : 'Thanks — generating SQL now.', data);
       if (data.error) showError(data.error);
     }
     await refreshSidebar();
