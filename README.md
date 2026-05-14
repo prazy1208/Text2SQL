@@ -1,12 +1,3 @@
----
-title: Text2SQL
-emoji: 🔐
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-pinned: false
----
-
 # 🔐 Privacy-Preserving Natural Language Querying via Schema-Driven Agent Pipelines
 
 ## 📌 Overview
@@ -81,9 +72,7 @@ The system is built as an **LLM-powered, agent-driven pipeline** that decomposes
 | [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) | Repository layout, backend conventions, how routes are organized |
 | [docs/CHAT_UI_AND_SESSIONS.md](docs/CHAT_UI_AND_SESSIONS.md) | Multi-chat sidebar, session/chat REST API, Postgres fields, browser `localStorage` keys |
 | [docs/MULTI_CHAT_SIDEBAR_PLAN.md](docs/MULTI_CHAT_SIDEBAR_PLAN.md) | Short status pointer for the multi-chat implementation |
-| [docs/BACKFILL_SESSIONS.md](docs/BACKFILL_SESSIONS.md) | SQL backfill for `sessions.title` and optional `client_id` |
 | [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) | Hosted Postgres (Supabase) connection and schema |
-| [docs/STAGE1_FINALIZED_PLAN.md](docs/STAGE1_FINALIZED_PLAN.md) | Stage 1 app schema and Intent pipeline scope |
 
 ## Repository layout (summary)
 
