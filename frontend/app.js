@@ -173,7 +173,9 @@ function renderWelcomePanel(domains) {
 
   const cardsHtml = domains.map(d => {
     const icon = DOMAIN_ICONS[d.name] || '';
-    const tablesPreview = d.tables.slice(0, 5).join(', ') + (d.tables.length > 5 ? '...' : '');
+    const tablePills = d.tables.slice(0, 6).map(t =>
+      `<span class="table-tag">${escapeHtml(t)}</span>`
+    ).join('') + (d.tables.length > 6 ? `<span class="table-tag table-tag--more">+${d.tables.length - 6}</span>` : '');
     const examplesHtml = (d.example_questions || []).map(q =>
       `<li><button type="button" class="example-question-btn" data-domain="${d.name}" data-question="${escapeHtml(q)}">${escapeHtml(q)}</button></li>`
     ).join('');
@@ -184,7 +186,7 @@ function renderWelcomePanel(domains) {
           <h3 class="domain-card-title">${d.display_name}</h3>
         </div>
         <p class="domain-card-desc">${d.description}</p>
-        <p class="domain-card-tables">${d.table_count} tables: ${tablesPreview}</p>
+        <div class="domain-card-tables">${tablePills}</div>
         <ul class="domain-card-examples">${examplesHtml}</ul>
       </div>
     `;
@@ -207,26 +209,28 @@ function renderWelcomePanel(domains) {
   welcomePanel.innerHTML = `
     <div class="welcome-hero">
       <h2>Text2SQL</h2>
-      <p>Convert natural language into SQL &mdash; powered by a multi-agent AI pipeline. Choose a domain and ask a question to get started.</p>
+      <p>Convert natural language into SQL &mdash; powered by a multi-agent AI pipeline.</p>
     </div>
-    <div class="welcome-domains">${cardsHtml}</div>
     <div class="welcome-how">
-      <h3>How It Works</h3>
       ${pipelineHtml}
     </div>
+    <div class="welcome-domains">${cardsHtml}</div>
   `;
 
-  welcomePanel.addEventListener('click', (e) => {
-    const btn = e.target.closest('.example-question-btn');
-    if (!btn) return;
-    const domain = btn.dataset.domain;
-    const question = btn.dataset.question;
-    if (domain && question) {
-      selectDomain(domain);
-      messageInput.value = question;
-      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    }
-  });
+  if (!welcomePanel.dataset.bound) {
+    welcomePanel.dataset.bound = '1';
+    welcomePanel.addEventListener('click', (e) => {
+      const btn = e.target.closest('.example-question-btn');
+      if (!btn) return;
+      const domain = btn.dataset.domain;
+      const question = btn.dataset.question;
+      if (domain && question) {
+        selectDomain(domain);
+        messageInput.value = question;
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      }
+    });
+  }
 }
 
 function showWelcome() {

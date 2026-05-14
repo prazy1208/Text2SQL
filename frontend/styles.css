@@ -292,32 +292,41 @@ body {
 }
 
 .welcome-hero {
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .welcome-hero h2 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 800;
-  color: var(--blue-900);
-  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-900));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.04em;
 }
 
 .welcome-hero p {
-  margin: 0.5rem 0 0;
-  font-size: 1rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
   color: var(--text-muted);
-  max-width: 36rem;
+  max-width: 34rem;
   margin-left: auto;
   margin-right: auto;
+  line-height: 1.4;
 }
 
 .welcome-domains {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   text-align: left;
+}
+
+.welcome-domains > .domain-card {
+  display: flex;
+  flex-direction: column;
 }
 
 .domain-card {
@@ -381,10 +390,28 @@ body {
 }
 
 .domain-card-tables {
-  font-size: 0.75rem;
-  color: var(--blue-700);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
   margin: 0 0 0.75rem;
+}
+
+.table-tag {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.68rem;
   font-weight: 500;
+  font-family: 'SF Mono', Consolas, monospace;
+  background: var(--blue-50);
+  color: var(--blue-700);
+  border-radius: 4px;
+  border: 1px solid var(--blue-100);
+}
+
+.table-tag--more {
+  background: var(--surface);
+  color: var(--text-muted);
+  border-color: var(--border);
 }
 
 .domain-card-examples {
@@ -394,6 +421,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  margin-top: auto;
 }
 
 .domain-card-examples li {
@@ -412,13 +440,45 @@ body {
   font-size: 0.82rem;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.12s, border-color 0.12s, transform 0.1s;
   line-height: 1.3;
 }
 
 .example-question-btn:hover {
   background: var(--blue-100);
   border-color: var(--blue-300);
+  transform: translateX(2px);
+}
+
+.domain-card-icon--healthcare + .domain-card-title ~ .domain-card-examples .example-question-btn,
+.domain-card:nth-child(1) .example-question-btn {
+  background: #fdf2f8;
+  border-color: #fce7f3;
+  color: #9d174d;
+}
+.domain-card:nth-child(1) .example-question-btn:hover {
+  background: #fce7f3;
+  border-color: #fbcfe8;
+}
+
+.domain-card:nth-child(2) .example-question-btn {
+  background: #eff6ff;
+  border-color: #dbeafe;
+  color: #1e40af;
+}
+.domain-card:nth-child(2) .example-question-btn:hover {
+  background: #dbeafe;
+  border-color: #bfdbfe;
+}
+
+.domain-card:nth-child(3) .example-question-btn {
+  background: #f0fdf4;
+  border-color: #dcfce7;
+  color: #166534;
+}
+.domain-card:nth-child(3) .example-question-btn:hover {
+  background: #dcfce7;
+  border-color: #bbf7d0;
 }
 
 .example-question-btn::before {
@@ -433,18 +493,12 @@ body {
 
 /* How it works */
 .welcome-how {
-  margin-top: 0.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-}
-
-.welcome-how h3 {
-  margin: 0 0 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
 }
 
 .pipeline-diagram {
@@ -859,6 +913,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+  justify-content: flex-end;
+  min-height: 100%;
 }
 
 .chat-item--intent-prompt {
