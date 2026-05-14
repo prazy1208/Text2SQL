@@ -867,6 +867,7 @@ form.addEventListener('submit', async (e) => {
   showError('');
   hideIntentActions();
   appendChatBubble('user', message);
+  messageInput.value = '';
   setLoadingState(true, 'Running multi-agent pipeline...', true);
 
   try {
@@ -911,7 +912,6 @@ form.addEventListener('submit', async (e) => {
       if (data.error) showError(data.error);
     }
     await refreshSidebar();
-    messageInput.value = '';
   } catch (err) {
     const errText = err?.message || 'Request failed';
     showError(errText);
