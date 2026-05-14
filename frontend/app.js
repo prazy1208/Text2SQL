@@ -117,12 +117,27 @@ function resetDomainSelect() {
   updatePlaceholderForDomain('');
 }
 
-function selectDomain(name) {
+function selectDomain(name, opts = {}) {
+  const previousDomain = useCaseSelect.value;
   useCaseSelect.value = name;
   domainSelectorEl.querySelectorAll('.domain-btn').forEach(b => {
     b.classList.toggle('is-selected', b.dataset.domain === name);
   });
   updatePlaceholderForDomain(name);
+
+  if (opts.silent) return;
+
+  if (previousDomain && previousDomain !== name && chatThread.children.length > 0) {
+    setActiveSessionId(null);
+    clearChatThread();
+    pendingIntentState = null;
+    hideIntentActions();
+    showError('');
+    showContextualSuggestions();
+    void refreshSidebar();
+  } else if (chatThread.children.length === 0) {
+    showContextualSuggestions();
+  }
 }
 
 function renderDomainButtons(domains) {
@@ -225,7 +240,7 @@ function renderWelcomePanel(domains) {
       const domain = btn.dataset.domain;
       const question = btn.dataset.question;
       if (domain && question) {
-        selectDomain(domain);
+        selectDomain(domain, { silent: true });
         messageInput.value = question;
         form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
       }
@@ -481,7 +496,7 @@ function applyUseCaseFromSession(sessionId) {
   const row = cachedSessions.find((x) => x.session_id === sessionId);
   const uc = row?.use_case && String(row.use_case).trim();
   if (!uc) return;
-  selectDomain(uc);
+  selectDomain(uc, { silent: true });
 }
 
 async function fetchSessionMessages(sessionId) {
@@ -994,7 +1009,7 @@ if (chatListEl) {
     if (!btn || !btn.dataset.sessionId) return;
     const id = btn.dataset.sessionId;
     if (id === activeSessionId) return;
-    if (btn.dataset.useCase) selectDomain(btn.dataset.useCase.trim());
+    if (btn.dataset.useCase) selectDomain(btn.dataset.useCase.trim(), { silent: true });
     loadChatSession(id);
   });
 }
