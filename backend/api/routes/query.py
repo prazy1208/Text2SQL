@@ -1,5 +1,6 @@
-"""Routes: POST /session, POST /query (full pipeline incl. Gen-SQL), GET /use-cases."""
+"""Routes: POST /session, POST /query (full pipeline incl. Gen-SQL), GET /use-cases, GET /domain-info."""
 
+import json
 import logging
 import re
 import time
@@ -38,7 +39,7 @@ from backend.api.db import (
     update_intent_review_status,
     update_session_use_case,
 )
-from backend.config import USE_CASE_TO_SCHEMA, USE_CASES
+from backend.config import METADATA_STORE_DIR, USE_CASE_TO_SCHEMA, USE_CASES
 from backend.services.relationship_retrieval import (
     filter_relationships_for_selected_tables,
     list_relationships_from_metadata,
@@ -285,6 +286,68 @@ def _strip_internal_memory_keys(summary: dict) -> dict:
 @router.get("/use-cases")
 def get_use_cases() -> list[str]:
     return USE_CASES
+
+
+_DOMAIN_META: dict[str, dict] = {
+    "healthcare": {
+        "display_name": "Healthcare",
+        "description": "Patient records, visits, diagnoses, billing, and insurance claims",
+        "icon": "heart",
+        "example_questions": [
+            "How many patients registered in each month of 2024?",
+            "What is the average billing amount by insurance type?",
+            "Which departments have the most patient visits?",
+        ],
+    },
+    "retail": {
+        "display_name": "Retail",
+        "description": "Customers, products, orders, inventory, shipments, and promotions",
+        "icon": "cart",
+        "example_questions": [
+            "What are the top 10 best-selling products by revenue?",
+            "How has order volume changed month over month?",
+            "Which stores have the highest inventory turnover?",
+        ],
+    },
+    "finance": {
+        "display_name": "Finance",
+        "description": "Accounts, transactions, loans, credit cards, and fraud alerts",
+        "icon": "chart",
+        "example_questions": [
+            "What is the total transaction volume by branch?",
+            "Which accounts have the highest average balance?",
+            "How many fraud alerts were raised per month?",
+        ],
+    },
+}
+
+
+@router.get("/domain-info")
+def get_domain_info() -> dict:
+    """Return domain descriptions, table lists, and curated example questions for the UI."""
+    domains = []
+    for use_case in USE_CASES:
+        schema = USE_CASE_TO_SCHEMA[use_case]
+        meta = _DOMAIN_META.get(use_case, {})
+        metadata_file = METADATA_STORE_DIR / f"{schema}_metadata.json"
+        tables: list[str] = []
+        if metadata_file.is_file():
+            try:
+                with open(metadata_file, "r", encoding="utf-8") as f:
+                    table_list = json.load(f)
+                tables = [t["table_name"] for t in table_list if "table_name" in t]
+            except (json.JSONDecodeError, KeyError):
+                pass
+        domains.append({
+            "name": use_case,
+            "display_name": meta.get("display_name", use_case.capitalize()),
+            "description": meta.get("description", ""),
+            "icon": meta.get("icon", "database"),
+            "tables": tables,
+            "table_count": len(tables),
+            "example_questions": meta.get("example_questions", []),
+        })
+    return {"domains": domains}
 
 
 @router.post("/session", response_model=SessionResponse)

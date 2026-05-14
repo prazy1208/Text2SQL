@@ -18,41 +18,45 @@ const intentActions = document.getElementById('intent-actions');
 const intentActionsLabel = document.getElementById('intent-actions-label');
 const intentYesBtn = document.getElementById('intent-yes-btn');
 const intentNoBtn = document.getElementById('intent-no-btn');
-const sessionIdEl = document.getElementById('session-id');
 const chatListEl = document.getElementById('chat-list');
 const newChatBtn = document.getElementById('new-chat-btn');
 const deleteConfirmModal = document.getElementById('delete-confirm-modal');
 const deleteConfirmCancelBtn = document.getElementById('delete-confirm-cancel');
 const deleteConfirmDeleteBtn = document.getElementById('delete-confirm-delete');
+const domainSelectorEl = document.getElementById('domain-selector');
+const pipelineProgressEl = document.getElementById('pipeline-progress');
+const welcomePanel = document.getElementById('welcome-panel');
 
-/** Current conversation id (also persisted as ACTIVE_SESSION_KEY for reload). */
 let activeSessionId = null;
-
-/** Last session list from API (for sidebar titles + use_case when switching). */
 let cachedSessions = [];
-
-/** Session id awaiting delete confirmation in the custom modal (null when closed). */
 let pendingDeleteSessionId = null;
-
 let pendingIntentState = null;
+let domainInfo = null;
+let pipelineInterval = null;
 
 const PROMPT_CORRECTED_QUESTION = 'Please provide a corrected question.';
 
 const COPY_SQL_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
 
+const DOMAIN_ICONS = {
+  healthcare: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
+  retail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>`,
+  finance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`,
+};
+
+const PIPELINE_STEPS = ['intent', 'tables', 'columns', 'fewshot', 'sql'];
+
+// ===== Utility =====
+
 function removeLegacyKeys() {
   try {
     localStorage.removeItem(LEGACY_CHAT_HISTORY_KEY);
     localStorage.removeItem(LEGACY_SESSION_KEY);
-  } catch (_e) {
-    /* ignore */
-  }
+  } catch (_e) { /* ignore */ }
 }
 
 function randomUUID() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
@@ -63,59 +67,34 @@ function randomUUID() {
 function ensureClientId() {
   try {
     let id = localStorage.getItem(CLIENT_ID_KEY);
-    if (!id) {
-      id = randomUUID();
-      localStorage.setItem(CLIENT_ID_KEY, id);
-    }
+    if (!id) { id = randomUUID(); localStorage.setItem(CLIENT_ID_KEY, id); }
     return id;
-  } catch (_e) {
-    return randomUUID();
-  }
+  } catch (_e) { return randomUUID(); }
 }
 
 function getClientHeaders() {
-  const cid = ensureClientId();
-  return { 'X-Client-Id': cid };
+  return { 'X-Client-Id': ensureClientId() };
 }
 
 function persistActiveSession(id) {
-  try {
-    if (id) localStorage.setItem(ACTIVE_SESSION_KEY, id);
-    else localStorage.removeItem(ACTIVE_SESSION_KEY);
-  } catch (_e) {
-    /* ignore */
-  }
+  try { if (id) localStorage.setItem(ACTIVE_SESSION_KEY, id); else localStorage.removeItem(ACTIVE_SESSION_KEY); }
+  catch (_e) { /* ignore */ }
 }
 
 function getRememberedSessionId() {
-  try {
-    return localStorage.getItem(ACTIVE_SESSION_KEY);
-  } catch (_e) {
-    return null;
-  }
+  try { return localStorage.getItem(ACTIVE_SESSION_KEY); } catch (_e) { return null; }
 }
 
-function updateSessionHeader(id) {
-  sessionIdEl.textContent = id || '—';
-}
+function updateSessionHeader(id) { /* no-op: session id removed from header */ }
 
-function getActiveSessionId() {
-  return activeSessionId;
-}
+function getActiveSessionId() { return activeSessionId; }
 
 function setActiveSessionId(id) {
   const sid = id != null && String(id).trim() ? String(id).trim() : null;
   activeSessionId = sid;
-  if (sid) {
-    persistActiveSession(sid);
-    updateSessionHeader(sid);
-  } else {
-    persistActiveSession(null);
-    updateSessionHeader(null);
-  }
+  persistActiveSession(sid);
 }
 
-/** Sidebar label for sessions without a DB title (legacy empty rows stay distinguishable). */
 function sidebarLabelForSession(s) {
   const t = s.title && String(s.title).trim();
   if (t) return t;
@@ -124,11 +103,238 @@ function sidebarLabelForSession(s) {
   return `New chat (${tail})`;
 }
 
-/** Clear domain dropdown to the placeholder (new chat or no active session). */
-function resetDomainSelect() {
-  if (!useCaseSelect) return;
-  useCaseSelect.value = '';
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
 }
+
+// ===== Domain selector =====
+
+function resetDomainSelect() {
+  useCaseSelect.value = '';
+  domainSelectorEl.querySelectorAll('.domain-btn').forEach(b => b.classList.remove('is-selected'));
+  updatePlaceholderForDomain('');
+}
+
+function selectDomain(name) {
+  useCaseSelect.value = name;
+  domainSelectorEl.querySelectorAll('.domain-btn').forEach(b => {
+    b.classList.toggle('is-selected', b.dataset.domain === name);
+  });
+  updatePlaceholderForDomain(name);
+}
+
+function renderDomainButtons(domains) {
+  if (!domainSelectorEl) return;
+  domainSelectorEl.innerHTML = '';
+  (domains || []).forEach(d => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'domain-btn';
+    btn.dataset.domain = d.name;
+    btn.innerHTML = `<span class="domain-btn-icon">${DOMAIN_ICONS[d.name] || ''}</span>${d.display_name}`;
+    btn.addEventListener('click', () => selectDomain(d.name));
+    domainSelectorEl.appendChild(btn);
+  });
+}
+
+function updatePlaceholderForDomain(domain) {
+  if (!messageInput) return;
+  if (domain) {
+    const name = domain.charAt(0).toUpperCase() + domain.slice(1);
+    messageInput.placeholder = `Ask a question about ${name} data...`;
+  } else {
+    messageInput.placeholder = 'Select a domain, then ask a question...';
+  }
+}
+
+// ===== Welcome screen =====
+
+async function loadDomainInfo() {
+  try {
+    const res = await fetch(`${API_BASE}/domain-info`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    domainInfo = data.domains || [];
+    return domainInfo;
+  } catch (e) {
+    console.warn('domain-info failed', e);
+    return null;
+  }
+}
+
+function renderWelcomePanel(domains) {
+  if (!welcomePanel) return;
+  if (!domains || !domains.length) {
+    welcomePanel.innerHTML = '<p style="color:var(--text-muted)">Loading...</p>';
+    return;
+  }
+
+  const cardsHtml = domains.map(d => {
+    const icon = DOMAIN_ICONS[d.name] || '';
+    const tablesPreview = d.tables.slice(0, 5).join(', ') + (d.tables.length > 5 ? '...' : '');
+    const examplesHtml = (d.example_questions || []).map(q =>
+      `<li><button type="button" class="example-question-btn" data-domain="${d.name}" data-question="${escapeHtml(q)}">${escapeHtml(q)}</button></li>`
+    ).join('');
+    return `
+      <div class="domain-card">
+        <div class="domain-card-header">
+          <div class="domain-card-icon domain-card-icon--${d.name}">${icon}</div>
+          <h3 class="domain-card-title">${d.display_name}</h3>
+        </div>
+        <p class="domain-card-desc">${d.description}</p>
+        <p class="domain-card-tables">${d.table_count} tables: ${tablesPreview}</p>
+        <ul class="domain-card-examples">${examplesHtml}</ul>
+      </div>
+    `;
+  }).join('');
+
+  const pipelineHtml = `
+    <div class="pipeline-diagram">
+      <div class="pipeline-diagram-step"><div class="pipeline-diagram-icon">1</div><span class="pipeline-diagram-label">Intent</span></div>
+      <div class="pipeline-diagram-arrow"></div>
+      <div class="pipeline-diagram-step"><div class="pipeline-diagram-icon">2</div><span class="pipeline-diagram-label">Tables</span></div>
+      <div class="pipeline-diagram-arrow"></div>
+      <div class="pipeline-diagram-step"><div class="pipeline-diagram-icon">3</div><span class="pipeline-diagram-label">Columns</span></div>
+      <div class="pipeline-diagram-arrow"></div>
+      <div class="pipeline-diagram-step"><div class="pipeline-diagram-icon">4</div><span class="pipeline-diagram-label">Few-Shot</span></div>
+      <div class="pipeline-diagram-arrow"></div>
+      <div class="pipeline-diagram-step"><div class="pipeline-diagram-icon">5</div><span class="pipeline-diagram-label">Gen SQL</span></div>
+    </div>
+  `;
+
+  welcomePanel.innerHTML = `
+    <div class="welcome-hero">
+      <h2>Text2SQL</h2>
+      <p>Convert natural language into SQL &mdash; powered by a multi-agent AI pipeline. Choose a domain and ask a question to get started.</p>
+    </div>
+    <div class="welcome-domains">${cardsHtml}</div>
+    <div class="welcome-how">
+      <h3>How It Works</h3>
+      ${pipelineHtml}
+    </div>
+  `;
+
+  welcomePanel.addEventListener('click', (e) => {
+    const btn = e.target.closest('.example-question-btn');
+    if (!btn) return;
+    const domain = btn.dataset.domain;
+    const question = btn.dataset.question;
+    if (domain && question) {
+      selectDomain(domain);
+      messageInput.value = question;
+      form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    }
+  });
+}
+
+function showWelcome() {
+  outputPlaceholder.classList.remove('hidden');
+  outputContent.classList.add('hidden');
+  if (domainInfo) renderWelcomePanel(domainInfo);
+}
+
+// ===== Contextual placeholder (in-chat suggestions) =====
+
+function showContextualSuggestions() {
+  const domain = useCaseSelect.value;
+  if (!domain || !domainInfo) {
+    showWelcome();
+    return;
+  }
+  const info = domainInfo.find(d => d.name === domain);
+  if (!info) { showWelcome(); return; }
+
+  outputPlaceholder.classList.remove('hidden');
+  outputContent.classList.add('hidden');
+
+  const pills = (info.example_questions || []).map(q =>
+    `<button type="button" class="suggestion-pill" data-question="${escapeHtml(q)}">${escapeHtml(q)}</button>`
+  ).join('');
+
+  welcomePanel.innerHTML = `
+    <div class="chat-suggestions">
+      <h3>Ask about ${info.display_name}</h3>
+      <p>${info.description} &mdash; ${info.table_count} tables available</p>
+      <div class="suggestion-pills">${pills}</div>
+    </div>
+  `;
+
+  welcomePanel.onclick = (e) => {
+    const pill = e.target.closest('.suggestion-pill');
+    if (!pill) return;
+    messageInput.value = pill.dataset.question;
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  };
+}
+
+// ===== Pipeline progress =====
+
+function showPipelineProgress() {
+  if (!pipelineProgressEl) return;
+  pipelineProgressEl.classList.remove('hidden');
+  let stepIndex = 0;
+  updatePipelineStep(stepIndex);
+  pipelineInterval = setInterval(() => {
+    stepIndex++;
+    if (stepIndex >= PIPELINE_STEPS.length) {
+      stepIndex = PIPELINE_STEPS.length - 1;
+    }
+    updatePipelineStep(stepIndex);
+  }, 3000);
+}
+
+function updatePipelineStep(activeIdx) {
+  const steps = pipelineProgressEl.querySelectorAll('.pipeline-step');
+  const connectors = pipelineProgressEl.querySelectorAll('.pipeline-connector');
+  steps.forEach((el, i) => {
+    el.classList.remove('is-active', 'is-done');
+    if (i < activeIdx) el.classList.add('is-done');
+    else if (i === activeIdx) el.classList.add('is-active');
+  });
+  connectors.forEach((el, i) => {
+    el.style.background = i < activeIdx ? 'var(--green-500)' : 'var(--border)';
+  });
+}
+
+function hidePipelineProgress() {
+  if (pipelineInterval) { clearInterval(pipelineInterval); pipelineInterval = null; }
+  if (!pipelineProgressEl) return;
+  const steps = pipelineProgressEl.querySelectorAll('.pipeline-step');
+  steps.forEach(el => { el.classList.remove('is-active'); el.classList.add('is-done'); });
+  const connectors = pipelineProgressEl.querySelectorAll('.pipeline-connector');
+  connectors.forEach(el => { el.style.background = 'var(--green-500)'; });
+  setTimeout(() => {
+    pipelineProgressEl.classList.add('hidden');
+    steps.forEach(el => el.classList.remove('is-done', 'is-active'));
+    connectors.forEach(el => { el.style.background = ''; });
+  }, 800);
+}
+
+// ===== SQL syntax highlighting =====
+
+function highlightSQL(sql) {
+  const keywords = /\b(SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|OUTER|FULL|CROSS|ON|AND|OR|NOT|IN|IS|NULL|AS|ORDER|BY|GROUP|HAVING|LIMIT|OFFSET|UNION|ALL|DISTINCT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TABLE|INDEX|VIEW|SET|VALUES|INTO|BETWEEN|LIKE|ILIKE|EXISTS|CASE|WHEN|THEN|ELSE|END|WITH|RECURSIVE|ASC|DESC|COUNT|SUM|AVG|MIN|MAX|COALESCE|CAST|EXTRACT|DATE_TRUNC|GENERATE_SERIES|OVER|PARTITION|ROW_NUMBER|RANK|DENSE_RANK|LAG|LEAD|FILTER|LATERAL|FETCH|NEXT|ROWS|ONLY|NULLS|FIRST|LAST)\b/gi;
+  const functions = /\b(COUNT|SUM|AVG|MIN|MAX|COALESCE|CAST|EXTRACT|DATE_TRUNC|GENERATE_SERIES|ROW_NUMBER|RANK|DENSE_RANK|LAG|LEAD|NOW|CURRENT_DATE|CURRENT_TIMESTAMP|ROUND|FLOOR|CEIL|ABS|LENGTH|UPPER|LOWER|TRIM|SUBSTRING|CONCAT|TO_CHAR|TO_DATE|TO_NUMBER)\s*(?=\()/gi;
+  const strings = /('[^']*')/g;
+  const numbers = /\b(\d+\.?\d*)\b/g;
+  const comments = /(--[^\n]*)/g;
+
+  let result = escapeHtml(sql);
+  result = result.replace(comments, '<span class="sql-comment">$1</span>');
+  result = result.replace(strings, '<span class="sql-string">$1</span>');
+  result = result.replace(functions, '<span class="sql-function">$1</span>');
+  result = result.replace(keywords, '<span class="sql-keyword">$1</span>');
+  result = result.replace(numbers, (match, num, offset, str) => {
+    const before = str.substring(Math.max(0, offset - 20), offset);
+    if (before.includes('sql-')) return match;
+    return `<span class="sql-number">${num}</span>`;
+  });
+  return result;
+}
+
+// ===== Use cases / sessions =====
 
 async function loadUseCases() {
   try {
@@ -172,8 +378,7 @@ function renderChatList(sessions) {
   if (!chatListEl) return;
   cachedSessions = Array.isArray(sessions) ? sessions.slice() : [];
   chatListEl.innerHTML = '';
-  const list = cachedSessions;
-  list.forEach((s) => {
+  cachedSessions.forEach((s) => {
     const row = document.createElement('div');
     row.className = 'chat-list-row' + (s.session_id === activeSessionId ? ' is-active' : '');
     row.dataset.sessionId = s.session_id;
@@ -200,14 +405,14 @@ function renderChatList(sessions) {
   });
 }
 
-/** Update active row without refetching the session list (instant when switching chats). */
 function setSidebarActiveHighlight(sessionId) {
   if (!chatListEl) return;
   chatListEl.querySelectorAll('.chat-list-row').forEach((row) => {
-    const id = row.dataset.sessionId;
-    row.classList.toggle('is-active', Boolean(sessionId) && id === sessionId);
+    row.classList.toggle('is-active', Boolean(sessionId) && row.dataset.sessionId === sessionId);
   });
 }
+
+// ===== Session management =====
 
 async function deleteSessionRemote(sessionId) {
   const cid = ensureClientId();
@@ -259,9 +464,7 @@ async function executeConfirmedDeleteChat() {
         clearChatThread();
         pendingIntentState = null;
         hideIntentActions();
-        outputPlaceholder.classList.remove('hidden');
-        outputPlaceholder.textContent = 'Submit a question to start the conversation.';
-        outputContent.classList.add('hidden');
+        showWelcome();
         setSidebarActiveHighlight(null);
       }
     }
@@ -274,8 +477,7 @@ function applyUseCaseFromSession(sessionId) {
   const row = cachedSessions.find((x) => x.session_id === sessionId);
   const uc = row?.use_case && String(row.use_case).trim();
   if (!uc) return;
-  const opt = [...useCaseSelect.options].find((o) => o.value === uc);
-  if (opt) useCaseSelect.value = uc;
+  selectDomain(uc);
 }
 
 async function fetchSessionMessages(sessionId) {
@@ -329,11 +531,6 @@ function turnHasPipelineArtifacts(turn) {
   return Boolean(sql || tables);
 }
 
-/**
- * Merge chat_messages with pipeline-turns: rich assistant bubbles for completed pipelines
- * (from agent output tables). Matches each pipeline_completed row to the next intent turn
- * that has SQL or table output (skips greeting-only intent rows).
- */
 function renderReloadedThread(msgs, turns) {
   const list = Array.isArray(msgs) ? msgs : [];
   const pipelineTurns = Array.isArray(turns) ? turns : [];
@@ -392,14 +589,10 @@ async function bootstrapFreshSession() {
     const detail = data?.detail != null ? data.detail : res.statusText;
     throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
   }
-  const sid = String(data.session_id);
-  setActiveSessionId(sid);
-  return sid;
+  setActiveSessionId(String(data.session_id));
+  return String(data.session_id);
 }
 
-/**
- * Load transcript: chat_messages plus structured pipeline-turns (agent DB) for rich replay.
- */
 async function loadChatSession(sessionId) {
   if (!sessionId) return;
   setLoadingState(true, 'Loading chat…');
@@ -410,18 +603,13 @@ async function loadChatSession(sessionId) {
   try {
     const [msgs, turns] = await Promise.all([
       fetchSessionMessages(sessionId),
-      fetchSessionPipelineTurns(sessionId).catch((e) => {
-        console.warn('pipeline-turns', e);
-        return [];
-      }),
+      fetchSessionPipelineTurns(sessionId).catch((e) => { console.warn('pipeline-turns', e); return []; }),
     ]);
     setActiveSessionId(sessionId);
     clearChatThread();
 
     if (!msgs.length) {
-      outputPlaceholder.classList.remove('hidden');
-      outputPlaceholder.textContent = 'Submit a question to start the conversation.';
-      outputContent.classList.add('hidden');
+      showContextualSuggestions();
       setSidebarActiveHighlight(sessionId);
       void refreshSidebar().then(() => applyUseCaseFromSession(sessionId));
       return;
@@ -430,15 +618,15 @@ async function loadChatSession(sessionId) {
     showChatArea();
     renderReloadedThread(msgs, turns);
     setSidebarActiveHighlight(sessionId);
-    /** Refetch list in background — do not block showing the thread (was a major cause of slow switches). */
     void refreshSidebar().then(() => applyUseCaseFromSession(sessionId));
   } catch (e) {
     showError(e?.message || 'Failed to load chat');
-    updateSessionHeader(getActiveSessionId());
   } finally {
     setLoadingState(false);
   }
 }
+
+// ===== Chat rendering =====
 
 function appendPlainBubble(role, text, options = {}) {
   showChatArea();
@@ -458,7 +646,6 @@ function scrollChatToBottom() {
   chatScroll.scrollTop = chatScroll.scrollHeight;
 }
 
-/** Delegated clicks: copy SQL from `.out-sql-wrap` code blocks (dynamic bubbles). */
 function bindSqlCopyDelegation() {
   if (!chatThread || chatThread.dataset.sqlCopyBound === '1') return;
   chatThread.dataset.sqlCopyBound = '1';
@@ -476,7 +663,6 @@ function bindSqlCopyDelegation() {
       btn.setAttribute('aria-label', 'Copy SQL');
       btn.title = 'Copy SQL';
       window.clearTimeout(btn._copyResetTid);
-      btn._copyResetTid = undefined;
     };
 
     try {
@@ -484,59 +670,40 @@ function bindSqlCopyDelegation() {
         await navigator.clipboard.writeText(text);
       } else {
         const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
       }
       btn.classList.add('copy-sql-btn--done');
-      btn.setAttribute('aria-label', 'Copied');
-      btn.title = 'Copied';
+      btn.setAttribute('aria-label', 'Copied'); btn.title = 'Copied';
       window.clearTimeout(btn._copyResetTid);
       btn._copyResetTid = window.setTimeout(revert, 1600);
-    } catch (_err) {
-      revert();
-    }
+    } catch (_err) { revert(); }
   });
 }
 
-function setLoadingState(loading, text) {
+function setLoadingState(loading, text, showPipeline = false) {
   submitBtn.disabled = loading;
   newChatBtn.disabled = loading;
-  const statusText = text || 'Processing...';
   if (loading) {
     outputError.classList.add('hidden');
     outputError.textContent = '';
+    if (showPipeline) showPipelineProgress();
     const hasThread = chatThread.children.length > 0;
     if (hasThread) {
       outputContent.classList.remove('hidden');
       outputPlaceholder.classList.add('hidden');
-      if (composerStatus) {
-        composerStatus.textContent = statusText;
-        composerStatus.classList.remove('hidden');
-      }
-    } else {
-      outputPlaceholder.classList.remove('hidden');
-      outputPlaceholder.textContent = statusText;
-      outputContent.classList.add('hidden');
-      if (composerStatus) {
-        composerStatus.classList.add('hidden');
-        composerStatus.textContent = '';
-      }
+    }
+    if (composerStatus) {
+      composerStatus.textContent = text || 'Processing...';
+      composerStatus.classList.remove('hidden');
     }
   } else {
-    if (composerStatus) {
-      composerStatus.classList.add('hidden');
-      composerStatus.textContent = '';
-    }
+    hidePipelineProgress();
+    if (composerStatus) { composerStatus.classList.add('hidden'); composerStatus.textContent = ''; }
     if (!chatThread.children.length) {
-      outputPlaceholder.classList.remove('hidden');
-      outputPlaceholder.textContent = 'Submit a question to start the conversation.';
-      outputContent.classList.add('hidden');
+      showContextualSuggestions();
     }
   }
 }
@@ -554,13 +721,19 @@ function buildAssistantDetails(data) {
   const parts = [];
   const interpreted = (data.resolved_question || data.rephrased_question || '').trim();
   if (interpreted) {
-    parts.push(`<h4>User query</h4><p class="out-text">${escapeHtml(interpreted)}</p>`);
+    parts.push(`<h4>Interpreted Query</h4><p class="out-text">${escapeHtml(interpreted)}</p>`);
+  }
+
+  const tables = Array.isArray(data.selected_tables) ? data.selected_tables : [];
+  if (tables.length) {
+    const pills = tables.map(t => `<span class="table-pill">${escapeHtml(t)}</span>`).join('');
+    parts.push(`<h4>Selected Tables</h4><div class="table-pills">${pills}</div>`);
   }
 
   const sql = (data.generated_sql && String(data.generated_sql).trim()) || '';
   if (sql) {
-    parts.push(`<div class="out-sql-wrap">
-<pre class="out-sql"><code>${escapeHtml(sql)}</code></pre>
+    parts.push(`<h4>Generated SQL</h4><div class="out-sql-wrap">
+<pre class="out-sql"><code>${highlightSQL(sql)}</code></pre>
 <button type="button" class="copy-sql-btn" aria-label="Copy SQL" title="Copy SQL">${COPY_SQL_ICON}</button>
 </div>`);
   } else if (data.error != null && String(data.error).trim()) {
@@ -621,11 +794,10 @@ function hideIntentActions() {
   dockIntentActionsDefault();
 }
 
+// ===== Query submission =====
+
 async function callQuery(payload) {
-  const body = {
-    ...payload,
-    client_id: ensureClientId(),
-  };
+  const body = { ...payload, client_id: ensureClientId() };
   let res = await fetch(`${API_BASE}/query`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -634,15 +806,10 @@ async function callQuery(payload) {
   let data = await res.json();
 
   const invalidSession =
-    !res.ok &&
-    data?.detail &&
-    String(data.detail).toLowerCase().includes('invalid or unknown session_id');
+    !res.ok && data?.detail && String(data.detail).toLowerCase().includes('invalid or unknown session_id');
   if (invalidSession) {
     await bootstrapFreshSession();
-    const retryPayload = {
-      ...body,
-      session_id: getActiveSessionId(),
-    };
+    const retryPayload = { ...body, session_id: getActiveSessionId() };
     res = await fetch(`${API_BASE}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -655,12 +822,6 @@ async function callQuery(payload) {
   return { res, data };
 }
 
-function escapeHtml(s) {
-  const div = document.createElement('div');
-  div.textContent = s;
-  return div.innerHTML;
-}
-
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const useCase = useCaseSelect.value?.trim();
@@ -670,7 +831,7 @@ form.addEventListener('submit', async (e) => {
   showError('');
   hideIntentActions();
   appendChatBubble('user', message);
-  setLoadingState(true, 'Processing... (first request may take 1-2 min to load the model)');
+  setLoadingState(true, 'Processing...', true);
 
   try {
     const body = {
@@ -691,29 +852,18 @@ form.addEventListener('submit', async (e) => {
     }
 
     if (data.conversation_state === 'waiting_intent_confirmation') {
-      pendingIntentState = {
-        useCase,
-        pendingIntentId: data.pending_intent_id || null,
-      };
-      const prompt =
-        data.clarification_question ||
+      pendingIntentState = { useCase, pendingIntentId: data.pending_intent_id || null };
+      const prompt = data.clarification_question ||
         `Did I understand correctly: ${data.resolved_question || data.rephrased_question}?`;
       appendChatBubble('assistant', prompt, data, { intentInline: true });
     } else if (data.conversation_state === 'waiting_user_rephrase') {
-      pendingIntentState = {
-        useCase,
-        pendingIntentId: data.pending_intent_id || null,
-      };
+      pendingIntentState = { useCase, pendingIntentId: data.pending_intent_id || null };
       appendChatBubble('assistant', PROMPT_CORRECTED_QUESTION, { conversation_state: 'waiting_user_rephrase' });
       hideIntentActions();
     } else if (data.conversation_state === 'waiting_analytical_query') {
       pendingIntentState = null;
       hideIntentActions();
-      appendChatBubble(
-        'assistant',
-        data.clarification_question || 'Please type your analytical question.',
-        data
-      );
+      appendChatBubble('assistant', data.clarification_question || 'Please type your analytical question.', data);
     } else if (data.conversation_state === 'conversation_ended') {
       pendingIntentState = null;
       hideIntentActions();
@@ -736,11 +886,13 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+// ===== Intent confirmation =====
+
 async function submitIntentConfirmation(answer) {
   if (!pendingIntentState) return;
   hideIntentActions();
   appendChatBubble('user', answer === 'yes' ? 'Yes' : 'No');
-  setLoadingState(true, 'Applying confirmation...');
+  setLoadingState(true, 'Applying confirmation...', true);
   try {
     const payload = {
       message: answer,
@@ -760,29 +912,18 @@ async function submitIntentConfirmation(answer) {
     }
 
     if (data.conversation_state === 'waiting_user_rephrase') {
-      pendingIntentState = {
-        useCase: pendingIntentState.useCase,
-        pendingIntentId: data.pending_intent_id || null,
-      };
+      pendingIntentState = { useCase: pendingIntentState.useCase, pendingIntentId: data.pending_intent_id || null };
       appendChatBubble('assistant', PROMPT_CORRECTED_QUESTION, { conversation_state: 'waiting_user_rephrase' });
     } else if (data.conversation_state === 'waiting_analytical_query') {
       pendingIntentState = null;
-      appendChatBubble(
-        'assistant',
-        data.clarification_question || 'Please type your analytical question.',
-        data
-      );
+      appendChatBubble('assistant', data.clarification_question || 'Please type your analytical question.', data);
     } else if (data.conversation_state === 'conversation_ended') {
       pendingIntentState = null;
       appendChatBubble('assistant', data.clarification_question || 'Ok, thank you!', data);
     } else {
       pendingIntentState = null;
       const done = data.conversation_state === 'completed';
-      appendChatBubble(
-        'assistant',
-        done ? 'Here is what I found.' : 'Thanks — proceeding with SQL generation.',
-        data
-      );
+      appendChatBubble('assistant', done ? 'Here is what I found.' : 'Thanks — proceeding with SQL generation.', data);
       if (data.error) showError(data.error);
     }
     await refreshSidebar();
@@ -800,10 +941,10 @@ async function submitIntentConfirmation(answer) {
 intentYesBtn.addEventListener('click', () => submitIntentConfirmation('yes'));
 intentNoBtn.addEventListener('click', () => submitIntentConfirmation('no'));
 
+// ===== Modal =====
+
 if (deleteConfirmModal) {
-  deleteConfirmModal.addEventListener('click', (e) => {
-    if (e.target === deleteConfirmModal) closeDeleteConfirmModal();
-  });
+  deleteConfirmModal.addEventListener('click', (e) => { if (e.target === deleteConfirmModal) closeDeleteConfirmModal(); });
 }
 if (deleteConfirmCancelBtn) {
   deleteConfirmCancelBtn.addEventListener('click', () => closeDeleteConfirmModal());
@@ -818,12 +959,13 @@ document.addEventListener('keydown', (e) => {
   closeDeleteConfirmModal();
 });
 
+// ===== Sidebar events =====
+
 if (chatListEl) {
   chatListEl.addEventListener('click', (e) => {
     const delBtn = e.target.closest('.chat-list-delete');
     if (delBtn && delBtn.dataset.sessionId) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       void handleDeleteChat(delBtn.dataset.sessionId);
       return;
     }
@@ -831,11 +973,7 @@ if (chatListEl) {
     if (!btn || !btn.dataset.sessionId) return;
     const id = btn.dataset.sessionId;
     if (id === activeSessionId) return;
-    if (btn.dataset.useCase) {
-      const uc = btn.dataset.useCase.trim();
-      const opt = [...useCaseSelect.options].find((o) => o.value === uc);
-      if (opt) useCaseSelect.value = uc;
-    }
+    if (btn.dataset.useCase) selectDomain(btn.dataset.useCase.trim());
     loadChatSession(id);
   });
 }
@@ -843,25 +981,18 @@ if (chatListEl) {
 if (newChatBtn) {
   newChatBtn.addEventListener('click', async () => {
     showError('');
-    setLoadingState(true, 'Starting new chat…');
-    try {
-      /** No POST /session here — the session row is created on first Send. */
-      setActiveSessionId(null);
-      resetDomainSelect();
-      clearChatThread();
-      pendingIntentState = null;
-      hideIntentActions();
-      outputPlaceholder.classList.remove('hidden');
-      outputPlaceholder.textContent = 'Submit a question to start the conversation.';
-      outputContent.classList.add('hidden');
-      await refreshSidebar();
-    } catch (err) {
-      showError(err?.message || 'Failed to start chat');
-    } finally {
-      setLoadingState(false);
-    }
+    setActiveSessionId(null);
+    resetDomainSelect();
+    clearChatThread();
+    pendingIntentState = null;
+    hideIntentActions();
+    showWelcome();
+    setSidebarActiveHighlight(null);
+    await refreshSidebar();
   });
 }
+
+// ===== Init =====
 
 async function init() {
   bindSqlCopyDelegation();
@@ -869,56 +1000,42 @@ async function init() {
   newChatBtn.disabled = true;
   removeLegacyKeys();
   ensureClientId();
-  await loadUseCases();
+
+  const [, domains] = await Promise.all([loadUseCases(), loadDomainInfo()]);
+  if (domains) renderDomainButtons(domains);
+
   showError('');
   hideIntentActions();
-  outputPlaceholder.classList.remove('hidden');
-  outputPlaceholder.textContent = 'Loading conversations…';
-  outputContent.classList.add('hidden');
+  showWelcome();
 
   try {
     let sessions = [];
-    try {
-      sessions = await fetchSessionsList();
-    } catch (e) {
-      console.warn('Could not list sessions', e);
-      sessions = [];
-    }
+    try { sessions = await fetchSessionsList(); } catch (e) { console.warn('Could not list sessions', e); }
 
     const remembered = getRememberedSessionId();
     let pick = null;
-    if (remembered && sessions.some((s) => s.session_id === remembered)) {
-      pick = remembered;
-    } else if (sessions.length) {
-      pick = sessions[0].session_id;
-    }
+    if (remembered && sessions.some((s) => s.session_id === remembered)) pick = remembered;
+    else if (sessions.length) pick = sessions[0].session_id;
 
     renderChatList(sessions);
 
     if (!pick) {
       setActiveSessionId(null);
       resetDomainSelect();
-      clearChatThread();
-      pendingIntentState = null;
-      hideIntentActions();
-      outputPlaceholder.classList.remove('hidden');
-      outputPlaceholder.textContent = 'Submit a question to start the conversation.';
-      outputContent.classList.add('hidden');
+      showWelcome();
       submitBtn.disabled = false;
       newChatBtn.disabled = false;
       return;
     }
 
     await loadChatSession(pick);
-
-    outputPlaceholder.textContent = 'Submit a question to start the conversation.';
     submitBtn.disabled = false;
     newChatBtn.disabled = false;
   } catch (e) {
-    outputPlaceholder.textContent = 'Could not initialize. Refresh to retry.';
     showError(e.message || 'Failed to initialize');
     submitBtn.disabled = false;
     newChatBtn.disabled = false;
   }
 }
+
 init();
