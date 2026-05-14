@@ -91,6 +91,8 @@ uvicorn backend.api.main:app --reload
 
 Then open `http://127.0.0.1:8000/` for the chat UI. Apply `scripts/create_app_schema.sql` (or your full setup script) so `app_schema.sessions` and `chat_messages` exist.
 
+Project URL: https://prazy1208-text2sql.hf.space/
+
 ## 🚀 Future Scope
 - Introduce **caching mechanisms** to optimize repeated query performance  
 - Extend **conversational memory** and structured persistence for richer reload fidelity  
